@@ -1,24 +1,9 @@
-# WAM (Cycle7)
+# Fork of "WAM (Cycle7)"
 
-Official repository of the third-generation spectral WAve Model WAM
+This is a fork of the "Official repository of the third-generation spectral WAve Model WAM"
+which is mainly developped by Hereon (Geesthacht)
 
-This branch is the most recent offical stand-alone version of WAM.
-For previous versions please visit: <https://github.com/mywave/WAM/>
 
-New in Cycle 7:
-  - ST6 (BYDBR) physics (IPHYS = 2)
-  - bug fix in normalised wave stress
-  - betamax for ST4 adjustable via namelist
-  - improved Netcdf conversion
-  - ! IMPROVED COMPILATION VIA NEW MAKEFILE !
-  - merge with OASIS branch
-  - source term output
-  - ! UPDATED COUPLING INTERFACE FOLLOWING OASIS3-MCT CONVENTIONS (data exchange 
-    at coupling times t=0,...,N-1 only; no data exchange at t=N) !
-  - Upgrade to modern Fortran 2008 MPI module mpi_f08
-  - Bug fix of uninitialized value in data assimilation routine
-
-################################################################################
 ## License
 
 WAM is free software: you can redistribute it and/or modify it under the terms 
