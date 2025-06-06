@@ -13,6 +13,8 @@ MODULE PREPROC_MODULE
 !                                                                              !
 ! ---------------------------------------------------------------------------- !
 
+USE netcdf
+  
 USE WAM_COORDINATE_MODULE          !! COORDINATE TYPE AND PROCEDURES
 
 USE WAM_GENERAL_MODULE,   ONLY:  &
@@ -1169,6 +1171,32 @@ SUBROUTINE WRITE_PREPROC_FILE
 !     ----------------                                                         !
 
 INTEGER      :: LEN, I
+
+integer :: ncid, varid, dimids(1) !dimids(NDIMS)
+
+! ---------------------------------------------------------------------------- !
+!                                                                              !
+!     1. OPEN FILES.                                                           !
+!        -----------                                                           !
+
+LEN = LEN_TRIM(FILE07)
+OPEN (UNIT=IU07, FILE=FILE07(1:LEN), FORM='UNFORMATTED', STATUS='UNKNOWN')
+
+WRITE(IU07) HEADER
+
+
+
+
+!
+! Binary format
+!
+
+! ---------------------------------------------------------------------------- !
+!                                                                              !
+!     LOCAL VARIABLES.                                                         !
+!     ----------------                                                         !
+
+!INTEGER      :: LEN, I
 
 ! ---------------------------------------------------------------------------- !
 !                                                                              !
