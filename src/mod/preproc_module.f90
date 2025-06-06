@@ -1172,7 +1172,11 @@ SUBROUTINE WRITE_PREPROC_FILE
 
 INTEGER      :: LEN, I
 
-integer :: ncid, varid, dimids(1) !dimids(NDIMS)
+integer :: ncid, varid, dimids(1), status !dimids(NDIMS)
+integer :: varid_nnest, varid_maxnest, varid_nbounc, varid_nname, varid_ncode
+integer :: varid_ijarc, varid_xdello, varid_xdella
+integer :: varid_nsouth, varid_nnorth, varid_neast, varid_nwest
+integer :: varid_blongc, varid_blatc, varid_nzdel
 
 ! ---------------------------------------------------------------------------- !
 !                                                                              !
@@ -1180,10 +1184,35 @@ integer :: ncid, varid, dimids(1) !dimids(NDIMS)
 !        -----------                                                           !
 
 LEN = LEN_TRIM(FILE07)
-OPEN (UNIT=IU07, FILE=FILE07(1:LEN), FORM='UNFORMATTED', STATUS='UNKNOWN')
+! OPEN (UNIT=IU07, FILE=FILE07(1:LEN), FORM='UNFORMATTED', STATUS='UNKNOWN')
+!WRITE(IU07) HEADER
 
-WRITE(IU07) HEADER
+status = nf90_create(FILE07(1:LEN), NF90_CLOBBER, ncid)
 
+status = nf90_def_var(ncid, "n_nest", NF90_INT, dimids(1), varid_nnest)
+status = nf90_def_var(ncid, "max_nest", NF90_INT, dimids(1), varid_maxnest)
+status = nf90_def_var(ncid, "nbounc", NF90_INT, dimids(1), varid_nbounc)
+status = nf90_def_var(ncid, "n_name", NF90_CHAR, dimids(1), varid_nname)
+status = nf90_def_var(ncid, "n_code", NF90_INT, dimids(1), varid_ncode)
+
+status = nf90_def_var(ncid, "ijarc", NF90_INT, dimids(1), varid_ijarc)
+status = nf90_def_var(ncid, "xdello", NF90_INT, dimids(1), varid_xdello)
+status = nf90_def_var(ncid, "xdella", NF90_INT, dimids(1), varid_xdella)
+status = nf90_def_var(ncid, "n_south", NF90_CHAR, dimids(1), varid_nsouth)
+status = nf90_def_var(ncid, "n_north", NF90_INT, dimids(1), varid_nnorth)
+status = nf90_def_var(ncid, "n_east", NF90_CHAR, dimids(1), varid_neast)
+status = nf90_def_var(ncid, "n_west", NF90_INT, dimids(1), varid_nwest)
+
+status = nf90_def_var(ncid, "blngc", NF90_CHAR, dimids(1), varid_blongc)
+status = nf90_def_var(ncid, "blatc", NF90_INT, dimids(1), varid_blatc)
+status = nf90_def_var(ncid, "n_zdel", NF90_INT, dimids(1), varid_nzdel)
+
+status = nf90_enddef(ncid)
+
+! Write to disc
+status = nf90_put_var(ncid, varid_nnest, n_nest)
+
+status = nf90_close(ncid)
 
 
 
