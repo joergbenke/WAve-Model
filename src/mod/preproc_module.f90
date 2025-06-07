@@ -1211,6 +1211,7 @@ status = nf90_enddef(ncid)
 
 ! Write to disc
 status = nf90_put_var(ncid, varid_nnest, n_nest)
+status = nf90_put_var(ncid, varid_maxnest, max_nest)
 
 status = nf90_close(ncid)
 
