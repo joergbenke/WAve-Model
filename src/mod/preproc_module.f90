@@ -1182,7 +1182,8 @@ CONTAINS
 
     integer :: varid_ml, varid_kl
     integer :: varid_fr, varid_dfim, varid_gom, varid_c, varid_th, varid_costh, varid_sinth
-    integer :: varid_delth, varid_deltr
+    integer :: varid_delth, varid_deltr, varid_inv_log_co, varid_df, varid_df_fr, varid_df_fr2
+    integer :: varid_dfim_ofr
     
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
@@ -1254,6 +1255,13 @@ CONTAINS
     status = nf90_def_var(ncid, "costh", NF90_DOUBLE, (/ kl /), varid_costh)
     status = nf90_def_var(ncid, "sinth", NF90_DOUBLE, (/ kl /), varid_sinth)
 
+    status = nf90_def_var(ncid, "inv_log_co", NF90_DOUBLE, varid_inv_log_co)
+    status = nf90_def_var(ncid, "df", NF90_DOUBLE, (/ML/), varid_df)
+    status = nf90_def_var(ncid, "df_fr", NF90_DOUBLE, (/ML/),varid_df_fr)
+    status = nf90_def_var(ncid, "df_fr2", NF90_DOUBLE, (/ML/), varid_df_fr2)
+    status = nf90_def_var(ncid, "dfim", NF90_DOUBLE, (/ ML /), varid_dfim)
+    status = nf90_def_var(ncid, "dfim_ofr", NF90_DOUBLE, (/ ML /), varid_dfim_ofr)
+
     status = nf90_enddef(ncid)
 
     !
@@ -1300,12 +1308,21 @@ CONTAINS
     status = nf90_put_var(ncid, varid_dfim, DFIM)
     status = nf90_put_var(ncid, varid_gom, GOM)
 
+
     status = nf90_put_var(ncid, varid_c, C)
     status = nf90_put_var(ncid, varid_delth, DELTH)
     status = nf90_put_var(ncid, varid_deltr, DELTR)
     status = nf90_put_var(ncid, varid_th, TH)
     status = nf90_put_var(ncid, varid_costh, COSTH)
     status = nf90_put_var(ncid, varid_sinth, SINTH)
+
+    
+    status = nf90_put_var(ncid, varid_inv_log_co, INV_LOG_CO)
+    status = nf90_put_var(ncid, varid_df, DF)
+    status = nf90_put_var(ncid, varid_df_fr, DF_FR)
+    status = nf90_put_var(ncid, varid_df_fr2, DF_FR2)
+    status = nf90_put_var(ncid, varid_dfim, DFIM)
+    status = nf90_put_var(ncid, varid_dfim_ofr, DFIMOFR)
 
 
 
