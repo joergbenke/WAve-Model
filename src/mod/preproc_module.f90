@@ -1203,32 +1203,67 @@ CONTAINS
     
     status = nf90_def_var(ncid, "n_nest", NF90_INT, varid_nnest)
     status = nf90_def_var(ncid, "max_nest", NF90_INT, varid_maxnest)
+
+    !
+    ! 2. WRITE COARSE GRID BOUNDARY OUTPUT INFORMATION. 
+
     status = nf90_def_var(ncid, "nbounc", NF90_INT,  (/ dimid_n_nest /), varid_nbounc)
     status = nf90_def_var(ncid, "n_name", NF90_CHAR, (/ dimid_n_nest /), varid_nname)
     status = nf90_def_var(ncid, "n_code", NF90_INT,  (/ dimid_n_nest /), varid_ncode)
+
+    do i = 1, n_nest
+       if(NBOUNC(i) > 0) then
+!          status = nf90_def_var(ncid, "ijarc", NF90_INT, (/NBOUNC(I),I/), varid_ijarc)
+          status = nf90_def_var(ncid, "xdello", NF90_INT, varid_xdello)
+          status = nf90_def_var(ncid, "xdella", NF90_INT, varid_xdella)
+          status = nf90_def_var(ncid, "n_south", NF90_INT, (/dimid_n_nest/), varid_nsouth)
+          status = nf90_def_var(ncid, "n_north", NF90_INT, (/dimid_n_nest/), varid_nnorth)
+          status = nf90_def_var(ncid, "n_east", NF90_INT, (/dimid_n_nest/), varid_neast)
+          status = nf90_def_var(ncid, "n_west", NF90_INT, (/dimid_n_nest/), varid_nwest)
+       end if
+       exit
+    end do
+
     !
     ! status = nf90_def_var(ncid, "ijarc", NF90_INT, dimids(1), varid_ijarc)
-    ! status = nf90_def_var(ncid, "xdello", NF90_INT, dimids(1), varid_xdello)
-    ! status = nf90_def_var(ncid, "xdella", NF90_INT, dimids(1), varid_xdella)
-    ! status = nf90_def_var(ncid, "n_south", NF90_CHAR, dimids(1), varid_nsouth)
-    ! status = nf90_def_var(ncid, "n_north", NF90_INT, dimids(1), varid_nnorth)
-    ! status = nf90_def_var(ncid, "n_east", NF90_CHAR, dimids(1), varid_neast)
-    ! status = nf90_def_var(ncid, "n_west", NF90_INT, dimids(1), varid_nwest)
     !
     ! status = nf90_def_var(ncid, "blngc", NF90_CHAR, dimids(1), varid_blongc)
     ! status = nf90_def_var(ncid, "blatc", NF90_INT, dimids(1), varid_blatc)
     ! status = nf90_def_var(ncid, "n_zdel", NF90_INT, dimids(1), varid_nzdel)
 
+
+    !
+    ! 4. WRITE FREQUENCY DIRECTION GRID. 
+
+    
     status = nf90_enddef(ncid)
 
     ! Write to disc
     status = nf90_put_var(ncid, varid_nnest, n_nest)
     status = nf90_put_var(ncid, varid_maxnest, max_nest)
+
+! 2. WRITE COARSE GRID BOUNDARY OUTPUT INFORMATION. 
     status = nf90_put_var(ncid, varid_nbounc, NBOUNC)
     status = nf90_put_var(ncid, varid_nname, N_NAME)
     status = nf90_put_var(ncid, varid_ncode, n_code)
-    
-    status = nf90_close(ncid)
+
+    do i = 1, n_nest
+ !      status = nf90_put_var(ncid, varid_ijarc, ijarc)
+       if(NBOUNC(I) > 0) then
+          status = nf90_put_var(ncid, varid_xdello, xdello)
+          status = nf90_put_var(ncid, varid_xdella, xdella)
+          status = nf90_put_var(ncid, varid_nnorth, n_north)
+          status = nf90_put_var(ncid, varid_nsouth, n_south)
+          status = nf90_put_var(ncid, varid_neast, n_east)
+          status = nf90_put_var(ncid, varid_nwest, n_west)
+       end if
+       end do
+
+    !
+    ! 4. WRITE FREQUENCY DIRECTION GRID. 
+
+
+       status = nf90_close(ncid)
 
 
     !
