@@ -1180,6 +1180,10 @@ CONTAINS
     integer :: varid_nsouth, varid_nnorth, varid_neast, varid_nwest
     integer :: varid_blongc, varid_blatc, varid_nzdel
 
+    integer :: varid_ml, varid_kl
+    integer :: varid_fr, varid_dfim, varid_gom, varid_c, varid_th, varid_costh, varid_sinth
+    integer :: varid_delth, varid_deltr
+    
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
     !     1. OPEN FILES.                                                           !
@@ -1189,7 +1193,7 @@ CONTAINS
     ! OPEN (UNIT=IU07, FILE=FILE07(1:LEN), FORM='UNFORMATTED', STATUS='UNKNOWN')
     !WRITE(IU07) HEADER
 
-!    FILE07_NC = trim(FILE07(1:LEN) // "_netcdf.nc")
+    !    FILE07_NC = trim(FILE07(1:LEN) // "_netcdf.nc")
     status = nf90_create("./grid/grind_info.nc", NF90_CLOBBER, ncid)
     write(*, *) "len = ", LEN
     write(*, *) "FILE07 = ", FILE07
@@ -1200,12 +1204,14 @@ CONTAINS
 
 
     status = nf90_def_dim(ncid, "n_nests", N_NEST, dimid_n_nest) 
-    
+
     status = nf90_def_var(ncid, "n_nest", NF90_INT, varid_nnest)
     status = nf90_def_var(ncid, "max_nest", NF90_INT, varid_maxnest)
 
-    !
-    ! 2. WRITE COARSE GRID BOUNDARY OUTPUT INFORMATION. 
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !            2. WRITE COARSE GRID BOUNDARY OUTPUT INFORMATION.                 !
+    ! ---------------------------------------------------------------------------- !
 
     status = nf90_def_var(ncid, "nbounc", NF90_INT,  (/ dimid_n_nest /), varid_nbounc)
     status = nf90_def_var(ncid, "n_name", NF90_CHAR, (/ dimid_n_nest /), varid_nname)
@@ -1213,7 +1219,7 @@ CONTAINS
 
     do i = 1, n_nest
        if(NBOUNC(i) > 0) then
-!          status = nf90_def_var(ncid, "ijarc", NF90_INT, (/NBOUNC(I),I/), varid_ijarc)
+          !          status = nf90_def_var(ncid, "ijarc", NF90_INT, (/NBOUNC(I),I/), varid_ijarc)
           status = nf90_def_var(ncid, "xdello", NF90_INT, varid_xdello)
           status = nf90_def_var(ncid, "xdella", NF90_INT, varid_xdella)
           status = nf90_def_var(ncid, "n_south", NF90_INT, (/dimid_n_nest/), varid_nsouth)
@@ -1224,31 +1230,55 @@ CONTAINS
        exit
     end do
 
-    !
     ! status = nf90_def_var(ncid, "ijarc", NF90_INT, dimids(1), varid_ijarc)
     !
     ! status = nf90_def_var(ncid, "blngc", NF90_CHAR, dimids(1), varid_blongc)
     ! status = nf90_def_var(ncid, "blatc", NF90_INT, dimids(1), varid_blatc)
     ! status = nf90_def_var(ncid, "n_zdel", NF90_INT, dimids(1), varid_nzdel)
 
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !                4. WRITE FREQUENCY DIRECTION GRID.                            !
+    ! ---------------------------------------------------------------------------- !
 
-    !
-    ! 4. WRITE FREQUENCY DIRECTION GRID. 
+    status = nf90_def_var(ncid, "ml", NF90_INT, varid_ml)
+    status = nf90_def_var(ncid, "kl", NF90_INT, varid_kl)
+    status = nf90_def_var(ncid, "fr", NF90_DOUBLE, varid_fr)
+    status = nf90_def_var(ncid, "dfim", NF90_DOUBLE, varid_dfim)
+    status = nf90_def_var(ncid, "gom", NF90_DOUBLE, varid_gom)
 
-    
+    status = nf90_def_var(ncid, "c", NF90_DOUBLE, varid_c)
+    status = nf90_def_var(ncid, "th", NF90_DOUBLE, varid_th)
+    status = nf90_def_var(ncid, "delth", NF90_DOUBLE, varid_delth)
+    status = nf90_def_var(ncid, "deltr", NF90_DOUBLE, varid_deltr)
+    status = nf90_def_var(ncid, "costh", NF90_DOUBLE, (/ kl /), varid_costh)
+    status = nf90_def_var(ncid, "sinth", NF90_DOUBLE, (/ kl /), varid_sinth)
+
     status = nf90_enddef(ncid)
 
-    ! Write to disc
+    !
+    ! End of definition
+    !
+
+
+    !
+    ! Write to netCDF file
+    !
+    
     status = nf90_put_var(ncid, varid_nnest, n_nest)
     status = nf90_put_var(ncid, varid_maxnest, max_nest)
 
-! 2. WRITE COARSE GRID BOUNDARY OUTPUT INFORMATION. 
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !              2. WRITE COARSE GRID BOUNDARY OUTPUT INFORMATION.               ! 
+    ! ---------------------------------------------------------------------------- !
+
     status = nf90_put_var(ncid, varid_nbounc, NBOUNC)
     status = nf90_put_var(ncid, varid_nname, N_NAME)
     status = nf90_put_var(ncid, varid_ncode, n_code)
 
     do i = 1, n_nest
- !      status = nf90_put_var(ncid, varid_ijarc, ijarc)
+       !      status = nf90_put_var(ncid, varid_ijarc, ijarc)
        if(NBOUNC(I) > 0) then
           status = nf90_put_var(ncid, varid_xdello, xdello)
           status = nf90_put_var(ncid, varid_xdella, xdella)
@@ -1257,13 +1287,33 @@ CONTAINS
           status = nf90_put_var(ncid, varid_neast, n_east)
           status = nf90_put_var(ncid, varid_nwest, n_west)
        end if
-       end do
+    end do
+
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !                4. WRITE FREQUENCY DIRECTION GRID.                            !
+    ! ---------------------------------------------------------------------------- !
+
+    status = nf90_put_var(ncid, varid_ml, ML)
+    status = nf90_put_var(ncid, varid_kl, KL)
+    status = nf90_put_var(ncid, varid_fr, FR)
+    status = nf90_put_var(ncid, varid_dfim, DFIM)
+    status = nf90_put_var(ncid, varid_gom, GOM)
+
+    status = nf90_put_var(ncid, varid_c, C)
+    status = nf90_put_var(ncid, varid_delth, DELTH)
+    status = nf90_put_var(ncid, varid_deltr, DELTR)
+    status = nf90_put_var(ncid, varid_th, TH)
+    status = nf90_put_var(ncid, varid_costh, COSTH)
+    status = nf90_put_var(ncid, varid_sinth, SINTH)
+
+
 
     !
-    ! 4. WRITE FREQUENCY DIRECTION GRID. 
+    ! End of writing to netCDF file
+    !
 
-
-       status = nf90_close(ncid)
+    status = nf90_close(ncid)
 
 
     !
