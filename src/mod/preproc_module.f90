@@ -1174,7 +1174,8 @@ CONTAINS
     INTEGER      :: LEN, I
 
     integer :: ncid, varid, dimids(1), status !dimids(NDIMS)
-    integer :: dimid_n_nest 
+    integer :: dimid_n_nest, dimid_ml, dimid_kl
+    
     integer :: varid_nnest, varid_maxnest, varid_nbounc, varid_nname, varid_ncode
     integer :: varid_ijarc, varid_xdello, varid_xdella
     integer :: varid_nsouth, varid_nnorth, varid_neast, varid_nwest
@@ -1184,6 +1185,10 @@ CONTAINS
     integer :: varid_fr, varid_dfim, varid_gom, varid_c, varid_th, varid_costh, varid_sinth
     integer :: varid_delth, varid_deltr, varid_inv_log_co, varid_df, varid_df_fr, varid_df_fr2
     integer :: varid_dfim_ofr
+
+    integer :: varid_dfim_fr, varid_dfim_fr2, varid_fr5, varid_frm5, varid_rhowg_dfim
+    integer :: varid_fmin, varid_mo_tail, varid_mm1_tail, varid_mp1_tail, varid_mp2_tail 
+    integer :: varid_mpm, varid_kpm, varid_jxo, varid_jyo
     
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
@@ -1195,7 +1200,7 @@ CONTAINS
     !WRITE(IU07) HEADER
 
     !    FILE07_NC = trim(FILE07(1:LEN) // "_netcdf.nc")
-    status = nf90_create("./grid/grind_info.nc", NF90_CLOBBER, ncid)
+    status = nf90_create("./grid/grind_info.nc", ior(ior(NF90_CLOBBER,NF90_SHARE),NF90_NETCDF4), ncid)
     write(*, *) "len = ", LEN
     write(*, *) "FILE07 = ", FILE07
     !    write(*, *) "FILE07_NC = ", FILE07_NC
@@ -1205,13 +1210,15 @@ CONTAINS
 
 
     status = nf90_def_dim(ncid, "n_nests", N_NEST, dimid_n_nest) 
+    status = nf90_def_dim(ncid, "ml", ML, dimid_ml) 
+    status = nf90_def_dim(ncid, "kl", KL, dimid_kl) 
 
     status = nf90_def_var(ncid, "n_nest", NF90_INT, varid_nnest)
     status = nf90_def_var(ncid, "max_nest", NF90_INT, varid_maxnest)
 
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
-    !            2. WRITE COARSE GRID BOUNDARY OUTPUT INFORMATION.                 !
+    !    2. WRITE COARSE GRID BOUNDARY OUTPUT INFORMATION.  (definition part)      !
     ! ---------------------------------------------------------------------------- !
 
     status = nf90_def_var(ncid, "nbounc", NF90_INT,  (/ dimid_n_nest /), varid_nbounc)
@@ -1239,7 +1246,7 @@ CONTAINS
 
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
-    !                4. WRITE FREQUENCY DIRECTION GRID.                            !
+    !                4. WRITE FREQUENCY DIRECTION GRID. (definition part)          !
     ! ---------------------------------------------------------------------------- !
 
     status = nf90_def_var(ncid, "ml", NF90_INT, varid_ml)
@@ -1252,15 +1259,32 @@ CONTAINS
     status = nf90_def_var(ncid, "th", NF90_DOUBLE, varid_th)
     status = nf90_def_var(ncid, "delth", NF90_DOUBLE, varid_delth)
     status = nf90_def_var(ncid, "deltr", NF90_DOUBLE, varid_deltr)
-    status = nf90_def_var(ncid, "costh", NF90_DOUBLE, (/ kl /), varid_costh)
-    status = nf90_def_var(ncid, "sinth", NF90_DOUBLE, (/ kl /), varid_sinth)
+    status = nf90_def_var(ncid, "costh", NF90_DOUBLE, (/ dimid_kl /), varid_costh)
+    status = nf90_def_var(ncid, "sinth", NF90_DOUBLE, (/ dimid_kl /), varid_sinth)
 
     status = nf90_def_var(ncid, "inv_log_co", NF90_DOUBLE, varid_inv_log_co)
-    status = nf90_def_var(ncid, "df", NF90_DOUBLE, (/ML/), varid_df)
-    status = nf90_def_var(ncid, "df_fr", NF90_DOUBLE, (/ML/),varid_df_fr)
-    status = nf90_def_var(ncid, "df_fr2", NF90_DOUBLE, (/ML/), varid_df_fr2)
-    status = nf90_def_var(ncid, "dfim", NF90_DOUBLE, (/ ML /), varid_dfim)
-    status = nf90_def_var(ncid, "dfim_ofr", NF90_DOUBLE, (/ ML /), varid_dfim_ofr)
+    status = nf90_def_var(ncid, "df", NF90_DOUBLE, (/ dimid_ml /), varid_df)
+    status = nf90_def_var(ncid, "df_fr", NF90_DOUBLE, (/ dimid_ml /),varid_df_fr)
+    status = nf90_def_var(ncid, "df_fr2", NF90_DOUBLE, (/ dimid_ml /), varid_df_fr2)
+    status = nf90_def_var(ncid, "dfim", NF90_DOUBLE, (/ dimid_ml /), varid_dfim)
+    status = nf90_def_var(ncid, "dfim_ofr", NF90_DOUBLE, (/ dimid_ml /), varid_dfim_ofr)
+
+    status = nf90_def_var(ncid, "dfim_fr", NF90_DOUBLE, (/ dimid_ml /), varid_dfim_fr)
+    status = nf90_def_var(ncid, "dfim_fr2", NF90_DOUBLE, (/ dimid_ml /), varid_dfim_fr2)
+    status = nf90_def_var(ncid, "fr5", NF90_DOUBLE, (/ dimid_ml /),varid_fr5)
+    status = nf90_def_var(ncid, "frm5", NF90_DOUBLE, (/ dimid_ml /), varid_frm5)
+    status = nf90_def_var(ncid, "rhowg_dfim", NF90_DOUBLE, (/ dimid_ml /), varid_rhowg_dfim)
+    status = nf90_def_var(ncid, "fmin", NF90_DOUBLE, varid_fmin)
+
+    status = nf90_def_var(ncid, "mo_tail", NF90_DOUBLE, varid_mo_tail)
+    status = nf90_def_var(ncid, "mm1_tail", NF90_DOUBLE, varid_mm1_tail)
+    status = nf90_def_var(ncid, "mp1_tail", NF90_DOUBLE, varid_mp1_tail)
+    status = nf90_def_var(ncid, "mp2_tail", NF90_DOUBLE, varid_mp2_tail)
+    status = nf90_def_var(ncid, "mpm", NF90_INT, (/ dimid_ml, 2 /), varid_mpm)
+    status = nf90_def_var(ncid, "kpm", NF90_INT, (/ dimid_kl, 2 /), varid_kpm)
+    status = nf90_def_var(ncid, "jxo", NF90_INT, (/ dimid_kl, 2 /), varid_jxo)
+    status = nf90_def_var(ncid, "jyo", NF90_INT, (/ dimid_kl, 2 /), varid_jyo)
+
 
     status = nf90_enddef(ncid)
 
@@ -1278,7 +1302,7 @@ CONTAINS
 
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
-    !              2. WRITE COARSE GRID BOUNDARY OUTPUT INFORMATION.               ! 
+    !      2. WRITE COARSE GRID BOUNDARY OUTPUT INFORMATION. (write part)          ! 
     ! ---------------------------------------------------------------------------- !
 
     status = nf90_put_var(ncid, varid_nbounc, NBOUNC)
@@ -1299,7 +1323,7 @@ CONTAINS
 
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
-    !                4. WRITE FREQUENCY DIRECTION GRID.                            !
+    !                4. WRITE FREQUENCY DIRECTION GRID. (write part)               !
     ! ---------------------------------------------------------------------------- !
 
     status = nf90_put_var(ncid, varid_ml, ML)
@@ -1308,14 +1332,12 @@ CONTAINS
     status = nf90_put_var(ncid, varid_dfim, DFIM)
     status = nf90_put_var(ncid, varid_gom, GOM)
 
-
     status = nf90_put_var(ncid, varid_c, C)
     status = nf90_put_var(ncid, varid_delth, DELTH)
     status = nf90_put_var(ncid, varid_deltr, DELTR)
     status = nf90_put_var(ncid, varid_th, TH)
     status = nf90_put_var(ncid, varid_costh, COSTH)
     status = nf90_put_var(ncid, varid_sinth, SINTH)
-
     
     status = nf90_put_var(ncid, varid_inv_log_co, INV_LOG_CO)
     status = nf90_put_var(ncid, varid_df, DF)
@@ -1323,6 +1345,24 @@ CONTAINS
     status = nf90_put_var(ncid, varid_df_fr2, DF_FR2)
     status = nf90_put_var(ncid, varid_dfim, DFIM)
     status = nf90_put_var(ncid, varid_dfim_ofr, DFIMOFR)
+
+    status = nf90_put_var(ncid, varid_dfim_fr, DFIM_FR)
+    status = nf90_put_var(ncid, varid_dfim_fr2, DFIM_FR2)
+    status = nf90_put_var(ncid, varid_fr5, FR5)
+    status = nf90_put_var(ncid, varid_frm5, FRM5)
+    status = nf90_put_var(ncid, varid_rhowg_dfim, RHOWG_DFIM)
+
+    status = nf90_put_var(ncid, varid_fmin, FMIN)
+    status = nf90_put_var(ncid, varid_mo_tail, MO_TAIL)
+    status = nf90_put_var(ncid, varid_mm1_tail, MM1_TAIL)
+    status = nf90_put_var(ncid, varid_mp1_tail, MP1_TAIL)
+    status = nf90_put_var(ncid, varid_mp2_tail, MP2_TAIL)
+
+    status = nf90_put_var(ncid, varid_mpm, MPM)
+    status = nf90_put_var(ncid, varid_kpm, KPM)
+    status = nf90_put_var(ncid, varid_jxo, JXO)
+    status = nf90_put_var(ncid, varid_jyo, JYO)
+    
 
 
 
