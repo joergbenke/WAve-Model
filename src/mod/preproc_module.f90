@@ -1175,10 +1175,16 @@ CONTAINS
 
     integer :: ncid, varid, dimids(1), status !dimids(NDIMS)
     integer :: dimid_n_nest, dimid_ml, dimid_kl
+
+    ! Section 1
+    integer :: varid_header
     
+    ! Section 2
     integer :: varid_nnest, varid_maxnest, varid_nbounc, varid_nname, varid_ncode
     integer :: varid_ijarc, varid_xdello, varid_xdella
     integer :: varid_nsouth, varid_nnorth, varid_neast, varid_nwest
+
+    ! Section 2
     integer :: varid_blongc, varid_blatc, varid_nzdel
 
     integer :: varid_ml, varid_kl
@@ -1190,6 +1196,11 @@ CONTAINS
     integer :: varid_fmin, varid_mo_tail, varid_mm1_tail, varid_mp1_tail, varid_mp2_tail 
     integer :: varid_mpm, varid_kpm, varid_jxo, varid_jyo
 
+    ! Section 3
+    integer :: varid_nbounf, varid_nbinp, varid_c_name
+    integer :: varid_blngf, varid_blatf, varid_ijarf, varid_ibfl, varid_ibfr, varid_bfw
+
+    
     ! Section 5
     integer :: varid_nx, varid_ny, varid_nsea, varid_iper, varid_one_point
     integer :: varid_reduced_grid, varid_l_obstruction_t, varid_nlon_rg, varid_delphi, varid_dellam 
@@ -1211,30 +1222,36 @@ CONTAINS
 
     LEN = LEN_TRIM(FILE07)
     ! OPEN (UNIT=IU07, FILE=FILE07(1:LEN), FORM='UNFORMATTED', STATUS='UNKNOWN')
-    !WRITE(IU07) HEADER
 
     !    FILE07_NC = trim(FILE07(1:LEN) // "_netcdf.nc")
     status = nf90_create("./grid/grind_info.nc", ior(ior(NF90_CLOBBER,NF90_SHARE),NF90_NETCDF4), ncid)
     write(*, *) "len = ", LEN
     write(*, *) "FILE07 = ", FILE07
+    ! WRITE(IU07) HEADER
     !    write(*, *) "FILE07_NC = ", FILE07_NC
     dO I=1,N_NEST
        WRITE (*, *) NBOUNC(I), N_NAME(I), n_code(i)
     END DO
 
-
     status = nf90_def_dim(ncid, "n_nests", N_NEST, dimid_n_nest) 
     status = nf90_def_dim(ncid, "ml", ML, dimid_ml) 
     status = nf90_def_dim(ncid, "kl", KL, dimid_kl) 
 
-    status = nf90_def_var(ncid, "n_nest", NF90_INT, varid_nnest)
-    status = nf90_def_var(ncid, "max_nest", NF90_INT, varid_maxnest)
+    !-------------------------------------
+    !
+    !          1. Open Files
+    !          --------------
+    
+    status = nf90_def_var(ncid, "header", NF90_CHAR, varid_header) 
 
+    
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
     !    2. WRITE COARSE GRID BOUNDARY OUTPUT INFORMATION.  (definition part)      !
     ! ---------------------------------------------------------------------------- !
 
+    status = nf90_def_var(ncid, "n_nest", NF90_INT, varid_nnest)
+    status = nf90_def_var(ncid, "max_nest", NF90_INT, varid_maxnest)
     status = nf90_def_var(ncid, "nbounc", NF90_INT,  (/ dimid_n_nest /), varid_nbounc)
     status = nf90_def_var(ncid, "n_name", NF90_CHAR, (/ dimid_n_nest /), varid_nname)
     status = nf90_def_var(ncid, "n_code", NF90_INT,  (/ dimid_n_nest /), varid_ncode)
@@ -1258,6 +1275,26 @@ CONTAINS
     ! status = nf90_def_var(ncid, "blatc", NF90_INT, dimids(1), varid_blatc)
     ! status = nf90_def_var(ncid, "n_zdel", NF90_INT, dimids(1), varid_nzdel)
 
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !     3. WRITE FINE GRID BOUNDARY INPUT INFORMATION. (defintion part)          !
+    !        -------------------------------------------                           !
+
+    
+    status = nf90_def_var(ncid, "nbounf", NF90_INT, varid_nbounf)
+    status = nf90_def_var(ncid, "nbinp", NF90_INT, varid_nbinp)
+    status = nf90_def_var(ncid, "c_name", NF90_CHAR, varid_c_name)
+
+    if(nbounf > 0) THEN
+       status = nf90_def_var(ncid, "blngf", NF90_INT, varid_blngf)
+       status = nf90_def_var(ncid, "blatf", NF90_INT, varid_blatf)
+       status = nf90_def_var(ncid, "ijarf", NF90_INT, varid_ijarf)
+       status = nf90_def_var(ncid, "ibfl", NF90_INT, varid_ibfl)
+       status = nf90_def_var(ncid, "ibfr", NF90_INT, varid_ibfr)
+       status = nf90_def_var(ncid, "bfw", NF90_DOUBLE, varid_bfw)
+    end if
+
+    
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
     !                4. WRITE FREQUENCY DIRECTION GRID. (definition part)          !
@@ -1374,30 +1411,52 @@ CONTAINS
     ! Write to netCDF file
     !
     
-    status = nf90_put_var(ncid, varid_nnest, n_nest)
-    status = nf90_put_var(ncid, varid_maxnest, max_nest)
+    status = nf90_put_var(ncid, varid_header, HEADER)
 
+    
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
     !      2. WRITE COARSE GRID BOUNDARY OUTPUT INFORMATION. (write part)          ! 
     ! ---------------------------------------------------------------------------- !
 
+    status = nf90_put_var(ncid, varid_nnest, N_NEST)
+    status = nf90_put_var(ncid, varid_maxnest, MAX_NEST)
     status = nf90_put_var(ncid, varid_nbounc, NBOUNC)
     status = nf90_put_var(ncid, varid_nname, N_NAME)
-    status = nf90_put_var(ncid, varid_ncode, n_code)
+    status = nf90_put_var(ncid, varid_ncode, N_CODE)
 
     do i = 1, n_nest
        !      status = nf90_put_var(ncid, varid_ijarc, ijarc)
        if(NBOUNC(I) > 0) then
-          status = nf90_put_var(ncid, varid_xdello, xdello)
-          status = nf90_put_var(ncid, varid_xdella, xdella)
-          status = nf90_put_var(ncid, varid_nnorth, n_north)
-          status = nf90_put_var(ncid, varid_nsouth, n_south)
-          status = nf90_put_var(ncid, varid_neast, n_east)
-          status = nf90_put_var(ncid, varid_nwest, n_west)
+          status = nf90_put_var(ncid, varid_xdello, XDELLO)
+          status = nf90_put_var(ncid, varid_xdella, XDELLA)
+          status = nf90_put_var(ncid, varid_nnorth, N_NORTH)
+          status = nf90_put_var(ncid, varid_nsouth, N_SOUTH)
+          status = nf90_put_var(ncid, varid_neast, N_EAST)
+          status = nf90_put_var(ncid, varid_nwest, N_WEST)
        end if
     end do
 
+
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !     3. WRITE FINE GRID BOUNDARY INPUT INFORMATION.                           !
+    !        -------------------------------------------                           !
+
+    status = nf90_put_var(ncid, varid_nbounf, NBOUNF)
+    status = nf90_put_var(ncid, varid_nbinp, NBINP)
+    status = nf90_put_var(ncid, varid_c_name, C_NAME)
+
+    IF (NBOUNF > 0) THEN 
+       status = nf90_put_var(ncid, varid_blngf, BLNGF(1:NBOUNF))
+       status = nf90_put_var(ncid, varid_blatf, BLATF(1:NBOUNF))
+       status = nf90_put_var(ncid, varid_ijarf, IJARF(1:NBOUNF))
+       status = nf90_put_var(ncid, varid_ibfl, IBFL(1:NBOUNF))
+       status = nf90_put_var(ncid, varid_ibfr, IBFR(1:NBOUNF))
+       status = nf90_put_var(ncid, varid_bfw, BFW(1:NBOUNF))
+    end IF
+
+    
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
     !                4. WRITE FREQUENCY DIRECTION GRID. (write part)               !
