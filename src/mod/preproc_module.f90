@@ -1189,6 +1189,20 @@ CONTAINS
     integer :: varid_dfim_fr, varid_dfim_fr2, varid_fr5, varid_frm5, varid_rhowg_dfim
     integer :: varid_fmin, varid_mo_tail, varid_mm1_tail, varid_mp1_tail, varid_mp2_tail 
     integer :: varid_mpm, varid_kpm, varid_jxo, varid_jyo
+
+    ! Section 5
+    integer :: varid_nx, varid_ny, varid_nsea, varid_iper, varid_one_point
+    integer :: varid_reduced_grid, varid_l_obstruction_t, varid_nlon_rg, varid_delphi, varid_dellam 
+    integer :: varid_sinph, varid_cosph, varid_amowep, varid_amosop, varid_amoeap, varid_amonop
+
+    integer :: varid_zdello, varid_ixlg, varid_kxlt, varid_l_s_mask, varid_klat, varid_klon, varid_wlat
+    integer :: varid_depth_b, varid_obslat, varid_obslon
+
+    ! section 6 (grid definition)
+    integer :: varid_ndepth, varid_deptha, varid_depthd, varid_depthe
+    integer :: varid_flminfr, varid_tcgond, varid_tfak, varid_tsihkd, varid_tfac_st, varid_t_tail
+    integer :: varid_delu
+
     
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
@@ -1286,6 +1300,69 @@ CONTAINS
     status = nf90_def_var(ncid, "jyo", NF90_INT, (/ dimid_kl, 2 /), varid_jyo)
 
 
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !     5. WRITE GRID INFORMATION. (definition part)                             !
+    !        -----------------------                                               !
+
+    status = nf90_def_var(ncid, "nx", NF90_DOUBLE, varid_nx)
+    status = nf90_def_var(ncid, "ny", NF90_DOUBLE, varid_ny)
+    status = nf90_def_var(ncid, "nsea", NF90_DOUBLE, varid_nsea)
+    status = nf90_def_var(ncid, "iper", NF90_BYTE, varid_iper)
+    status = nf90_def_var(ncid, "one_point", NF90_BYTE, varid_one_point)
+    status = nf90_def_var(ncid, "reduced_grid", NF90_BYTE, varid_reduced_grid)
+    status = nf90_def_var(ncid, "l_obstruction_t", NF90_BYTE, varid_l_obstruction_t)
+
+    status = nf90_def_var(ncid, "nlon_rg", NF90_INT, varid_nlon_rg)
+
+    status = nf90_def_var(ncid, "delphi", NF90_DOUBLE, varid_delphi)
+    status = nf90_def_var(ncid, "dellam", NF90_DOUBLE, varid_dellam)
+    status = nf90_def_var(ncid, "sinph", NF90_DOUBLE, varid_sinph)
+    status = nf90_def_var(ncid, "cosph", NF90_DOUBLE, varid_cosph)
+
+    status = nf90_def_var(ncid, "amowep", NF90_INT, varid_amowep)
+    status = nf90_def_var(ncid, "amosop", NF90_INT, varid_amosop)
+    status = nf90_def_var(ncid, "amoeap", NF90_INT, varid_amoeap)
+    status = nf90_def_var(ncid, "amonop", NF90_INT, varid_amonop)
+    status = nf90_def_var(ncid, "xdella", NF90_DOUBLE, varid_delphi)
+    status = nf90_def_var(ncid, "xdello", NF90_DOUBLE, varid_dellam)
+    status = nf90_def_var(ncid, "zdello", NF90_DOUBLE, varid_zdello)
+
+    status = nf90_def_var(ncid, "ixlg", NF90_INT, varid_ixlg)
+    status = nf90_def_var(ncid, "kxlt", NF90_INT, varid_kxlt)
+    status = nf90_def_var(ncid, "l_s_mask", NF90_BYTE, varid_l_s_mask)
+
+    status = nf90_def_var(ncid, "klat", NF90_INT, varid_klat)
+    status = nf90_def_var(ncid, "klon", NF90_INT, varid_klon)
+    status = nf90_def_var(ncid, "wlat", NF90_BYTE, varid_wlat)
+    status = nf90_def_var(ncid, "depth_b", NF90_DOUBLE, varid_depth_b)
+
+    if( L_OBSTRUCTION_T) then
+       status = nf90_def_var(ncid, "obslat", NF90_DOUBLE, varid_obslat)
+       status = nf90_def_var(ncid, "obslon", NF90_DOUBLE, varid_obslon)
+    end if
+
+
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !     6. WRITE TABLES. (definition part)                                       !
+    !        -------------                                                         !
+
+    status = nf90_def_var(ncid, "ndepth", NF90_INT, varid_ndepth)
+    status = nf90_def_var(ncid, "deptha", NF90_DOUBLE, varid_deptha)
+    status = nf90_def_var(ncid, "depthd", NF90_DOUBLE, varid_depthd)
+    status = nf90_def_var(ncid, "depthe", NF90_DOUBLE, varid_depthe)
+
+    status = nf90_def_var(ncid, "flminfr", NF90_DOUBLE, varid_flminfr)
+    status = nf90_def_var(ncid, "tcgond", NF90_DOUBLE, varid_tcgond)
+    status = nf90_def_var(ncid, "tfak", NF90_DOUBLE, varid_tfak)
+    status = nf90_def_var(ncid, "tsihkd", NF90_DOUBLE, varid_tsihkd)
+    status = nf90_def_var(ncid, "tfac_st", NF90_DOUBLE, varid_tfac_st)
+    status = nf90_def_var(ncid, "t_tail", NF90_DOUBLE, varid_t_tail)
+
+    status = nf90_def_var(ncid, "delu", NF90_DOUBLE, varid_delu)
+
+
     status = nf90_enddef(ncid)
 
     !
@@ -1364,7 +1441,66 @@ CONTAINS
     status = nf90_put_var(ncid, varid_jyo, JYO)
     
 
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !     5. WRITE GRID INFORMATION.                                               !
+    !        -----------------------                                               !
 
+    status = nf90_put_var(ncid, varid_nx, NX)
+    status = nf90_put_var(ncid, varid_ny, NY)
+    status = nf90_put_var(ncid, varid_nsea, NSEA)
+ !   status = nf90_put_var(ncid, varid_iper, IPER)
+
+ !   status = nf90_put_var(ncid, varid_one_point, ONE_POINT)
+ !   status = nf90_put_var(ncid, varid_reduced_grid, REDUCED_GRID)
+ !   status = nf90_put_var(ncid, varid_l_obstruction_t, L_OBSTRUCTION_T)
+    status = nf90_put_var(ncid, varid_nlon_rg, NLON_RG)
+    status = nf90_put_var(ncid, varid_delphi, DELPHI)
+    status = nf90_put_var(ncid, varid_dellam, DELLAM)
+    
+    status = nf90_put_var(ncid, varid_sinph, SINPH)
+    status = nf90_put_var(ncid, varid_cosph, COSPH)
+    status = nf90_put_var(ncid, varid_amowep, AMOWEP)
+    status = nf90_put_var(ncid, varid_amosop, AMOSOP)
+    status = nf90_put_var(ncid, varid_amoeap, AMOEAP)
+    status = nf90_put_var(ncid, varid_amonop, AMONOP)
+
+    status = nf90_put_var(ncid, varid_delphi, DELPHI)
+    status = nf90_put_var(ncid, varid_dellam, DELLAM)
+    status = nf90_put_var(ncid, varid_zdello, ZDELLO)
+
+    status = nf90_put_var(ncid, varid_ixlg, IXLG)
+    status = nf90_put_var(ncid, varid_kxlt, KXLT)
+!    status = nf90_put_var(ncid, varid_l_s_mask, L_S_MASK)
+    status = nf90_put_var(ncid, varid_klat, KLAT)
+    status = nf90_put_var(ncid, varid_klon, KLON)
+
+    status = nf90_put_var(ncid, varid_wlat, WLAT)
+    status = nf90_put_var(ncid, varid_depth_b, DEPTH_B)
+
+    if( L_OBSTRUCTION_T) then
+       status = nf90_put_var(ncid, varid_obslat, OBSLAT)
+       status = nf90_put_var(ncid, varid_obslon, OBSLON)
+    end if
+
+    
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !     6. WRITE TABLES.                                                         !
+    !        -------------                                                         !
+
+    status = nf90_put_var(ncid, varid_ndepth, NDEPTH)
+    status = nf90_put_var(ncid, varid_deptha, DEPTHA)
+    status = nf90_put_var(ncid, varid_depthd, DEPTHD)
+    status = nf90_put_var(ncid, varid_depthe, DEPTHE)
+    
+    status = nf90_put_var(ncid, varid_flminfr, FLMINFR)
+    status = nf90_put_var(ncid, varid_tcgond, TCGOND)
+    status = nf90_put_var(ncid, varid_tfak, TFAK)
+    status = nf90_put_var(ncid, varid_tfac_st, TFAC_ST)
+    status = nf90_put_var(ncid, varid_tsihkd, TSIHKD)
+    status = nf90_put_var(ncid, varid_t_tail, T_TAIL)
+    status = nf90_put_var(ncid, varid_delu, DELU)
 
     !
     ! End of writing to netCDF file
