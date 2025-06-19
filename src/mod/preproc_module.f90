@@ -1196,16 +1196,16 @@ CONTAINS
     INTEGER      :: LEN, I
 
     integer :: ncid, varid, dimids(1), status !dimids(NDIMS)
-    integer :: dimid_n_nest, dimid_ml, dimid_kl
+    integer :: dimid_n_nest, dimid_ml, dimid_kl, dimid_max_nbounc
 
     ! Section 1
     integer :: varid_header
     
     ! Section 2
     integer :: varid_nnest, varid_maxnest
-    integer, allocatable, dimension(:) :: varid_nbounc, varid_nname, varid_ncode
+    integer :: varid_nbounc, varid_n_name, varid_n_code
     integer :: varid_ijarc, varid_xdello, varid_xdella
-    integer, allocatable, dimension(:) :: varid_nsouth, varid_nnorth, varid_neast, varid_nwest
+    integer :: varid_nsouth, varid_nnorth, varid_neast, varid_nwest
 
     ! Section 2
     integer :: varid_blongc, varid_blatc, varid_nzdel
@@ -1240,39 +1240,26 @@ CONTAINS
     
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
-    !     1. OPEN FILES.                                                           !
-    !        -----------                                                           !
+    !     1. OPEN FILES and define dimensions                                      !
+    !        --------------------------------                                      !
 
     LEN = LEN_TRIM(FILE07)
     ! OPEN (UNIT=IU07, FILE=FILE07(1:LEN), FORM='UNFORMATTED', STATUS='UNKNOWN')
+    ! FILE07_NC = trim(FILE07(1:LEN) // "_netcdf.nc")
 
-    !    FILE07_NC = trim(FILE07(1:LEN) // "_netcdf.nc")
-!    status = nf90_create("./grid/grind_info.nc", ior(ior(NF90_CLOBBER,NF90_SHARE),NF90_NETCDF4), ncid)
+    ! Open File
     call check( nf90_create("./grid/grind_info.nc", ior(ior(NF90_CLOBBER,NF90_SHARE),NF90_NETCDF4), ncid), "nf90_create" )
 
-    call check( nf90_def_dim(ncid, "n_nests", N_NEST, dimid_n_nest), "nf90_def_dim n_nest" )
+    ! Define dimensions
+    call check( nf90_def_dim(ncid, "n_nests", N_NEST, dimid_n_nest), "nf90_def_dim N_NEST" )
     call check( nf90_def_dim(ncid, "ml", ML, dimid_ml), "nf90_def_dim ML" ) 
     call check( nf90_def_dim(ncid, "kl", KL, dimid_kl), "nf90_def_dim KL" ) 
+    call check( nf90_def_dim(ncid, "max_nbounc", MAXVAL(NBOUNC), dimid_max_nbounc), "nf90_def_dim MAX(NBOUNC)" ) 
 
-    write( *, * ) "End defdim ..."
-    !-------------------------------------
-    !
-    !          1. Open Files
-    !          --------------
-
-    allocate(varid_nbounc(N_NEST))
-    allocate(varid_nname(N_NEST))
-    allocate(varid_ncode(N_NEST))
-
-    allocate(varid_nnorth(N_NEST))
-    allocate(varid_nsouth(N_NEST))
-    allocate(varid_neast(N_NEST))
-    allocate(varid_nwest(N_NEST))
-
+    
+    ! Define variables for netCDF
     call check( nf90_def_var(ncid, "header", NF90_CHAR, varid_header), "nf90_def_var HEADER" )
 
-    write( *,* ) "End def open file ... "
-    
     
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
@@ -1282,34 +1269,24 @@ CONTAINS
     call check( nf90_def_var(ncid, "n_nest", NF90_INT, varid_nnest), "nf90_def_var N_NEST" )
     call check( nf90_def_var(ncid, "max_nest", NF90_INT, varid_maxnest), "nf90_def_var MAX_NEST" )
 
-    do i = 1, n_nest
-       call check( nf90_def_var(ncid, "nbounc", NF90_INT, varid_nbounc(i)), "nf90_def_var NBOUNC" )
-       call check( nf90_def_var(ncid, "n_name", NF90_CHAR, varid_nname(i)), "nf90_def_var N_NAME" )
-       call check( nf90_def_var(ncid, "n_code", NF90_INT, varid_ncode(i)), "nf90_def_var N_CODE" )
+    call check( nf90_def_var(ncid, "nbounc", NF90_INT, (/dimid_n_nest/), varid_nbounc), "nf90_def_var NBOUNC" )
+    call check( nf90_def_var(ncid, "n_name", NF90_CHAR, (/dimid_n_nest/), varid_n_name), "nf90_def_var N_NAME" )
+    call check( nf90_def_var(ncid, "n_code", NF90_INT, (/dimid_n_nest/), varid_n_code), "nf90_def_var N_CODE" )
 
-       if(NBOUNC(i) > 0) then
-          !          call check( nf90_def_var(ncid, "ijarc", NF90_INT, (/NBOUNC(I),I/), varid_ijarc)
-          call check( nf90_def_var(ncid, "xdello", NF90_INT, varid_xdello), "nf90_def_var XDELLO" )
-          call check( nf90_def_var(ncid, "xdella", NF90_INT, varid_xdella), "nf90_def_var XDELLA" )
-          call check( nf90_def_var(ncid, "n_south", NF90_INT, varid_nsouth(i)), "nf90_def_var NSOUTH" )
-          call check( nf90_def_var(ncid, "n_north", NF90_INT, varid_nnorth(i)), "nf90_def_var NNORTH" )
-          call check( nf90_def_var(ncid, "n_east", NF90_INT, varid_neast(i)), "nf90_def_var NEAST" )
-          call check( nf90_def_var(ncid, "n_west", NF90_INT, varid_nwest(i)), "nf90_def_var NWEST" )
-!          call check( nf90_def_var(ncid, "n_south", NF90_INT, (/dimid_n_nest/), varid_nsouth) )
-!          call check( nf90_def_var(ncid, "n_north", NF90_INT, (/dimid_n_nest/), varid_nnorth) )
-!          call check( nf90_def_var(ncid, "n_east", NF90_INT, (/dimid_n_nest/), varid_neast) )
-!          call check( nf90_def_var(ncid, "n_west", NF90_INT, (/dimid_n_nest/), varid_nwest) )
-       end if
-       exit
-    end do
+    !          call check( nf90_def_var(ncid, "ijarc", NF90_INT, (/NBOUNC(I),I/), varid_ijarc)
+    call check( nf90_def_var(ncid, "xdello", NF90_INT, varid_xdello), "nf90_def_var XDELLO" )
+    call check( nf90_def_var(ncid, "xdella", NF90_INT, varid_xdella), "nf90_def_var XDELLA" )
+    call check( nf90_def_var(ncid, "n_south", NF90_INT, (/dimid_n_nest/), varid_nsouth), "nf90_def_var NSOUTH" )
+    call check( nf90_def_var(ncid, "n_north", NF90_INT, (/dimid_n_nest/), varid_nnorth), "nf90_def_var NNORTH" )
+    call check( nf90_def_var(ncid, "n_east", NF90_INT, (/dimid_n_nest/), varid_neast), "nf90_def_var NEAST" )
+    call check( nf90_def_var(ncid, "n_west", NF90_INT, (/dimid_n_nest/), varid_nwest), "nf90_def_var NWEST" )
+    
+    call check( nf90_def_var(ncid, "ijarc", NF90_INT, (/ dimid_n_nest /), varid_ijarc), "nf90_def_var IJARC" )
+    call check( nf90_def_var(ncid, "blngc", NF90_CHAR, (/dimid_n_nest/), varid_blongc), "nf90_def_var BLONGC" )
+    call check( nf90_def_var(ncid, "blatc", NF90_INT, (/dimid_n_nest/), varid_blatc), "nf90_def_var BLATC" )
+    call check( nf90_def_var(ncid, "n_zdel", NF90_INT, (/dimid_n_nest/), varid_nzdel), "nf90_def_var NZDEL" )
 
     write( *, * ) "Definition of nr 2 ended ..."
-    
-    ! call check( nf90_def_var(ncid, "ijarc", NF90_INT, dimids(1), varid_ijarc) )
-    !
-    ! call check( nf90_def_var(ncid, "blngc", NF90_CHAR, dimids(1), varid_blongc) )
-    ! call check( nf90_def_var(ncid, "blatc", NF90_INT, dimids(1), varid_blatc) )
-    ! call check( nf90_def_var(ncid, "n_zdel", NF90_INT, dimids(1), varid_nzdel) )
 
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
@@ -1477,20 +1454,16 @@ CONTAINS
     call check( nf90_put_var(ncid, varid_nnest, N_NEST), "nf90_def_var N_NEST" )
     call check( nf90_put_var(ncid, varid_maxnest, MAX_NEST), "nf90_def_var MAX_NEST" )
 
-    do i = 1, n_nest
-       call check( nf90_put_var(ncid, varid_nbounc(i), NBOUNC(i)), "nf90_def_var NBOUNC_I" )
-       call check( nf90_put_var(ncid, varid_nname(i), N_NAME(i)), "nf90_def_var N_NAME_I" )
-       call check( nf90_put_var(ncid, varid_ncode(i), N_CODE(i)), "nf90_def_var N_CODE_I" )
+    call check( nf90_put_var(ncid, varid_nbounc, NBOUNC), "nf90_def_var NBOUNC_I" )
+    call check( nf90_put_var(ncid, varid_n_name, N_NAME), "nf90_def_var N_NAME_I" )
+    call check( nf90_put_var(ncid, varid_n_code, N_CODE), "nf90_def_var N_CODE_I" )
        
-       if(NBOUNC(I) > 0) then
-          call check( nf90_put_var(ncid, varid_xdello, XDELLO), "nf90_def_var XDELLO" )
-          call check( nf90_put_var(ncid, varid_xdella, XDELLA), "nf90_def_var XDELLA" )
-          call check( nf90_put_var(ncid, varid_nnorth(i), N_NORTH(i)), "nf90_def_var N_NORTH_I" )
-          call check( nf90_put_var(ncid, varid_nsouth(i), N_SOUTH(i)), "nf90_def_var N_SOUTH_I" )
-          call check( nf90_put_var(ncid, varid_neast(i), N_EAST(i)), "nf90_def_var N_EAST_I" )
-          call check( nf90_put_var(ncid, varid_nwest(i), N_WEST(i)), "nf90_def_var N_WEST_I" )
-       end if
-    end do
+    call check( nf90_put_var(ncid, varid_xdello, XDELLO), "nf90_def_var XDELLO" )
+    call check( nf90_put_var(ncid, varid_xdella, XDELLA), "nf90_def_var XDELLA" )
+    call check( nf90_put_var(ncid, varid_nnorth, N_NORTH), "nf90_def_var N_NORTH" )
+    call check( nf90_put_var(ncid, varid_nsouth, N_SOUTH), "nf90_def_var N_SOUTH" )
+    call check( nf90_put_var(ncid, varid_neast, N_EAST), "nf90_def_var N_EAST" )
+    call check( nf90_put_var(ncid, varid_nwest, N_WEST), "nf90_def_var N_WEST" )
 
     write( *, *) "Wrote nr 2 ..."
     
