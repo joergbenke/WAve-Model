@@ -70,7 +70,7 @@ MODULE PREPROC_MODULE
 
   USE WAM_TABLES_MODULE,  ONLY: NDEPTH, DEPTHA, DEPTHD, DEPTHE,                  &
        &                             FLMINFR, TCGOND, TFAK, TSIHKD, TFAC_ST, T_TAIL,  &
-       &                             DELU
+       &                             DELU, JUMAX
 
   ! ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ !
   !                                                                              !
@@ -1197,7 +1197,8 @@ CONTAINS
 
     integer :: ncid, varid, dimids(1), status !dimids(NDIMS)
     integer :: dimid_n_nest, dimid_ml, dimid_kl, dimid_max_nbounc, dimid_nbounf
-
+    integer :: dimid_nx, dimid_ny, dimid_nsea, dimid_jumax, dimid_ndepth
+    
     ! Section 1
     integer :: varid_header
     
@@ -1256,7 +1257,11 @@ CONTAINS
     call check( nf90_def_dim(ncid, "kl", KL, dimid_kl), "nf90_def_dim KL" ) 
 !    call check( nf90_def_dim(ncid, "max_nbounc", MAXVAL(NBOUNC), dimid_max_nbounc), "nf90_def_dim MAX(NBOUNC)" ) 
     call check( nf90_def_dim(ncid, "nbounf", NBOUNF, dimid_nbounf), "nf90_def_dim NBOUNF" ) 
-
+    call check( nf90_def_dim(ncid, "nx", NX, dimid_nx), "nf90_def_dim NX" ) 
+    call check( nf90_def_dim(ncid, "ny", NY, dimid_ny), "nf90_def_dim NY" ) 
+    call check( nf90_def_dim(ncid, "dim_nsea", NSEA, dimid_nsea), "nf90_def_dim NSEA" ) 
+    call check( nf90_def_dim(ncid, "jumax", JUMAX, dimid_jumax), "nf90_def_dim JUMAX" ) 
+    call check( nf90_def_dim(ncid, "dim_ndepth", NDEPTH, dimid_ndepth), "nf90_def_dim NDEPTH" ) 
     
     ! Define variables for netCDF
     call check( nf90_def_var(ncid, "header", NF90_CHAR, varid_header), "nf90_def_var HEADER" )
@@ -1365,31 +1370,31 @@ CONTAINS
     call check( nf90_def_var(ncid, "reduced_grid", NF90_INT, varid_reduced_grid), "nf90_def_var REDUCED_GRID" )
     call check( nf90_def_var(ncid, "l_obstruction_t", NF90_INT, varid_l_obstruction_t), "nf90_def_var L_OBSTRUCTION_T" )
 
-    call check( nf90_def_var(ncid, "nlon_rg", NF90_INT, varid_nlon_rg), "nf90_def_var NLON_RG" )
+    call check( nf90_def_var(ncid, "nlon_rg", NF90_INT, (/ dimid_ny /), varid_nlon_rg), "nf90_def_var NLON_RG" )
 
     call check( nf90_def_var(ncid, "delphi", NF90_DOUBLE, varid_delphi), "nf90_def_var DELPHI" )
-    call check( nf90_def_var(ncid, "dellam", NF90_DOUBLE, varid_dellam), "nf90_def_var DELLAM" )
-    call check( nf90_def_var(ncid, "sinph", NF90_DOUBLE, varid_sinph), "nf90_def_var SINPH" )
-    call check( nf90_def_var(ncid, "cosph", NF90_DOUBLE, varid_cosph), "nf90_def_var COSPH" )
+    call check( nf90_def_var(ncid, "dellam", NF90_DOUBLE, (/ dimid_ny /), varid_dellam), "nf90_def_var DELLAM" )
+    call check( nf90_def_var(ncid, "sinph", NF90_DOUBLE, (/ dimid_ny /), varid_sinph), "nf90_def_var SINPH" )
+    call check( nf90_def_var(ncid, "cosph", NF90_DOUBLE, (/ dimid_ny /), varid_cosph), "nf90_def_var COSPH" )
 
     call check( nf90_def_var(ncid, "amowep", NF90_INT, varid_amowep), "nf90_def_var AMOWEP" )
     call check( nf90_def_var(ncid, "amosop", NF90_INT, varid_amosop), "nf90_def_var AMOSOP" )
     call check( nf90_def_var(ncid, "amoeap", NF90_INT, varid_amoeap), "nf90_def_var AMOEAP" )
     call check( nf90_def_var(ncid, "amonop", NF90_INT, varid_amonop), "nf90_def_var AMONOP" )
-    call check( nf90_def_var(ncid, "zdello", NF90_DOUBLE, varid_zdello), "nf90_def_var ZDELLO" )
+    call check( nf90_def_var(ncid, "zdello", NF90_DOUBLE, (/ dimid_ny /), varid_zdello), "nf90_def_var ZDELLO" )
 
-    call check( nf90_def_var(ncid, "ixlg", NF90_INT, varid_ixlg), "nf90_def_var IXLG" )
-    call check( nf90_def_var(ncid, "kxlt", NF90_INT, varid_kxlt), "nf90_def_var KXLT" )
-    call check( nf90_def_var(ncid, "l_s_mask", NF90_BYTE, varid_l_s_mask), "nf90_def_var L_S_MASK" )
+    call check( nf90_def_var(ncid, "ixlg", NF90_INT, (/ dimid_nsea /), varid_ixlg), "nf90_def_var IXLG" )
+    call check( nf90_def_var(ncid, "kxlt", NF90_INT, (/ dimid_nsea /), varid_kxlt), "nf90_def_var KXLT" )
+    call check( nf90_def_var(ncid, "l_s_mask", NF90_INT, varid_l_s_mask), "nf90_def_var L_S_MASK" )
 
-    call check( nf90_def_var(ncid, "klat", NF90_INT, varid_klat), "nf90_def_var KLAT" )
-    call check( nf90_def_var(ncid, "klon", NF90_INT, varid_klon), "nf90_def_var KLON" )
-    call check( nf90_def_var(ncid, "wlat", NF90_BYTE, varid_wlat), "nf90_def_var WLAT" )
-    call check( nf90_def_var(ncid, "depth_b", NF90_DOUBLE, varid_depth_b), "nf90_def_var DEPTH_B" )
+    call check( nf90_def_var(ncid, "klat", NF90_INT, (/ dimid_nsea, 2, 2 /), varid_klat), "nf90_def_var KLAT" )
+    call check( nf90_def_var(ncid, "klon", NF90_INT, (/ dimid_nsea, 2 /), varid_klon), "nf90_def_var KLON" )
+    call check( nf90_def_var(ncid, "wlat", NF90_INT, (/ dimid_nsea, 2 /), varid_wlat), "nf90_def_var WLAT" )
+    call check( nf90_def_var(ncid, "depth_b", NF90_DOUBLE, (/ dimid_nsea /), varid_depth_b), "nf90_def_var DEPTH_B" )
 
     if( L_OBSTRUCTION_T) then
-       call check( nf90_def_var(ncid, "obslat", NF90_DOUBLE, varid_obslat), "nf90_def_var OBSLAT" )
-       call check( nf90_def_var(ncid, "obslon", NF90_DOUBLE, varid_obslon), "nf90_def_var OBSLON" )
+       call check( nf90_def_var(ncid, "obslat", NF90_DOUBLE, (/ dimid_nsea, 2, dimid_ml /), varid_obslat), "nf90_def_var OBSLAT" )
+       call check( nf90_def_var(ncid, "obslon", NF90_DOUBLE, (/ dimid_nsea, 2, dimid_ml /), varid_obslon), "nf90_def_var OBSLON" )
     end if
     write( *, * ) "Definition of nr 5 ended ..."
 
@@ -1404,12 +1409,12 @@ CONTAINS
     call check( nf90_def_var(ncid, "depthd", NF90_DOUBLE, varid_depthd), "nf90_def_var DEPTHD" )
     call check( nf90_def_var(ncid, "depthe", NF90_DOUBLE, varid_depthe), "nf90_def_var DEPTHE" )
 
-    call check( nf90_def_var(ncid, "flminfr", NF90_DOUBLE, varid_flminfr), "nf90_def_var FLMINFR" )
-    call check( nf90_def_var(ncid, "tcgond", NF90_DOUBLE, varid_tcgond), "nf90_def_var TCGOND" )
-    call check( nf90_def_var(ncid, "tfak", NF90_DOUBLE, varid_tfak), "nf90_def_var TFAK" )
-    call check( nf90_def_var(ncid, "tsihkd", NF90_DOUBLE, varid_tsihkd), "nf90_def_var TSIHKD" )
-    call check( nf90_def_var(ncid, "tfac_st", NF90_DOUBLE, varid_tfac_st), "nf90_def_var TFAC_ST" )
-    call check( nf90_def_var(ncid, "t_tail", NF90_DOUBLE, varid_t_tail), "nf90_def_var T_TAIL" )
+    call check( nf90_def_var(ncid, "flminfr", NF90_DOUBLE, (/ dimid_jumax, dimid_ml /), varid_flminfr), "nf90_def_var FLMINFR" )
+    call check( nf90_def_var(ncid, "tcgond", NF90_DOUBLE, (/ dimid_ndepth, dimid_ml /), varid_tcgond), "nf90_def_var TCGOND" )
+    call check( nf90_def_var(ncid, "tfak", NF90_DOUBLE, (/ dimid_ndepth, dimid_ml /), varid_tfak), "nf90_def_var TFAK" )
+    call check( nf90_def_var(ncid, "tsihkd", NF90_DOUBLE, (/ dimid_ndepth, dimid_ml /), varid_tsihkd), "nf90_def_var TSIHKD" )
+    call check( nf90_def_var(ncid, "tfac_st", NF90_DOUBLE, (/ dimid_ndepth, dimid_ml /), varid_tfac_st), "nf90_def_var TFAC_ST" )
+    call check( nf90_def_var(ncid, "t_tail", NF90_DOUBLE, (/ dimid_ndepth, dimid_ml /), varid_t_tail), "nf90_def_var T_TAIL" )
 
     call check( nf90_def_var(ncid, "delu", NF90_DOUBLE, varid_delu), "nf90_def_var DELU" )
 
