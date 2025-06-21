@@ -1305,7 +1305,7 @@ CONTAINS
     call check( nf90_def_var(ncid, "ijarf", NF90_INT, (/ dimid_nbounf /), varid_ijarf), "nf90_def_var IJARF" )
     call check( nf90_def_var(ncid, "ibfl", NF90_INT, (/ dimid_nbounf /), varid_ibfl), "nf90_def_var IBFL" )
     call check( nf90_def_var(ncid, "ibfr", NF90_INT, (/ dimid_nbounf /), varid_ibfr), "nf90_def_var IBFR" )
-    call check( nf90_def_var(ncid, "bfw", NF90_DOUBLE, (/ dimid_nbounf /), varid_bfw), "nf90_def_var BFW" )
+!    call check( nf90_def_var(ncid, "bfw", NF90_DOUBLE, (/ dimid_nbounf /), varid_bfw), "nf90_def_var BFW" )
 
     
     ! ---------------------------------------------------------------------------- !
@@ -1320,7 +1320,7 @@ CONTAINS
     call check( nf90_def_var(ncid, "gom", NF90_DOUBLE, (/ dimid_ml /), varid_gom), "nf90_def_var GOM" )
 
     call check( nf90_def_var(ncid, "c", NF90_DOUBLE,  (/ dimid_ml /), varid_c), "nf90_def_var C" )
-    call check( nf90_def_var(ncid, "th", NF90_DOUBLE, varid_th), "nf90_def_var TH" )
+    call check( nf90_def_var(ncid, "th", NF90_DOUBLE, (/ dimid_kl /), varid_th), "nf90_def_var TH" )
     call check( nf90_def_var(ncid, "delth", NF90_DOUBLE, varid_delth), "nf90_def_var DELTAH" )
     call check( nf90_def_var(ncid, "deltr", NF90_DOUBLE, varid_deltr), "nf90_def_var DELTAR" )
     call check( nf90_def_var(ncid, "costh", NF90_DOUBLE, (/ dimid_kl /), varid_costh), "nf90_def_var COSTH" )
@@ -1345,8 +1345,8 @@ CONTAINS
     call check( nf90_def_var(ncid, "mm1_tail", NF90_DOUBLE, varid_mm1_tail), "nf90_def_var MM1_TAIL" )
     call check( nf90_def_var(ncid, "mp1_tail", NF90_DOUBLE, varid_mp1_tail), "nf90_def_var MP1_TAIL" )
     call check( nf90_def_var(ncid, "mp2_tail", NF90_DOUBLE, varid_mp2_tail), "nf90_def_var MP2_TAIL" )
-    call check( nf90_def_var(ncid, "mpm", NF90_INT, (/ dimid_ml, 2 /), varid_mpm), "nf90_def_var MPM" )
-    call check( nf90_def_var(ncid, "kpm", NF90_INT, (/ dimid_kl, 2 /), varid_kpm), "nf90_def_var KPM" )
+    call check( nf90_def_var(ncid, "mpm", NF90_INT, (/ dimid_ml, 3 /), varid_mpm), "nf90_def_var MPM" )
+    call check( nf90_def_var(ncid, "kpm", NF90_INT, (/ dimid_kl, 3 /), varid_kpm), "nf90_def_var KPM" )
     call check( nf90_def_var(ncid, "jxo", NF90_INT, (/ dimid_kl, 2 /), varid_jxo), "nf90_def_var JXO" )
     call check( nf90_def_var(ncid, "jyo", NF90_INT, (/ dimid_kl, 2 /), varid_jyo), "nf90_def_varJYO" )
 
@@ -1356,13 +1356,14 @@ CONTAINS
     !     5. WRITE GRID INFORMATION. (definition part)                             !
     !        -----------------------                                               !
 
-    call check( nf90_def_var(ncid, "nx", NF90_DOUBLE, varid_nx), "nf90_def_var NX" )
-    call check( nf90_def_var(ncid, "ny", NF90_DOUBLE, varid_ny), "nf90_def_var NY" )
-    call check( nf90_def_var(ncid, "nsea", NF90_DOUBLE, varid_nsea), "nf90_def_var NSEA" )
-    call check( nf90_def_var(ncid, "iper", NF90_BYTE, varid_iper), "nf90_def_var IPER" )
-    call check( nf90_def_var(ncid, "one_point", NF90_BYTE, varid_one_point), "nf90_def_var ONE_POINT" )
-    call check( nf90_def_var(ncid, "reduced_grid", NF90_BYTE, varid_reduced_grid), "nf90_def_var REDUCED_GRID" )
-    call check( nf90_def_var(ncid, "l_obstruction_t", NF90_BYTE, varid_l_obstruction_t), "nf90_def_var L_OBSTRUCTION_T" )
+    call check( nf90_def_var(ncid, "nx", NF90_INT, varid_nx), "nf90_def_var NX" )
+    call check( nf90_def_var(ncid, "ny", NF90_INT, varid_ny), "nf90_def_var NY" )
+    call check( nf90_def_var(ncid, "nsea", NF90_INT, varid_nsea), "nf90_def_var NSEA" )
+    call check( nf90_def_var(ncid, "iper", NF90_INT, varid_iper), "nf90_def_var IPER" )
+!    call check( nf90_def_var(ncid, "iper", NF90_BYTE, varid_iper), "nf90_def_var IPER" )
+    call check( nf90_def_var(ncid, "one_point", NF90_INT, varid_one_point), "nf90_def_var ONE_POINT" )
+    call check( nf90_def_var(ncid, "reduced_grid", NF90_INT, varid_reduced_grid), "nf90_def_var REDUCED_GRID" )
+    call check( nf90_def_var(ncid, "l_obstruction_t", NF90_INT, varid_l_obstruction_t), "nf90_def_var L_OBSTRUCTION_T" )
 
     call check( nf90_def_var(ncid, "nlon_rg", NF90_INT, varid_nlon_rg), "nf90_def_var NLON_RG" )
 
@@ -1462,7 +1463,7 @@ CONTAINS
     call check( nf90_put_var(ncid, varid_ijarf, (/ dimid_nbounf /), IJARF), "nf90_def_var IJARF" )
     call check( nf90_put_var(ncid, varid_ibfl, (/ dimid_nbounf /), IBFL), "nf90_def_var IBFL" )
     call check( nf90_put_var(ncid, varid_ibfr, (/ dimid_nbounf /), IBFR), "nf90_def_var IBFR" )
-    call check( nf90_put_var(ncid, varid_bfw, (/ dimid_nbounf /), BFW), "nf90_def_var BFW" )
+    ! call check( nf90_put_var(ncid, varid_bfw, (/ dimid_nbounf /), BFW), "nf90_def_var BFW" )
     ! before changing: call check( nf90_put_var(ncid, varid_bfw, BFW(1:NBOUNF)), "nf90_def_var BFW" )
 
        
@@ -1520,11 +1521,10 @@ CONTAINS
     call check( nf90_put_var(ncid, varid_ny, NY), "nf90_def_var NY" )
     call check( nf90_put_var(ncid, varid_nsea, NSEA), "nf90_def_var NSEA" )
     
- !   call check( nf90_put_var(ncid, varid_iper, IPER), "nf90_def_var IPER" )
-
- !   call check( nf90_put_var(ncid, varid_one_point, ONE_POINT), "nf90_def_var one_point" )
- !   call check( nf90_put_var(ncid, varid_reduced_grid, REDUCED_GRID), "nf90_def_var REDUCED_GRID" )
- !   call check( nf90_put_var(ncid, varid_l_obstruction_t, L_OBSTRUCTION_T), "nf90_def_var L_OBSTRUCTION_T" )
+    call check( nf90_put_var(ncid, varid_iper, merge(1, 0, IPER)), "nf90_def_var IPER" )
+    call check( nf90_put_var(ncid, varid_one_point, merge(1, 0, ONE_POINT)), "nf90_def_var one_point" )
+    call check( nf90_put_var(ncid, varid_reduced_grid, merge(1, 0, REDUCED_GRID)), "nf90_def_var REDUCED_GRID" )
+    call check( nf90_put_var(ncid, varid_l_obstruction_t, merge(1, 0, L_OBSTRUCTION_T)), "nf90_def_var L_OBSTRUCTION_T" )
     call check( nf90_put_var(ncid, varid_nlon_rg, NLON_RG), "nf90_def_var NLON_RG" )
     call check( nf90_put_var(ncid, varid_delphi, DELPHI), "nf90_def_var DELPHI" )
     call check( nf90_put_var(ncid, varid_dellam, DELLAM), "nf90_def_var DELLAM" )
@@ -1640,6 +1640,12 @@ CONTAINS
          &            RHOWG_DFIM,                                                       &
          &            FMIN, MO_TAIL, MM1_TAIL, MP1_TAIL, MP2_TAIL
     WRITE (IU07) MPM, KPM, JXO, JYO
+
+    write(*, *) "FR: ", FR
+    WRITE (*, *) "MPM: ", MPM
+    write(*, *) "KPM: ", KPM
+    write(*, *) "JXO: ", JXO
+    write(*, *) "JYO: ", JYO
 
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
