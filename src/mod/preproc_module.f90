@@ -1167,6 +1167,7 @@ CONTAINS
     !                                                                              !
     !     H.GUNTHER            ECMWF       04/04/1990                              !
     !     H.GUNTHER            GKSS       SEPTEMBER 2000   FT90                    !
+    !     J. BENKE             FZJ         06/2025                                 !
     !                                                                              !
     !     PURPOSE.                                                                 !
     !     --------                                                                 !
@@ -1178,6 +1179,534 @@ CONTAINS
     !     -------                                                                  !
     !                                                                              !
     !       UNFORMATTED WRITE AS SPECIFIED TO UNIT = IU07.                         !
+    !       FILENAME IS 'FILE07' AS DEFINED IN THE USER INPUT                      !
+    !                                                                              !
+    !     REFERENCE.                                                               !
+    !     ----------                                                               !
+    !                                                                              !
+    !       NONE.                                                                  !
+    !                                                                              !
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !     LOCAL VARIABLES.                                                         !
+    !     ----------------                                                         !
+
+    implicit none
+    
+    character, dimension(200) :: FILE07_NC
+    INTEGER      :: LEN, I
+
+    integer :: ncid, varid, dimids(1), status !dimids(NDIMS)
+    integer :: dimid_n_nest, dimid_ml, dimid_kl, dimid_max_nbounc, dimid_nbounf
+    integer :: dimid_nx, dimid_ny, dimid_nsea, dimid_jumax, dimid_ndepth
+    
+    ! Section 1
+    integer :: varid_header
+    
+    ! Section 2
+    integer :: varid_nnest, varid_maxnest
+    integer :: varid_nbounc, varid_n_name, varid_n_code
+    integer :: varid_ijarc, varid_xdello, varid_xdella
+    integer :: varid_nsouth, varid_nnorth, varid_neast, varid_nwest
+
+    ! Section 2
+    integer :: varid_blongc, varid_blatc, varid_nzdel
+
+    integer :: varid_ml, varid_kl
+    integer :: varid_fr, varid_dfim, varid_gom, varid_c, varid_th, varid_costh, varid_sinth
+    integer :: varid_delth, varid_deltr, varid_inv_log_co, varid_df, varid_df_fr, varid_df_fr2
+    integer :: varid_dfim_ofr
+
+    integer :: varid_dfim_fr, varid_dfim_fr2, varid_fr5, varid_frm5, varid_rhowg_dfim
+    integer :: varid_fmin, varid_mo_tail, varid_mm1_tail, varid_mp1_tail, varid_mp2_tail 
+    integer :: varid_mpm, varid_kpm, varid_jxo, varid_jyo
+
+    ! Section 3
+    integer :: varid_nbounf, varid_nbinp, varid_c_name
+    integer :: varid_blngf, varid_blatf, varid_ijarf, varid_ibfl, varid_ibfr, varid_bfw
+
+    
+    ! Section 5
+    integer :: varid_nx, varid_ny, varid_nsea, varid_iper, varid_one_point
+    integer :: varid_reduced_grid, varid_l_obstruction_t, varid_nlon_rg, varid_delphi, varid_dellam 
+    integer :: varid_sinph, varid_cosph, varid_amowep, varid_amosop, varid_amoeap, varid_amonop
+
+    integer :: varid_zdello, varid_ixlg, varid_kxlt, varid_l_s_mask, varid_klat, varid_klon, varid_wlat
+    integer :: varid_depth_b, varid_obslat, varid_obslon
+
+    ! section 6 (grid definition)
+    integer :: varid_ndepth, varid_deptha, varid_depthd, varid_depthe
+    integer :: varid_flminfr, varid_tcgond, varid_tfak, varid_tsihkd, varid_tfac_st, varid_t_tail
+    integer :: varid_delu
+
+    
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !     1. OPEN FILES and define dimensions                                      !
+    !        --------------------------------                                      !
+
+    LEN = LEN_TRIM(FILE07)
+    ! OPEN (UNIT=IU07, FILE=FILE07(1:LEN), FORM='UNFORMATTED', STATUS='UNKNOWN')
+    FILE07_NC = trim(FILE07) !// "nc"
+!    FILE07_NC = trim(FILE07(1:LEN)) !// "nc"
+    write(*, *) "File: ", trim(FILE07), "ausgabeende"
+    write(*, *) "netCDF file: ", FILE07_NC
+
+    ! Open File
+    !call check( nf90_create(trim(FILE07_NC), ior(ior(NF90_CLOBBER,NF90_SHARE),NF90_NETCDF4), ncid), "nf90_create" )
+    call check( nf90_create("./grid/grind_info.nc", ior(ior(NF90_CLOBBER,NF90_SHARE),NF90_NETCDF4), ncid), "nf90_create" )
+
+    ! Define dimensions
+    call check( nf90_def_dim(ncid, "n_nests", N_NEST, dimid_n_nest), "nf90_def_dim N_NEST" )
+    call check( nf90_def_dim(ncid, "ml", ML, dimid_ml), "nf90_def_dim ML" ) 
+    call check( nf90_def_dim(ncid, "kl", KL, dimid_kl), "nf90_def_dim KL" ) 
+!    call check( nf90_def_dim(ncid, "max_nbounc", MAXVAL(NBOUNC), dimid_max_nbounc), "nf90_def_dim MAX(NBOUNC)" ) 
+    call check( nf90_def_dim(ncid, "nbounf", NBOUNF, dimid_nbounf), "nf90_def_dim NBOUNF" ) 
+    call check( nf90_def_dim(ncid, "nx", NX, dimid_nx), "nf90_def_dim NX" ) 
+    call check( nf90_def_dim(ncid, "ny", NY, dimid_ny), "nf90_def_dim NY" ) 
+    call check( nf90_def_dim(ncid, "dim_nsea", NSEA, dimid_nsea), "nf90_def_dim NSEA" ) 
+    call check( nf90_def_dim(ncid, "jumax", JUMAX, dimid_jumax), "nf90_def_dim JUMAX" ) 
+    call check( nf90_def_dim(ncid, "dim_ndepth", NDEPTH, dimid_ndepth), "nf90_def_dim NDEPTH" ) 
+    
+    ! Define variables for netCDF
+    call check( nf90_def_var(ncid, "header", NF90_CHAR, varid_header), "nf90_def_var HEADER" )
+
+    
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !    2. WRITE COARSE GRID BOUNDARY OUTPUT INFORMATION.  (definition part)      !
+    ! ---------------------------------------------------------------------------- !
+
+    call check( nf90_def_var(ncid, "n_nest", NF90_INT, varid_nnest), "nf90_def_var N_NEST" )
+    call check( nf90_def_var(ncid, "max_nest", NF90_INT, varid_maxnest), "nf90_def_var MAX_NEST" )
+
+    call check( nf90_def_var(ncid, "nbounc", NF90_INT, (/dimid_n_nest/), varid_nbounc), "nf90_def_var NBOUNC" )
+    call check( nf90_def_var(ncid, "n_name", NF90_CHAR, (/dimid_n_nest/), varid_n_name), "nf90_def_var N_NAME" )
+    call check( nf90_def_var(ncid, "n_code", NF90_INT, (/dimid_n_nest/), varid_n_code), "nf90_def_var N_CODE" )
+
+    !          call check( nf90_def_var(ncid, "ijarc", NF90_INT, (/NBOUNC(I),I/), varid_ijarc)
+    call check( nf90_def_var(ncid, "xdello", NF90_INT, varid_xdello), "nf90_def_var XDELLO" )
+    call check( nf90_def_var(ncid, "xdella", NF90_INT, varid_xdella), "nf90_def_var XDELLA" )
+    call check( nf90_def_var(ncid, "n_south", NF90_INT, (/dimid_n_nest/), varid_nsouth), "nf90_def_var NSOUTH" )
+    call check( nf90_def_var(ncid, "n_north", NF90_INT, (/dimid_n_nest/), varid_nnorth), "nf90_def_var NNORTH" )
+    call check( nf90_def_var(ncid, "n_east", NF90_INT, (/dimid_n_nest/), varid_neast), "nf90_def_var NEAST" )
+    call check( nf90_def_var(ncid, "n_west", NF90_INT, (/dimid_n_nest/), varid_nwest), "nf90_def_var NWEST" )
+    
+!    call check( nf90_def_var(ncid, "ijarc", NF90_INT, (/ dimid_n_nest /), varid_ijarc), "nf90_def_var IJARC" )
+!    call check( nf90_def_var(ncid, "blngc", NF90_CHAR, (/dimid_n_nest/), varid_blongc), "nf90_def_var BLONGC" )
+!    call check( nf90_def_var(ncid, "blatc", NF90_INT, (/dimid_n_nest/), varid_blatc), "nf90_def_var BLATC" )
+!    call check( nf90_def_var(ncid, "n_zdel", NF90_INT, (/dimid_n_nest/), varid_nzdel), "nf90_def_var NZDEL" )
+
+    write( *, * ) "Definition of nr 2 ended ..."
+
+    
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !     3. WRITE FINE GRID BOUNDARY INPUT INFORMATION. (defintion part)          !
+    !        -------------------------------------------                           !
+
+    
+    call check( nf90_def_var(ncid, "nbounf", NF90_INT, varid_nbounf), "nf90_def_var NBOUNF" )
+    call check( nf90_def_var(ncid, "nbinp", NF90_INT, varid_nbinp), "nf90_def_var NBINP" )
+    call check( nf90_def_var(ncid, "c_name", NF90_CHAR, varid_c_name), "nf90_def_var C_NAME" )
+
+    call check( nf90_def_var(ncid, "blngf", NF90_INT, (/ dimid_nbounf /), varid_blngf), "nf90_def_var BLNGF" )
+    call check( nf90_def_var(ncid, "blatf", NF90_INT, (/ dimid_nbounf /), varid_blatf), "nf90_def_var BLATF" )
+    call check( nf90_def_var(ncid, "ijarf", NF90_INT, (/ dimid_nbounf /), varid_ijarf), "nf90_def_var IJARF" )
+    call check( nf90_def_var(ncid, "ibfl", NF90_INT, (/ dimid_nbounf /), varid_ibfl), "nf90_def_var IBFL" )
+    call check( nf90_def_var(ncid, "ibfr", NF90_INT, (/ dimid_nbounf /), varid_ibfr), "nf90_def_var IBFR" )
+    call check( nf90_def_var(ncid, "bfw", NF90_DOUBLE, (/ dimid_nbounf /), varid_bfw), "nf90_def_var BFW" )
+
+    
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !                4. WRITE FREQUENCY DIRECTION GRID. (definition part)          !
+    ! ---------------------------------------------------------------------------- !
+
+    call check( nf90_def_var(ncid, "ml", NF90_INT, varid_ml), "nf90_def_var ML" )
+    call check( nf90_def_var(ncid, "kl", NF90_INT, varid_kl), "nf90_def_var KL" )
+    call check( nf90_def_var(ncid, "fr", NF90_DOUBLE, (/ dimid_ml /), varid_fr), "nf90_def_var FR" )
+    call check( nf90_def_var(ncid, "dfim", NF90_DOUBLE, (/ dimid_ml /), varid_dfim), "nf90_def_var DFIM" )
+    call check( nf90_def_var(ncid, "gom", NF90_DOUBLE, (/ dimid_ml /), varid_gom), "nf90_def_var GOM" )
+
+    call check( nf90_def_var(ncid, "c", NF90_DOUBLE,  (/ dimid_ml /), varid_c), "nf90_def_var C" )
+    call check( nf90_def_var(ncid, "th", NF90_DOUBLE, (/ dimid_kl /), varid_th), "nf90_def_var TH" )
+    call check( nf90_def_var(ncid, "delth", NF90_DOUBLE, varid_delth), "nf90_def_var DELTAH" )
+    call check( nf90_def_var(ncid, "deltr", NF90_DOUBLE, varid_deltr), "nf90_def_var DELTAR" )
+    call check( nf90_def_var(ncid, "costh", NF90_DOUBLE, (/ dimid_kl /), varid_costh), "nf90_def_var COSTH" )
+    call check( nf90_def_var(ncid, "sinth", NF90_DOUBLE, (/ dimid_kl /), varid_sinth), "nf90_def_var SIMTH" )
+
+    call check( nf90_def_var(ncid, "inv_log_co", NF90_DOUBLE, varid_inv_log_co), "nf90_def_var INV_LOG_CO" )
+    call check( nf90_def_var(ncid, "df", NF90_DOUBLE, (/ dimid_ml /), varid_df), "nf90_def_var DF" )
+    call check( nf90_def_var(ncid, "df_fr", NF90_DOUBLE, (/ dimid_ml /),varid_df_fr), "nf90_def_var FR" )
+    call check( nf90_def_var(ncid, "df_fr2", NF90_DOUBLE, (/ dimid_ml /), varid_df_fr2), "nf90_def_var FR2" )
+
+    call check( nf90_def_var(ncid, "dfim_ofr", NF90_DOUBLE, (/ dimid_ml /), varid_dfim_ofr), "nf90_def_var OFR" )
+
+    call check( nf90_def_var(ncid, "dfim_fr", NF90_DOUBLE, (/ dimid_ml /), varid_dfim_fr), "nf90_def_var DFIM_FR" )
+    call check( nf90_def_var(ncid, "dfim_fr2", NF90_DOUBLE, (/ dimid_ml /), varid_dfim_fr2), "nf90_def_var DFIM_FR2" )
+    call check( nf90_def_var(ncid, "fr5", NF90_DOUBLE, (/ dimid_ml /),varid_fr5), "nf90_def_var FR5" )
+    call check( nf90_def_var(ncid, "frm5", NF90_DOUBLE, (/ dimid_ml /), varid_frm5), "nf90_def_var FRM5" )
+    call check( nf90_def_var(ncid, "rhowg_dfim", NF90_DOUBLE, (/ dimid_ml /), varid_rhowg_dfim), "nf90_def_var RHOWG_DFIM" )
+    call check( nf90_def_var(ncid, "fmin", NF90_DOUBLE, varid_fmin), "nf90_def_var FMIN" )
+
+    call check( nf90_def_var(ncid, "mo_tail", NF90_DOUBLE, varid_mo_tail), "nf90_def_var MO_TAIL" )
+    call check( nf90_def_var(ncid, "mm1_tail", NF90_DOUBLE, varid_mm1_tail), "nf90_def_var MM1_TAIL" )
+    call check( nf90_def_var(ncid, "mp1_tail", NF90_DOUBLE, varid_mp1_tail), "nf90_def_var MP1_TAIL" )
+    call check( nf90_def_var(ncid, "mp2_tail", NF90_DOUBLE, varid_mp2_tail), "nf90_def_var MP2_TAIL" )
+    call check( nf90_def_var(ncid, "mpm", NF90_INT, (/ dimid_ml, 3 /), varid_mpm), "nf90_def_var MPM" )
+    call check( nf90_def_var(ncid, "kpm", NF90_INT, (/ dimid_kl, 3 /), varid_kpm), "nf90_def_var KPM" )
+    call check( nf90_def_var(ncid, "jxo", NF90_INT, (/ dimid_kl, 2 /), varid_jxo), "nf90_def_var JXO" )
+    call check( nf90_def_var(ncid, "jyo", NF90_INT, (/ dimid_kl, 2 /), varid_jyo), "nf90_def_varJYO" )
+
+
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !     5. WRITE GRID INFORMATION. (definition part)                             !
+    !        -----------------------                                               !
+
+    call check( nf90_def_var(ncid, "nx", NF90_INT, varid_nx), "nf90_def_var NX" )
+    call check( nf90_def_var(ncid, "ny", NF90_INT, varid_ny), "nf90_def_var NY" )
+    call check( nf90_def_var(ncid, "nsea", NF90_INT, varid_nsea), "nf90_def_var NSEA" )
+    call check( nf90_def_var(ncid, "iper", NF90_INT, varid_iper), "nf90_def_var IPER" )
+!    call check( nf90_def_var(ncid, "iper", NF90_BYTE, varid_iper), "nf90_def_var IPER" )
+    call check( nf90_def_var(ncid, "one_point", NF90_INT, varid_one_point), "nf90_def_var ONE_POINT" )
+    call check( nf90_def_var(ncid, "reduced_grid", NF90_INT, varid_reduced_grid), "nf90_def_var REDUCED_GRID" )
+    call check( nf90_def_var(ncid, "l_obstruction_t", NF90_INT, varid_l_obstruction_t), "nf90_def_var L_OBSTRUCTION_T" )
+
+    call check( nf90_def_var(ncid, "nlon_rg", NF90_INT, (/ dimid_ny /), varid_nlon_rg), "nf90_def_var NLON_RG" )
+
+    call check( nf90_def_var(ncid, "delphi", NF90_DOUBLE, varid_delphi), "nf90_def_var DELPHI" )
+    call check( nf90_def_var(ncid, "dellam", NF90_DOUBLE, (/ dimid_ny /), varid_dellam), "nf90_def_var DELLAM" )
+    call check( nf90_def_var(ncid, "sinph", NF90_DOUBLE, (/ dimid_ny /), varid_sinph), "nf90_def_var SINPH" )
+    call check( nf90_def_var(ncid, "cosph", NF90_DOUBLE, (/ dimid_ny /), varid_cosph), "nf90_def_var COSPH" )
+
+    call check( nf90_def_var(ncid, "amowep", NF90_INT, varid_amowep), "nf90_def_var AMOWEP" )
+    call check( nf90_def_var(ncid, "amosop", NF90_INT, varid_amosop), "nf90_def_var AMOSOP" )
+    call check( nf90_def_var(ncid, "amoeap", NF90_INT, varid_amoeap), "nf90_def_var AMOEAP" )
+    call check( nf90_def_var(ncid, "amonop", NF90_INT, varid_amonop), "nf90_def_var AMONOP" )
+    call check( nf90_def_var(ncid, "zdello", NF90_DOUBLE, (/ dimid_ny /), varid_zdello), "nf90_def_var ZDELLO" )
+
+    call check( nf90_def_var(ncid, "ixlg", NF90_INT, (/ dimid_nsea /), varid_ixlg), "nf90_def_var IXLG" )
+    call check( nf90_def_var(ncid, "kxlt", NF90_INT, (/ dimid_nsea /), varid_kxlt), "nf90_def_var KXLT" )
+    call check( nf90_def_var(ncid, "l_s_mask", NF90_INT, varid_l_s_mask), "nf90_def_var L_S_MASK" )
+
+    call check( nf90_def_var(ncid, "klat", NF90_INT, (/ dimid_nsea, 2, 2 /), varid_klat), "nf90_def_var KLAT" )
+    call check( nf90_def_var(ncid, "klon", NF90_INT, (/ dimid_nsea, 2 /), varid_klon), "nf90_def_var KLON" )
+    call check( nf90_def_var(ncid, "wlat", NF90_INT, (/ dimid_nsea, 2 /), varid_wlat), "nf90_def_var WLAT" )
+    call check( nf90_def_var(ncid, "depth_b", NF90_DOUBLE, (/ dimid_nsea /), varid_depth_b), "nf90_def_var DEPTH_B" )
+
+    if( L_OBSTRUCTION_T .eqv. .FALSE.) then
+       call check( nf90_def_var(ncid, "obslat", NF90_DOUBLE, (/ dimid_nsea, 2, dimid_ml /), varid_obslat), "nf90_def_var OBSLAT" )
+       call check( nf90_def_var(ncid, "obslon", NF90_DOUBLE, (/ dimid_nsea, 2, dimid_ml /), varid_obslon), "nf90_def_var OBSLON" )
+    end if
+    write( *, * ) "Definition of nr 5 ended ..."
+
+
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !     6. WRITE TABLES. (definition part)                                       !
+    !        -------------                                                         !
+
+    call check( nf90_def_var(ncid, "ndepth", NF90_INT, varid_ndepth), "nf90_def_var NDEPTH" )
+    call check( nf90_def_var(ncid, "deptha", NF90_DOUBLE, varid_deptha), "nf90_def_var DEPTHA" )
+    call check( nf90_def_var(ncid, "depthd", NF90_DOUBLE, varid_depthd), "nf90_def_var DEPTHD" )
+    call check( nf90_def_var(ncid, "depthe", NF90_DOUBLE, varid_depthe), "nf90_def_var DEPTHE" )
+
+    call check( nf90_def_var(ncid, "flminfr", NF90_DOUBLE, (/ dimid_jumax, dimid_ml /), varid_flminfr), "nf90_def_var FLMINFR" )
+    call check( nf90_def_var(ncid, "tcgond", NF90_DOUBLE, (/ dimid_ndepth, dimid_ml /), varid_tcgond), "nf90_def_var TCGOND" )
+    call check( nf90_def_var(ncid, "tfak", NF90_DOUBLE, (/ dimid_ndepth, dimid_ml /), varid_tfak), "nf90_def_var TFAK" )
+    call check( nf90_def_var(ncid, "tsihkd", NF90_DOUBLE, (/ dimid_ndepth, dimid_ml /), varid_tsihkd), "nf90_def_var TSIHKD" )
+    call check( nf90_def_var(ncid, "tfac_st", NF90_DOUBLE, (/ dimid_ndepth, dimid_ml /), varid_tfac_st), "nf90_def_var TFAC_ST" )
+    call check( nf90_def_var(ncid, "t_tail", NF90_DOUBLE, (/ dimid_ndepth, dimid_ml /), varid_t_tail), "nf90_def_var T_TAIL" )
+
+    call check( nf90_def_var(ncid, "delu", NF90_DOUBLE, varid_delu), "nf90_def_var DELU" )
+
+
+    call check( nf90_enddef(ncid), "nf90_enddef" )
+    write( *, * ) "Definition of nr 6 ended ..."
+
+    !
+    ! End of definition
+    !
+
+
+    !
+    ! Write to netCDF file
+    !
+    
+    call check( nf90_put_var(ncid, varid_header, HEADER), "nf90_put_var HEADER" )
+    write( *, *) "Wrote header ..."
+    
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !      2. WRITE COARSE GRID BOUNDARY OUTPUT INFORMATION. (write part)          ! 
+    ! ---------------------------------------------------------------------------- !
+
+    call check( nf90_put_var(ncid, varid_nnest, N_NEST), "nf90_def_var N_NEST" )
+    call check( nf90_put_var(ncid, varid_maxnest, MAX_NEST), "nf90_def_var MAX_NEST" )
+
+    call check( nf90_put_var(ncid, varid_nbounc, NBOUNC), "nf90_def_var NBOUNC_I" )
+    call check( nf90_put_var(ncid, varid_n_name, N_NAME), "nf90_def_var N_NAME_I" )
+    call check( nf90_put_var(ncid, varid_n_code, N_CODE), "nf90_def_var N_CODE_I" )
+       
+    call check( nf90_put_var(ncid, varid_xdello, XDELLO), "nf90_def_var XDELLO" )
+    call check( nf90_put_var(ncid, varid_xdella, XDELLA), "nf90_def_var XDELLA" )
+    call check( nf90_put_var(ncid, varid_nnorth, N_NORTH), "nf90_def_var N_NORTH" )
+    call check( nf90_put_var(ncid, varid_nsouth, N_SOUTH), "nf90_def_var N_SOUTH" )
+    call check( nf90_put_var(ncid, varid_neast, N_EAST), "nf90_def_var N_EAST" )
+    call check( nf90_put_var(ncid, varid_nwest, N_WEST), "nf90_def_var N_WEST" )
+
+    
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !     3. WRITE FINE GRID BOUNDARY INPUT INFORMATION.                           !
+    !        -------------------------------------------                           !
+
+    call check( nf90_put_var(ncid, varid_nbounf, NBOUNF), "nf90_def_var NBOUNF" )
+    call check( nf90_put_var(ncid, varid_nbinp, NBINP), "nf90_def_var NBINP" ) 
+    call check( nf90_put_var(ncid, varid_c_name, C_NAME), "nf90_def_var C_NAME" )
+
+    call check( nf90_put_var(ncid, varid_blngf, (/ dimid_nbounf /), BLNGF), "nf90_def_var BLNGF" )
+    call check( nf90_put_var(ncid, varid_blatf, (/ dimid_nbounf /), BLATF), "nf90_def_var BLATF" )
+    call check( nf90_put_var(ncid, varid_ijarf, (/ dimid_nbounf /), IJARF), "nf90_def_var IJARF" )
+    call check( nf90_put_var(ncid, varid_ibfl, (/ dimid_nbounf /), IBFL), "nf90_def_var IBFL" )
+    call check( nf90_put_var(ncid, varid_ibfr, (/ dimid_nbounf /), IBFR), "nf90_def_var IBFR" )
+    ! call check( nf90_put_var(ncid, varid_bfw, (/ dimid_nbounf /), BFW), "nf90_def_var BFW" )
+    ! before changing: call check( nf90_put_var(ncid, varid_bfw, BFW(1:NBOUNF)), "nf90_def_var BFW" )
+
+       
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !                4. WRITE FREQUENCY DIRECTION GRID. (write part)               !
+    ! ---------------------------------------------------------------------------- !
+
+    call check( nf90_put_var(ncid, varid_ml, ML), "nf90_def_var ML" )
+    call check( nf90_put_var(ncid, varid_kl, KL), "nf90_def_var KL" )
+    call check( nf90_put_var(ncid, varid_fr, FR), "nf90_def_var FR" )
+    call check( nf90_put_var(ncid, varid_dfim, DFIM), "nf90_def_var DFIM" )
+    call check( nf90_put_var(ncid, varid_gom, GOM), "nf90_def_var GOM" )
+
+    
+    call check( nf90_put_var(ncid, varid_c, C), "nf90_def_var C" )
+    call check( nf90_put_var(ncid, varid_delth, DELTH), "nf90_def_var DELTH" )
+    call check( nf90_put_var(ncid, varid_deltr, DELTR), "nf90_def_var DELTR" )
+    call check( nf90_put_var(ncid, varid_th, TH), "nf90_def_var TH" )
+    call check( nf90_put_var(ncid, varid_costh, COSTH), "nf90_def_var COSTH" )
+    call check( nf90_put_var(ncid, varid_sinth, SINTH), "nf90_def_var SINTH" )
+    
+    call check( nf90_put_var(ncid, varid_inv_log_co, INV_LOG_CO), "nf90_def_var INV_LOG_CO" )
+    call check( nf90_put_var(ncid, varid_df, DF), "nf90_def_var DF" )
+    call check( nf90_put_var(ncid, varid_df_fr, DF_FR), "nf90_def_var DF_FR" )
+    call check( nf90_put_var(ncid, varid_df_fr2, DF_FR2), "nf90_def_var DF_FR2" )
+    call check( nf90_put_var(ncid, varid_dfim_ofr, DFIMOFR), "nf90_def_var DFIMOFR" )
+
+    call check( nf90_put_var(ncid, varid_dfim_fr, DFIM_FR), "nf90_def_var DFIM_FR" )
+    call check( nf90_put_var(ncid, varid_dfim_fr2, DFIM_FR2), "nf90_def_var DFIM_FR2" )
+    call check( nf90_put_var(ncid, varid_fr5, FR5), "nf90_def_var FR5" )
+    call check( nf90_put_var(ncid, varid_frm5, FRM5), "nf90_def_var FRM5" )
+    call check( nf90_put_var(ncid, varid_rhowg_dfim, RHOWG_DFIM), "nf90_def_var RHOWG_DFIM" )
+
+    call check( nf90_put_var(ncid, varid_fmin, FMIN), "nf90_def_var FMIN" )
+    call check( nf90_put_var(ncid, varid_mo_tail, MO_TAIL), "nf90_def_var MO_TAIL" )
+    call check( nf90_put_var(ncid, varid_mm1_tail, MM1_TAIL), "nf90_def_var MM1_TAIL" )
+    call check( nf90_put_var(ncid, varid_mp1_tail, MP1_TAIL), "nf90_def_var MP1_TAIL" )
+    call check( nf90_put_var(ncid, varid_mp2_tail, MP2_TAIL), "nf90_def_var MP2_TAIL" )
+
+    call check( nf90_put_var(ncid, varid_mpm, MPM), "nf90_def_var MPM" )
+    call check( nf90_put_var(ncid, varid_kpm, KPM), "nf90_def_var KPM" )
+    call check( nf90_put_var(ncid, varid_jxo, JXO), "nf90_def_var JXO" )
+    call check( nf90_put_var(ncid, varid_jyo, JYO), "nf90_def_var JYO" )
+    write( *, *) "Wrote nr 4 ..."
+        
+
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !     5. WRITE GRID INFORMATION.                                               !
+    !        -----------------------                                               !
+
+    call check( nf90_put_var(ncid, varid_nx, NX), "nf90_def_var NX" )
+    call check( nf90_put_var(ncid, varid_ny, NY), "nf90_def_var NY" )
+    call check( nf90_put_var(ncid, varid_nsea, NSEA), "nf90_def_var NSEA" )
+    
+    call check( nf90_put_var(ncid, varid_iper, merge(1, 0, IPER)), "nf90_def_var IPER" )
+    call check( nf90_put_var(ncid, varid_one_point, merge(1, 0, ONE_POINT)), "nf90_def_var one_point" )
+    call check( nf90_put_var(ncid, varid_reduced_grid, merge(1, 0, REDUCED_GRID)), "nf90_def_var REDUCED_GRID" )
+    call check( nf90_put_var(ncid, varid_l_obstruction_t, merge(1, 0, L_OBSTRUCTION_T)), "nf90_def_var L_OBSTRUCTION_T" )
+    call check( nf90_put_var(ncid, varid_nlon_rg, NLON_RG), "nf90_def_var NLON_RG" )
+    call check( nf90_put_var(ncid, varid_delphi, DELPHI), "nf90_def_var DELPHI" )
+    call check( nf90_put_var(ncid, varid_dellam, DELLAM), "nf90_def_var DELLAM" )
+    
+    call check( nf90_put_var(ncid, varid_sinph, SINPH), "nf90_def_var SINPH" )
+    call check( nf90_put_var(ncid, varid_cosph, COSPH), "nf90_def_var COSPH" )
+    call check( nf90_put_var(ncid, varid_amowep, AMOWEP), "nf90_def_var AMOWEP" )
+    call check( nf90_put_var(ncid, varid_amosop, AMOSOP), "nf90_def_var AMOSOP" )
+    call check( nf90_put_var(ncid, varid_amoeap, AMOEAP), "nf90_def_var AMOEAP" )
+    call check( nf90_put_var(ncid, varid_amonop, AMONOP), "nf90_def_var AMONOP" )
+
+    call check( nf90_put_var(ncid, varid_delphi, DELPHI), "nf90_def_var DELPHI" )
+    call check( nf90_put_var(ncid, varid_dellam, DELLAM), "nf90_def_var DELLAM" )
+    call check( nf90_put_var(ncid, varid_zdello, ZDELLO), "nf90_def_var ZDELLO" )
+
+    call check( nf90_put_var(ncid, varid_ixlg, IXLG), "nf90_def_var IXLG" )
+    call check( nf90_put_var(ncid, varid_kxlt, KXLT), "nf90_def_var KXLT" )
+!    call check( nf90_put_var(ncid, varid_l_s_mask, L_S_MASK), "nf90_def_var L_S_MASK" )
+    call check( nf90_put_var(ncid, varid_klat, KLAT), "nf90_def_var KLAT" )
+    call check( nf90_put_var(ncid, varid_klon, KLON), "nf90_def_var KLON" )
+
+    call check( nf90_put_var(ncid, varid_wlat, WLAT), "nf90_def_var WLAT" )
+    call check( nf90_put_var(ncid, varid_depth_b, DEPTH_B), "nf90_def_var DEPTH_B" )
+
+    if( L_OBSTRUCTION_T) then
+       call check( nf90_put_var(ncid, varid_obslat, OBSLAT), "nf90_def_var OBSLAT" )
+       call check( nf90_put_var(ncid, varid_obslon, OBSLON), "nf90_def_var OBSLON" )
+    end if
+    write( *, *) "Wrote nr 5 ..."
+    
+    
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !     6. WRITE TABLES.                                                         !
+    !        -------------                                                         !
+
+    call check( nf90_put_var(ncid, varid_ndepth, NDEPTH), "nf90_def_var NDEPTH" )
+    call check( nf90_put_var(ncid, varid_deptha, DEPTHA), "nf90_def_var DEPTHA" )
+    call check( nf90_put_var(ncid, varid_depthd, DEPTHD), "nf90_def_var DEPTHD" )
+    call check( nf90_put_var(ncid, varid_depthe, DEPTHE), "nf90_def_var DEPTHE" )
+    
+    call check( nf90_put_var(ncid, varid_flminfr, FLMINFR), "nf90_def_var FLMINFR" )
+    call check( nf90_put_var(ncid, varid_tcgond, TCGOND), "nf90_def_var TCGOND" ) 
+    call check( nf90_put_var(ncid, varid_tfak, TFAK), "nf90_def_var TFAK" )
+    call check( nf90_put_var(ncid, varid_tfac_st, TFAC_ST), "nf90_def_var TFAC_ST" )
+    call check( nf90_put_var(ncid, varid_tsihkd, TSIHKD), "nf90_def_var TSIHKD" )
+    call check( nf90_put_var(ncid, varid_t_tail, T_TAIL), "nf90_def_var T_TAIL" )
+    call check( nf90_put_var(ncid, varid_delu, DELU), "nf90_def_var DELU" )
+    write( *, *) "Wrote nr 2 ..."
+    
+    !
+    ! End of writing to netCDF file
+    !
+
+    call check( nf90_close(ncid), "nf90_def_var NF90_CLOASE" )
+ 
+
+    !
+    ! Binary format
+    !
+
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !     LOCAL VARIABLES.                                                         !
+    !     ----------------                                                         !
+
+    !INTEGER      :: LEN, I
+
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !     1. OPEN FILES.                                                           !
+    !        -----------                                                           !
+
+    LEN = LEN_TRIM(FILE07)
+    OPEN (UNIT=IU07, FILE=FILE07(1:LEN), FORM='UNFORMATTED', STATUS='UNKNOWN')
+
+    WRITE(IU07) HEADER
+
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !     2. WRITE COARSE GRID BOUNDARY OUTPUT INFORMATION.                        !
+    !        ----------------------------------------------                        !
+
+    WRITE (IU07) N_NEST, MAX_NEST
+    DO I=1,N_NEST
+       WRITE (IU07) NBOUNC(I), N_NAME(I), n_code(i)
+       IF (NBOUNC(I).GT.0) THEN
+          WRITE(IU07) IJARC(1:NBOUNC(I),I)
+          WRITE(IU07) XDELLO, XDELLA, N_SOUTH(I), N_NORTH(I), N_EAST(I), N_WEST(I),&
+               &              BLNGC(1:NBOUNC(I),I), BLATC(1:NBOUNC(I),I), N_ZDEL(1:NBOUNC(I),I)
+       END IF
+    END DO
+
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !     3. WRITE FINE GRID BOUNDARY INPUT INFORMATION.                           !
+    !        -------------------------------------------                           !
+
+    WRITE(IU07) NBOUNF, NBINP, C_NAME
+    IF (NBOUNF.GT.0) THEN
+       WRITE(IU07) BLNGF(1:NBOUNF), BLATF(1:NBOUNF), IJARF(1:NBOUNF),              &
+            &              IBFL(1:NBOUNF), IBFR(1:NBOUNF), BFW(1:NBOUNF)
+    END IF
+
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !     4. WRITE FREQUENCY DIRECTION GRID.                                       !
+    !        ------------------------------                                        !
+
+    WRITE (IU07) ML, KL
+    WRITE (IU07) FR, DFIM, GOM, C, DELTH, DELTR, TH, COSTH, SINTH, INV_LOG_CO,     &
+         &            DF, DF_FR, DF_FR2, DFIM, DFIMOFR, DFIM_FR, DFIM_FR2, FR5, FRM5,   &
+         &            RHOWG_DFIM,                                                       &
+         &            FMIN, MO_TAIL, MM1_TAIL, MP1_TAIL, MP2_TAIL
+    WRITE (IU07) MPM, KPM, JXO, JYO
+
+    write(*, *) "FR: ", FR
+    WRITE (*, *) "MPM: ", MPM
+    write(*, *) "KPM: ", KPM
+    write(*, *) "JXO: ", JXO
+    write(*, *) "JYO: ", JYO
+
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !     5. WRITE GRID INFORMATION.                                               !
+    !        -----------------------                                               !
+
+    WRITE (IU07) NX, NY, NSEA, IPER, ONE_POINT, REDUCED_GRID, L_OBSTRUCTION_T
+    WRITE (IU07) NLON_RG
+    WRITE (IU07) DELPHI, DELLAM, SINPH, COSPH, AMOWEP, AMOSOP, AMOEAP, AMONOP,     &
+         &            XDELLA, XDELLO, ZDELLO
+    WRITE (IU07) IXLG, KXLT, L_S_MASK
+    WRITE (IU07) KLAT, KLON, WLAT, DEPTH_B
+    IF (L_OBSTRUCTION_T) THEN
+       WRITE (IU07) OBSLAT, OBSLON
+    END IF
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !     6. WRITE TABLES.                                                         !
+    !        -------------                                                         !
+
+    WRITE (IU07) NDEPTH, DEPTHA, DEPTHD, DEPTHE
+    WRITE (IU07) FLMINFR, TCGOND, TFAK, TSIHKD, TFAC_ST, T_TAIL
+    WRITE (IU07) DELU
+
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !    10. CLOSE FILES.                                                          !
+    !        ------------                                                          !
+
+    CLOSE (UNIT=IU07, STATUS="KEEP")
+
+  END SUBROUTINE WRITE_PREPROC_FILE
+
+
+
+  SUBROUTINE READ_PREPROC_FILE_NETCDF
+
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !   WRITE_PREPROC_FILE - ROUTINE TO READ PREPROC NETCDF OUTPUT FROMO FILE      !
+    !                                                                              !
+    !     J.BENKE                FZJ       23/06/2025                              !
+    !                                                                              !
+    !     PURPOSE.                                                                 !
+    !     --------                                                                 !
+    !                                                                              !
+    !       TO READ IN THE COMPUTED CONSTANTS FROM NETCDF WHICH ARE STORED         !
+    !       IN MODULE WAM_CONST_MODULE.                                            !
+    !                                                                              !
+    !     METHOD.                                                                  !
+    !     -------                                                                  !
+    !                                                                              !
+    !       NETCDF WRITE AS SPECIFIED TO UNIT = IU07.                              !
     !       FILENAME IS 'FILE07' AS DEFINED IN THE USER INPUT                      !
     !                                                                              !
     !     REFERENCE.                                                               !
@@ -1443,7 +1972,7 @@ CONTAINS
     call check( nf90_put_var(ncid, varid_maxnest, MAX_NEST), "nf90_def_var MAX_NEST" )
 
     call check( nf90_put_var(ncid, varid_nbounc, NBOUNC), "nf90_def_var NBOUNC_I" )
-    call check( nf90_put_var(ncid, varid_n_name, N_NAME), "nf90_def_var N_NAME_I" )
+    call check( nf90_put_var(ncid, varid_n_name, N_NAME), "nf90_def_var N_NAME" )
     call check( nf90_put_var(ncid, varid_n_code, N_CODE), "nf90_def_var N_CODE_I" )
        
     call check( nf90_put_var(ncid, varid_xdello, XDELLO), "nf90_def_var XDELLO" )
@@ -1586,104 +2115,11 @@ CONTAINS
 
     call check( nf90_close(ncid), "nf90_def_var NF90_CLOASE" )
 
+  end SUBROUTINE READ_PREPROC_FILE_NETCDF
 
-    !
-    ! Binary format
-    !
 
-    ! ---------------------------------------------------------------------------- !
-    !                                                                              !
-    !     LOCAL VARIABLES.                                                         !
-    !     ----------------                                                         !
 
-    !INTEGER      :: LEN, I
-
-    ! ---------------------------------------------------------------------------- !
-    !                                                                              !
-    !     1. OPEN FILES.                                                           !
-    !        -----------                                                           !
-
-    LEN = LEN_TRIM(FILE07)
-    OPEN (UNIT=IU07, FILE=FILE07(1:LEN), FORM='UNFORMATTED', STATUS='UNKNOWN')
-
-    WRITE(IU07) HEADER
-
-    ! ---------------------------------------------------------------------------- !
-    !                                                                              !
-    !     2. WRITE COARSE GRID BOUNDARY OUTPUT INFORMATION.                        !
-    !        ----------------------------------------------                        !
-
-    WRITE (IU07) N_NEST, MAX_NEST
-    DO I=1,N_NEST
-       WRITE (IU07) NBOUNC(I), N_NAME(I), n_code(i)
-       IF (NBOUNC(I).GT.0) THEN
-          WRITE(IU07) IJARC(1:NBOUNC(I),I)
-          WRITE(IU07) XDELLO, XDELLA, N_SOUTH(I), N_NORTH(I), N_EAST(I), N_WEST(I),&
-               &              BLNGC(1:NBOUNC(I),I), BLATC(1:NBOUNC(I),I), N_ZDEL(1:NBOUNC(I),I)
-       END IF
-    END DO
-
-    ! ---------------------------------------------------------------------------- !
-    !                                                                              !
-    !     3. WRITE FINE GRID BOUNDARY INPUT INFORMATION.                           !
-    !        -------------------------------------------                           !
-
-    WRITE(IU07) NBOUNF, NBINP, C_NAME
-    IF (NBOUNF.GT.0) THEN
-       WRITE(IU07) BLNGF(1:NBOUNF), BLATF(1:NBOUNF), IJARF(1:NBOUNF),              &
-            &              IBFL(1:NBOUNF), IBFR(1:NBOUNF), BFW(1:NBOUNF)
-    END IF
-
-    ! ---------------------------------------------------------------------------- !
-    !                                                                              !
-    !     4. WRITE FREQUENCY DIRECTION GRID.                                       !
-    !        ------------------------------                                        !
-
-    WRITE (IU07) ML, KL
-    WRITE (IU07) FR, DFIM, GOM, C, DELTH, DELTR, TH, COSTH, SINTH, INV_LOG_CO,     &
-         &            DF, DF_FR, DF_FR2, DFIM, DFIMOFR, DFIM_FR, DFIM_FR2, FR5, FRM5,   &
-         &            RHOWG_DFIM,                                                       &
-         &            FMIN, MO_TAIL, MM1_TAIL, MP1_TAIL, MP2_TAIL
-    WRITE (IU07) MPM, KPM, JXO, JYO
-
-    write(*, *) "FR: ", FR
-    WRITE (*, *) "MPM: ", MPM
-    write(*, *) "KPM: ", KPM
-    write(*, *) "JXO: ", JXO
-    write(*, *) "JYO: ", JYO
-
-    ! ---------------------------------------------------------------------------- !
-    !                                                                              !
-    !     5. WRITE GRID INFORMATION.                                               !
-    !        -----------------------                                               !
-
-    WRITE (IU07) NX, NY, NSEA, IPER, ONE_POINT, REDUCED_GRID, L_OBSTRUCTION_T
-    WRITE (IU07) NLON_RG
-    WRITE (IU07) DELPHI, DELLAM, SINPH, COSPH, AMOWEP, AMOSOP, AMOEAP, AMONOP,     &
-         &            XDELLA, XDELLO, ZDELLO
-    WRITE (IU07) IXLG, KXLT, L_S_MASK
-    WRITE (IU07) KLAT, KLON, WLAT, DEPTH_B
-    IF (L_OBSTRUCTION_T) THEN
-       WRITE (IU07) OBSLAT, OBSLON
-    END IF
-    ! ---------------------------------------------------------------------------- !
-    !                                                                              !
-    !     6. WRITE TABLES.                                                         !
-    !        -------------                                                         !
-
-    WRITE (IU07) NDEPTH, DEPTHA, DEPTHD, DEPTHE
-    WRITE (IU07) FLMINFR, TCGOND, TFAK, TSIHKD, TFAC_ST, T_TAIL
-    WRITE (IU07) DELU
-
-    ! ---------------------------------------------------------------------------- !
-    !                                                                              !
-    !    10. CLOSE FILES.                                                          !
-    !        ------------                                                          !
-
-    CLOSE (UNIT=IU07, STATUS="KEEP")
-
-  END SUBROUTINE WRITE_PREPROC_FILE
-
+  
   ! ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ !
   !                                                                              !
   !     G. PRIVAT MODULE PROCEDURES.                                             !
