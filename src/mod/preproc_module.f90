@@ -1974,6 +1974,141 @@ CONTAINS
     write( stdout, *) "After reading: kl = ", kl, ", fr = ", fr
     write( stdout, *) "After reading: dfim = ", dfim, ", gom = ", gom
 
+    ! "c", "th", "costh", "sinth", "delth", "deltr", "inv_log_co", "df", "df_fr", "df_fr2", &
+ 
+    call check( nf90_get_var(ncid, id_of_var(21), c), "nf90_get_var c" )
+    call check( nf90_get_var(ncid, id_of_var(22), th), "nf90_get_var th" )
+    call check( nf90_get_var(ncid, id_of_var(23), costh), "nf90_get_var costh" )
+    call check( nf90_get_var(ncid, id_of_var(24), sinth), "nf90_get_var sinth" )
+    call check( nf90_get_var(ncid, id_of_var(25), delth), "nf90_get_var delth" )
+    call check( nf90_get_var(ncid, id_of_var(26), deltr), "nf90_get_var deltr" )
+    call check( nf90_get_var(ncid, id_of_var(27), inv_log_co), "nf90_get_var inv_log_co" )
+    call check( nf90_get_var(ncid, id_of_var(28), df), "nf90_get_var df" )
+    call check( nf90_get_var(ncid, id_of_var(29), df_fr), "nf90_get_var df_fr" )
+    call check( nf90_get_var(ncid, id_of_var(30), df_fr2), "nf90_get_var df_fr2" )
+
+    write( stdout, *) "After reading: c = ", c, ", th = ", th
+    write( stdout, *) "After reading: costh = ", costh, ", sinth = ", sinth
+    write( stdout, *) "After reading: delth = ", delth, ", deltr = ", deltr
+    write( stdout, *) "After reading: inv_log_co = ", inv_log_co, ", df = ", df
+    write( stdout, *) "After reading: df_fr = ", df_fr, ", df_fr2 = ", df_fr2
+
+    ! "dfim_ofr", "dfim_fr", "dfim_fr2", "fr5", "frm5", "rhowg_dfim", "fmin", "mo_tail", "mm1_tail", "mp1_tail", &
+
+!    call check( nf90_get_var(ncid, id_of_var(31), dfim_ofr), "nf90_get_var dfim_ofr" )
+    call check( nf90_get_var(ncid, id_of_var(32), dfim_fr), "nf90_get_var dfim_fr" )
+    call check( nf90_get_var(ncid, id_of_var(33), dfim_fr2), "nf90_get_var dfim_fr2" )
+    call check( nf90_get_var(ncid, id_of_var(34), fr5), "nf90_get_var fr5" )
+    call check( nf90_get_var(ncid, id_of_var(35), frm5), "nf90_get_var frm5" )
+    call check( nf90_get_var(ncid, id_of_var(36), rhowg_dfim), "nf90_get_var rhowg_dfim" )
+    call check( nf90_get_var(ncid, id_of_var(37), fmin), "nf90_get_var fmin" )
+    call check( nf90_get_var(ncid, id_of_var(38), mo_tail), "nf90_get_var mo_tail" )
+    call check( nf90_get_var(ncid, id_of_var(39), mm1_tail), "nf90_get_var mm1_tail" )
+    call check( nf90_get_var(ncid, id_of_var(40), mp1_tail), "nf90_get_var mp1_tail" )
+
+ !   write( stdout, *) "After reading: dfim_ofr = ", dfim_ofr, ", dfim_fr = ", dfim_fr
+    write( stdout, *) "After reading: dfim_fr2 = ", dfim_fr2, ", fr5 = ", fr5
+    write( stdout, *) "After reading: frm5 = ", frm5, ", rhowg_dfim = ", rhowg_dfim
+    write( stdout, *) "After reading: fmin = ", fmin, ", mo_tail = ", mo_tail
+    write( stdout, *) "After reading: mm1_tail = ", mm1_tail, ", mp1_tail = ", mp1_tail
+
+!  "mp2_tail", "mpm", "kpm", "jxo", "jyo", "nbounf", "nbinp", "c_name", "blngf", "blatf", &
+   
+    call check( nf90_get_var(ncid, id_of_var(41), mp2_tail), "nf90_get_var mp2_tail" )
+    call check( nf90_get_var(ncid, id_of_var(42), mpm), "nf90_get_var mpm" )
+    call check( nf90_get_var(ncid, id_of_var(43), kpm), "nf90_get_var kpm" )
+    call check( nf90_get_var(ncid, id_of_var(44), jxo), "nf90_get_var jxo" )
+    call check( nf90_get_var(ncid, id_of_var(45), jyo), "nf90_get_var jyo" )
+    call check( nf90_get_var(ncid, id_of_var(46), nbounf), "nf90_get_var nbounf" )
+    call check( nf90_get_var(ncid, id_of_var(47), nbinp), "nf90_get_var nbinp" )
+    call check( nf90_get_var(ncid, id_of_var(48), c_name), "nf90_get_var c_name" )
+    call check( nf90_get_var(ncid, id_of_var(49), blngf), "nf90_get_var blngf" )
+    call check( nf90_get_var(ncid, id_of_var(50), blatf), "nf90_get_var blatf" )
+
+    write( stdout, *) "After reading: mp2_tail = ", mp2_tail, ", mpm = ", mpm
+    write( stdout, *) "After reading: kpm = ", kpm, ", jxo = ", jxo
+    write( stdout, *) "After reading: jyo = ", jyo, ", nbounf = ", nbounf
+    write( stdout, *) "After reading: nbinp = ", nbinp, ", c_name = ", c_name
+    write( stdout, *) "After reading: blngf = ", blngf, ", blatf = ", blatf
+
+    
+    ! "ijarf", "ibfl", "ibfr", "bfw", "nx", "ny", "nsea", "iper", "one_point", "reduced_grid", &
+      
+    call check( nf90_get_var(ncid, id_of_var(51), ijarf), "nf90_get_var ijarf" )
+    call check( nf90_get_var(ncid, id_of_var(52), ibfl), "nf90_get_var ibfl" )
+    call check( nf90_get_var(ncid, id_of_var(53), ibfr), "nf90_get_var ibfr" )
+    call check( nf90_get_var(ncid, id_of_var(54), bfw), "nf90_get_var bfw" )
+    call check( nf90_get_var(ncid, id_of_var(55), nx), "nf90_get_var nx" )
+    call check( nf90_get_var(ncid, id_of_var(56), ny), "nf90_get_var ny" )
+    call check( nf90_get_var(ncid, id_of_var(57), nsea), "nf90_get_var nsea" )
+!    call check( nf90_get_var(ncid, id_of_var(58), iper), "nf90_get_var iper" )
+!    call check( nf90_get_var(ncid, id_of_var(59), one_point), "nf90_get_var one_point" )
+!    call check( nf90_get_var(ncid, id_of_var(60), reduced_grid), "nf90_get_var reduced_grid" )
+
+    write( stdout, *) "After reading: ijarf = ", ijarf, ", ibfl = ", ibfl
+    write( stdout, *) "After reading: ibfr = ", ibfr, ", bfw = ", bfw
+    write( stdout, *) "After reading: nx = ", nx, ", ny = ", ny
+!    write( stdout, *) "After reading: nsea = ", nsea, ", iper = ", iper
+!    write( stdout, *) "After reading: one_point = ", one_point, ", reduced_grid = ", reduced_grid
+
+    ! "l_obstruction", "nlon_rg", "delphi", "dellam", "sinph", "cosph", "amowep", "amosop", "amoeap", "amonop", &
+!    call check( nf90_get_var(ncid, id_of_var(61), l_obstruction), "nf90_get_var l_obstruction" )
+    call check( nf90_get_var(ncid, id_of_var(62), nlon_rg), "nf90_get_var nlon_rg" )
+    call check( nf90_get_var(ncid, id_of_var(63), delphi), "nf90_get_var delphi" )
+    call check( nf90_get_var(ncid, id_of_var(64), dellam), "nf90_get_var dellam" )
+    call check( nf90_get_var(ncid, id_of_var(65), sinph), "nf90_get_var sinph" )
+    call check( nf90_get_var(ncid, id_of_var(66), cosph), "nf90_get_var cosph" )
+    call check( nf90_get_var(ncid, id_of_var(67), amowep), "nf90_get_var amowep" )
+    call check( nf90_get_var(ncid, id_of_var(68), amosop), "nf90_get_var amosop" )
+    call check( nf90_get_var(ncid, id_of_var(69), amoeap), "nf90_get_var amoeap" )
+    call check( nf90_get_var(ncid, id_of_var(70), amonop), "nf90_get_var amonop" )
+
+ !   write( stdout, *) "After reading: l_obstruction = ", l_obstruction, ", nlon_rg = ", nlon_rg
+    write( stdout, *) "After reading: delphi = ", delphi, ", dellam = ", dellam
+    write( stdout, *) "After reading: sinph = ", sinph, ", cosph = ", cosph
+    write( stdout, *) "After reading: amowep = ", amowep, ", amosop = ", amosop
+    write( stdout, *) "After reading: amoeap = ", amoeap, ", amonop = ", amonop
+
+    ! "zdello", "ixlg", "kxlt", "l_s_mask", "klat", "klon", "wlat", "depth_b", "obslat", "obslon", &
+    call check( nf90_get_var(ncid, id_of_var(71), zdello), "nf90_get_var zdello" )
+    call check( nf90_get_var(ncid, id_of_var(72), ixlg), "nf90_get_var ixlg" )
+    call check( nf90_get_var(ncid, id_of_var(73), kxlt), "nf90_get_var kxlt" )
+!    call check( nf90_get_var(ncid, id_of_var(74), l_s_mask), "nf90_get_var l_s_mask" )
+    call check( nf90_get_var(ncid, id_of_var(75), klat), "nf90_get_var klat" )
+    call check( nf90_get_var(ncid, id_of_var(76), klon), "nf90_get_var klon" )
+    call check( nf90_get_var(ncid, id_of_var(77), wlat), "nf90_get_var wlat" )
+    call check( nf90_get_var(ncid, id_of_var(78), depth_b), "nf90_get_var depth_b" )
+    call check( nf90_get_var(ncid, id_of_var(79), obslat), "nf90_get_var obslat" )
+    call check( nf90_get_var(ncid, id_of_var(80), obslon), "nf90_get_var obslon" )
+
+    write( stdout, *) "After reading: zdello = ", zdello, ", ixlg = ", ixlg
+!    write( stdout, *) "After reading: kxlt = ", kxlt, ", l_s_mask = ", l_s_mask
+    write( stdout, *) "After reading: klat = ", klat, ", klon = ", klon
+    write( stdout, *) "After reading: wlat = ", wlat, ", depth_b = ", depth_b
+    write( stdout, *) "After reading: obslat = ", obslat, ", obslon = ", obslon
+
+    !  "ndepth", "deptha", "depthb", "depthe", "flminfr", "tcgond", "tfak", "tsihkd", "tfac_st", "t_tail", &
+    !     "delu"
+    call check( nf90_get_var(ncid, id_of_var(81), ndepth), "nf90_get_var ndepth" )
+    call check( nf90_get_var(ncid, id_of_var(82), deptha), "nf90_get_var deptha" )
+!    call check( nf90_get_var(ncid, id_of_var(83), depthb), "nf90_get_var depthb" )
+    call check( nf90_get_var(ncid, id_of_var(84), depthe), "nf90_get_var depthe" )
+    call check( nf90_get_var(ncid, id_of_var(85), flminfr), "nf90_get_var flminfr" )
+    call check( nf90_get_var(ncid, id_of_var(86), tcgond), "nf90_get_var tcgond" )
+    call check( nf90_get_var(ncid, id_of_var(87), tfak), "nf90_get_var tfak" )
+    call check( nf90_get_var(ncid, id_of_var(88), tsihkd), "nf90_get_var tsihkd" )
+    call check( nf90_get_var(ncid, id_of_var(89), tfac_st), "nf90_get_var tfac_st" )
+    call check( nf90_get_var(ncid, id_of_var(90), t_tail), "nf90_get_var t_tail" )
+    call check( nf90_get_var(ncid, id_of_var(91), delu), "nf90_get_var delu" )
+
+    write( stdout, *) "After reading: ndepth = ", ndepth, ", deptha = ", deptha
+    write( stdout, *) "After reading: depth_b = ", depth_b, ", depthe = ", depthe
+    write( stdout, *) "After reading: flminfr = ", flminfr, ", tcgond = ", tcgond
+    write( stdout, *) "After reading: tfak = ", tfak, ", tsihkd = ", tsihkd
+    write( stdout, *) "After reading: tfac_st = ", tfac_st, ", t_tail = ", t_tail
+    write( stdout, *) "After reading: delu = ", delu
+
+    
     
     write( *, * ) "Reading of nr 2 ended ..."
 
