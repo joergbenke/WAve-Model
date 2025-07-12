@@ -1208,14 +1208,17 @@ CONTAINS
     integer :: varid_header
     
     ! Section 2
-    integer :: varid_nnest, varid_maxnest
+    integer :: varid_n_nest, varid_max_nest
     integer :: varid_nbounc, varid_n_name, varid_n_code
     integer :: varid_ijarc, varid_xdello, varid_xdella
     integer :: varid_nsouth, varid_nnorth, varid_neast, varid_nwest
-
-    ! Section 2
     integer :: varid_blngc, varid_blatc, varid_n_zdel
 
+    ! Section 3
+    integer :: varid_nbounf, varid_nbinp, varid_c_name
+    integer :: varid_blngf, varid_blatf, varid_ijarf, varid_ibfl, varid_ibfr, varid_bfw
+
+    ! Section 4
     integer :: varid_ml, varid_kl
     integer :: varid_fr, varid_dfim, varid_gom, varid_c, varid_th, varid_costh, varid_sinth
     integer :: varid_delth, varid_deltr, varid_inv_log_co, varid_df, varid_df_fr, varid_df_fr2
@@ -1225,11 +1228,6 @@ CONTAINS
     integer :: varid_fmin, varid_mo_tail, varid_mm1_tail, varid_mp1_tail, varid_mp2_tail 
     integer :: varid_mpm, varid_kpm, varid_jxo, varid_jyo
 
-    ! Section 3
-    integer :: varid_nbounf, varid_nbinp, varid_c_name
-    integer :: varid_blngf, varid_blatf, varid_ijarf, varid_ibfl, varid_ibfr, varid_bfw
-
-    
     ! Section 5
     integer :: varid_nx, varid_ny, varid_nsea, varid_iper, varid_one_point
     integer :: varid_reduced_grid, varid_l_obstruction_t, varid_nlon_rg, varid_delphi, varid_dellam 
@@ -1242,7 +1240,7 @@ CONTAINS
     integer :: varid_ndepth, varid_deptha, varid_depthd, varid_depthe
     integer :: varid_flminfr, varid_tcgond, varid_tfak, varid_tsihkd, varid_tfac_st, varid_t_tail
     integer :: varid_delu
-
+ 
     
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
@@ -1261,7 +1259,6 @@ CONTAINS
     write( stdout, * ) "NBOUNC = ", NBOUNC
 
     ! Open File
-    !call check( nf90_create(trim(FILE07_NC), ior(ior(NF90_CLOBBER,NF90_SHARE),NF90_NETCDF4), ncid), "nf90_create" )
     call check( nf90_create("./grid/grind_info.nc", ior(ior(NF90_CLOBBER,NF90_SHARE),NF90_NETCDF4), ncid), "nf90_create" )
 
 
@@ -1286,31 +1283,33 @@ CONTAINS
     
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
-   !    2. WRITE COARSE GRID BOUNDARY OUTPUT INFORMATION.  (definition part)      !
+    !    2. WRITE COARSE GRID BOUNDARY OUTPUT INFORMATION.  (definition part)      !
     ! ---------------------------------------------------------------------------- !
 
-    call check( nf90_def_var(ncid, "n_nest", NF90_INT, varid_nnest), "nf90_def_var N_NEST" )
-    call check( nf90_def_var(ncid, "max_nest", NF90_INT, varid_maxnest), "nf90_def_var MAX_NEST" )
+    call check( nf90_def_var(ncid, "n_nest", NF90_INT, varid_n_nest), "nf90_def_var N_NEST" )
+    call check( nf90_def_var(ncid, "max_nest", NF90_INT, varid_max_nest), "nf90_def_var MAX_NEST" )
 
     call check( nf90_def_var(ncid, "nbounc", NF90_INT, (/dimid_n_nest/), varid_nbounc), "nf90_def_var NBOUNC" )
     call check( nf90_def_var(ncid, "n_name", NF90_STRING, (/dimid_n_nest/), varid_n_name), "nf90_def_var N_NAME" )
     call check( nf90_def_var(ncid, "n_code", NF90_INT, (/dimid_n_nest/), varid_n_code), "nf90_def_var N_CODE" )
 
-    call check( nf90_def_var(ncid, "xdello", NF90_INT, varid_xdello), "nf90_def_var XDELLO" )
-    call check( nf90_def_var(ncid, "xdella", NF90_INT, varid_xdella), "nf90_def_var XDELLA" )
-    call check( nf90_def_var(ncid, "n_south", NF90_INT, (/dimid_n_nest/), varid_nsouth), "nf90_def_var NSOUTH" )
-    call check( nf90_def_var(ncid, "n_north", NF90_INT, (/dimid_n_nest/), varid_nnorth), "nf90_def_var NNORTH" )
-    call check( nf90_def_var(ncid, "n_east", NF90_INT, (/dimid_n_nest/), varid_neast), "nf90_def_var NEAST" )
-    call check( nf90_def_var(ncid, "n_west", NF90_INT, (/dimid_n_nest/), varid_nwest), "nf90_def_var NWEST" )
+    if( result_max_val > 0 ) then
+       call check( nf90_def_var(ncid, "xdello", NF90_INT, varid_xdello), "nf90_def_var XDELLO" )
+       call check( nf90_def_var(ncid, "xdella", NF90_INT, varid_xdella), "nf90_def_var XDELLA" )
+       call check( nf90_def_var(ncid, "n_south", NF90_INT, (/dimid_n_nest/), varid_nsouth), "nf90_def_var N_SOUTH" )
+       call check( nf90_def_var(ncid, "n_north", NF90_INT, (/dimid_n_nest/), varid_nnorth), "nf90_def_var N_NORTH" )
+       call check( nf90_def_var(ncid, "n_east", NF90_INT, (/dimid_n_nest/), varid_neast), "nf90_def_var N_EAST" )
+       call check( nf90_def_var(ncid, "n_west", NF90_INT, (/dimid_n_nest/), varid_nwest), "nf90_def_var N_WEST" )
     
-    call check( nf90_def_var(ncid, "ijarc", NF90_INT, (/ dimid_result_max_val, dimid_n_nest /), varid_ijarc), &
-         "nf90_def_var IJARC" )
-    call check( nf90_def_var(ncid, "blngc", NF90_INT, (/ dimid_result_max_val, dimid_n_nest /), varid_blngc), &
-         "nf90_def_var BLONGC" )
-    call check( nf90_def_var(ncid, "blatc", NF90_INT, (/ dimid_result_max_val, dimid_n_nest /), varid_blatc), &
-         "nf90_def_var BLATC" )
-    call check( nf90_def_var(ncid, "n_zdel", NF90_INT, (/ dimid_result_max_val, dimid_n_nest /), varid_n_zdel), &
-         "nf90_def_var NZDEL" )
+       call check( nf90_def_var(ncid, "ijarc", NF90_INT, (/ dimid_result_max_val, dimid_n_nest /), varid_ijarc), &
+            "nf90_def_var IJARC" )
+       call check( nf90_def_var(ncid, "blngc", NF90_INT, (/ dimid_result_max_val, dimid_n_nest /), varid_blngc), &
+            "nf90_def_var BLONGC" )
+       call check( nf90_def_var(ncid, "blatc", NF90_INT, (/ dimid_result_max_val, dimid_n_nest /), varid_blatc), &
+            "nf90_def_var BLATC" )
+       call check( nf90_def_var(ncid, "n_zdel", NF90_INT, (/ dimid_result_max_val, dimid_n_nest /), varid_n_zdel), &
+            "nf90_def_var NZDEL" )
+    end if
 
     write( *, * ) "Definition of nr 2 ended ..."
 
@@ -1320,19 +1319,21 @@ CONTAINS
     !     3. WRITE FINE GRID BOUNDARY INPUT INFORMATION. (defintion part)          !
     !        -------------------------------------------                           !
 
-    
     call check( nf90_def_var(ncid, "nbounf", NF90_INT, varid_nbounf), "nf90_def_var NBOUNF" )
     call check( nf90_def_var(ncid, "nbinp", NF90_INT, varid_nbinp), "nf90_def_var NBINP" )
     call check( nf90_def_var(ncid, "c_name", NF90_STRING, varid_c_name), "nf90_def_var C_NAME" )
 
-    call check( nf90_def_var(ncid, "blngf", NF90_INT, (/ dimid_nbounf /), varid_blngf), "nf90_def_var BLNGF" )
-    call check( nf90_def_var(ncid, "blatf", NF90_INT, (/ dimid_nbounf /), varid_blatf), "nf90_def_var BLATF" )
-    call check( nf90_def_var(ncid, "ijarf", NF90_INT, (/ dimid_nbounf /), varid_ijarf), "nf90_def_var IJARF" )
-    call check( nf90_def_var(ncid, "ibfl", NF90_INT, (/ dimid_nbounf /), varid_ibfl), "nf90_def_var IBFL" )
-    call check( nf90_def_var(ncid, "ibfr", NF90_INT, (/ dimid_nbounf /), varid_ibfr), "nf90_def_var IBFR" )
-    call check( nf90_def_var(ncid, "bfw", NF90_DOUBLE, (/ dimid_nbounf /), varid_bfw), "nf90_def_var BFW" )
-
+    if( NBOUNF > 0 ) then
+       call check( nf90_def_var(ncid, "blngf", NF90_INT, (/ dimid_nbounf /), varid_blngf), "nf90_def_var BLNGF" )
+       call check( nf90_def_var(ncid, "blatf", NF90_INT, (/ dimid_nbounf /), varid_blatf), "nf90_def_var BLATF" )
+       call check( nf90_def_var(ncid, "ijarf", NF90_INT, (/ dimid_nbounf /), varid_ijarf), "nf90_def_var IJARF" )
+       call check( nf90_def_var(ncid, "ibfl", NF90_INT, (/ dimid_nbounf /), varid_ibfl), "nf90_def_var IBFL" )
+       call check( nf90_def_var(ncid, "ibfr", NF90_INT, (/ dimid_nbounf /), varid_ibfr), "nf90_def_var IBFR" )
+       call check( nf90_def_var(ncid, "bfw", NF90_DOUBLE, (/ dimid_nbounf /), varid_bfw), "nf90_def_var BFW" )
+    end if
     
+    write( *, * ) "Definition of nr 3 ended ..."
+
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
     !                4. WRITE FREQUENCY DIRECTION GRID. (definition part)          !
@@ -1346,36 +1347,37 @@ CONTAINS
 
     call check( nf90_def_var(ncid, "c", NF90_DOUBLE,  (/ dimid_ml /), varid_c), "nf90_def_var C" )
     call check( nf90_def_var(ncid, "th", NF90_DOUBLE, (/ dimid_kl /), varid_th), "nf90_def_var TH" )
-    call check( nf90_def_var(ncid, "delth", NF90_DOUBLE, varid_delth), "nf90_def_var DELTAH" )
-    call check( nf90_def_var(ncid, "deltr", NF90_DOUBLE, varid_deltr), "nf90_def_var DELTAR" )
+    call check( nf90_def_var(ncid, "delth", NF90_DOUBLE, varid_delth), "nf90_def_var DELTH" )
+    call check( nf90_def_var(ncid, "deltr", NF90_DOUBLE, varid_deltr), "nf90_def_var DELTR" )
     call check( nf90_def_var(ncid, "costh", NF90_DOUBLE, (/ dimid_kl /), varid_costh), "nf90_def_var COSTH" )
-    call check( nf90_def_var(ncid, "sinth", NF90_DOUBLE, (/ dimid_kl /), varid_sinth), "nf90_def_var SIMTH" )
 
+    call check( nf90_def_var(ncid, "sinth", NF90_DOUBLE, (/ dimid_kl /), varid_sinth), "nf90_def_var SIMTH" )
     call check( nf90_def_var(ncid, "inv_log_co", NF90_DOUBLE, varid_inv_log_co), "nf90_def_var INV_LOG_CO" )
     call check( nf90_def_var(ncid, "df", NF90_DOUBLE, (/ dimid_ml /), varid_df), "nf90_def_var DF" )
-    call check( nf90_def_var(ncid, "df_fr", NF90_DOUBLE, (/ dimid_ml /),varid_df_fr), "nf90_def_var FR" )
-    call check( nf90_def_var(ncid, "df_fr2", NF90_DOUBLE, (/ dimid_ml /), varid_df_fr2), "nf90_def_var FR2" )
+    call check( nf90_def_var(ncid, "df_fr", NF90_DOUBLE, (/ dimid_ml /),varid_df_fr), "nf90_def_var DF_FR" )
+    call check( nf90_def_var(ncid, "df_fr2", NF90_DOUBLE, (/ dimid_ml /), varid_df_fr2), "nf90_def_var DF_FR2" )
 
     call check( nf90_def_var(ncid, "dfim_ofr", NF90_DOUBLE, (/ dimid_ml /), varid_dfim_ofr), "nf90_def_var OFR" )
-
     call check( nf90_def_var(ncid, "dfim_fr", NF90_DOUBLE, (/ dimid_ml /), varid_dfim_fr), "nf90_def_var DFIM_FR" )
     call check( nf90_def_var(ncid, "dfim_fr2", NF90_DOUBLE, (/ dimid_ml /), varid_dfim_fr2), "nf90_def_var DFIM_FR2" )
     call check( nf90_def_var(ncid, "fr5", NF90_DOUBLE, (/ dimid_ml /), varid_fr5), "nf90_def_var FR5" )
     call check( nf90_def_var(ncid, "frm5", NF90_DOUBLE, (/ dimid_ml /), varid_frm5), "nf90_def_var FRM5" )
+
     call check( nf90_def_var(ncid, "rhowg_dfim", NF90_DOUBLE, (/ dimid_ml /), varid_rhowg_dfim), "nf90_def_var RHOWG_DFIM" )
     call check( nf90_def_var(ncid, "fmin", NF90_DOUBLE, varid_fmin), "nf90_def_var FMIN" )
-
     call check( nf90_def_var(ncid, "mo_tail", NF90_DOUBLE, varid_mo_tail), "nf90_def_var MO_TAIL" )
     call check( nf90_def_var(ncid, "mm1_tail", NF90_DOUBLE, varid_mm1_tail), "nf90_def_var MM1_TAIL" )
     call check( nf90_def_var(ncid, "mp1_tail", NF90_DOUBLE, varid_mp1_tail), "nf90_def_var MP1_TAIL" )
+
     call check( nf90_def_var(ncid, "mp2_tail", NF90_DOUBLE, varid_mp2_tail), "nf90_def_var MP2_TAIL" )
-!    call check( nf90_def_var(ncid, "mpm", NF90_INT, (/ dimid_ml, 3 /), varid_mpm), "nf90_def_var MPM" )
     call check( nf90_def_var(ncid, "mpm", NF90_INT, (/ dimid_ml, dimid_three /), varid_mpm), "nf90_def_var MPM" )
     call check( nf90_def_var(ncid, "kpm", NF90_INT, (/ dimid_kl, dimid_three /), varid_kpm), "nf90_def_var KPM" )
     call check( nf90_def_var(ncid, "jxo", NF90_INT, (/ dimid_kl, dimid_two /), varid_jxo), "nf90_def_var JXO" )
     call check( nf90_def_var(ncid, "jyo", NF90_INT, (/ dimid_kl, dimid_two /), varid_jyo), "nf90_def_varJYO" )
 
+    write( *, * ) "Definition of nr 4 ended ..."
 
+    
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
     !     5. WRITE GRID INFORMATION. (definition part)                             !
@@ -1385,24 +1387,22 @@ CONTAINS
     call check( nf90_def_var(ncid, "ny", NF90_INT, varid_ny), "nf90_def_var NY" )
     call check( nf90_def_var(ncid, "nsea", NF90_INT, varid_nsea), "nf90_def_var NSEA" )
     call check( nf90_def_var(ncid, "iper", NF90_INT, varid_iper), "nf90_def_var IPER" )
-!    call check( nf90_def_var(ncid, "iper", NF90_BYTE, varid_iper), "nf90_def_var IPER" )
     call check( nf90_def_var(ncid, "one_point", NF90_INT, varid_one_point), "nf90_def_var ONE_POINT" )
+
     call check( nf90_def_var(ncid, "reduced_grid", NF90_INT, varid_reduced_grid), "nf90_def_var REDUCED_GRID" )
     call check( nf90_def_var(ncid, "l_obstruction_t", NF90_INT, varid_l_obstruction_t), "nf90_def_var L_OBSTRUCTION_T" )
-
     call check( nf90_def_var(ncid, "nlon_rg", NF90_INT, (/ dimid_ny /), varid_nlon_rg), "nf90_def_var NLON_RG" )
-
     call check( nf90_def_var(ncid, "delphi", NF90_DOUBLE, varid_delphi), "nf90_def_var DELPHI" )
     call check( nf90_def_var(ncid, "dellam", NF90_DOUBLE, (/ dimid_ny /), varid_dellam), "nf90_def_var DELLAM" )
+
     call check( nf90_def_var(ncid, "sinph", NF90_DOUBLE, (/ dimid_ny /), varid_sinph), "nf90_def_var SINPH" )
     call check( nf90_def_var(ncid, "cosph", NF90_DOUBLE, (/ dimid_ny /), varid_cosph), "nf90_def_var COSPH" )
-
     call check( nf90_def_var(ncid, "amowep", NF90_INT, varid_amowep), "nf90_def_var AMOWEP" )
     call check( nf90_def_var(ncid, "amosop", NF90_INT, varid_amosop), "nf90_def_var AMOSOP" )
     call check( nf90_def_var(ncid, "amoeap", NF90_INT, varid_amoeap), "nf90_def_var AMOEAP" )
+
     call check( nf90_def_var(ncid, "amonop", NF90_INT, varid_amonop), "nf90_def_var AMONOP" )
     call check( nf90_def_var(ncid, "zdello", NF90_DOUBLE, (/ dimid_ny /), varid_zdello), "nf90_def_var ZDELLO" )
-
     call check( nf90_def_var(ncid, "ixlg", NF90_INT, (/ dimid_nsea /), varid_ixlg), "nf90_def_var IXLG" )
     call check( nf90_def_var(ncid, "kxlt", NF90_INT, (/ dimid_nsea /), varid_kxlt), "nf90_def_var KXLT" )
     call check( nf90_def_var(ncid, "l_s_mask", NF90_INT, varid_l_s_mask), "nf90_def_var L_S_MASK" )
@@ -1418,6 +1418,7 @@ CONTAINS
        call check( nf90_def_var(ncid, "obslon", NF90_DOUBLE, (/ dimid_nsea, dimid_two, dimid_ml /), varid_obslon), &
             "nf90_def_var OBSLON" )
     end if
+
     write( *, * ) "Definition of nr 5 ended ..."
 
 
@@ -1430,8 +1431,8 @@ CONTAINS
     call check( nf90_def_var(ncid, "deptha", NF90_DOUBLE, varid_deptha), "nf90_def_var DEPTHA" )
     call check( nf90_def_var(ncid, "depthd", NF90_DOUBLE, varid_depthd), "nf90_def_var DEPTHD" )
     call check( nf90_def_var(ncid, "depthe", NF90_DOUBLE, varid_depthe), "nf90_def_var DEPTHE" )
-
     call check( nf90_def_var(ncid, "flminfr", NF90_DOUBLE, (/ dimid_jumax, dimid_ml /), varid_flminfr), "nf90_def_var FLMINFR" )
+
     call check( nf90_def_var(ncid, "tcgond", NF90_DOUBLE, (/ dimid_ndepth, dimid_ml /), varid_tcgond), "nf90_def_var TCGOND" )
     call check( nf90_def_var(ncid, "tfak", NF90_DOUBLE, (/ dimid_ndepth, dimid_ml /), varid_tfak), "nf90_def_var TFAK" )
     call check( nf90_def_var(ncid, "tsihkd", NF90_DOUBLE, (/ dimid_ndepth, dimid_ml /), varid_tsihkd), "nf90_def_var TSIHKD" )
@@ -1442,6 +1443,7 @@ CONTAINS
 
 
     call check( nf90_enddef(ncid), "nf90_enddef" )
+
     write( *, * ) "Definition of nr 6 ended ..."
 
     !
@@ -1461,25 +1463,28 @@ CONTAINS
     !      2. WRITE COARSE GRID BOUNDARY OUTPUT INFORMATION. (write part)          ! 
     ! ---------------------------------------------------------------------------- !
 
-    call check( nf90_put_var(ncid, varid_nnest, N_NEST), "nf90_def_var N_NEST" )
-    call check( nf90_put_var(ncid, varid_maxnest, MAX_NEST), "nf90_def_var MAX_NEST" )
+    call check( nf90_put_var(ncid, varid_n_nest, N_NEST), "nf90_put_var N_NEST" )
+    call check( nf90_put_var(ncid, varid_max_nest, MAX_NEST), "nf90_put_var MAX_NEST" )
 
-    call check( nf90_put_var(ncid, varid_nbounc, NBOUNC), "nf90_def_var NBOUNC_I" )
-    call check( nf90_put_var(ncid, varid_n_name, N_NAME), "nf90_def_var N_NAME_I" )
-    call check( nf90_put_var(ncid, varid_n_code, N_CODE), "nf90_def_var N_CODE_I" )
+    call check( nf90_put_var(ncid, varid_nbounc, NBOUNC), "nf90_put_var NBOUNC_I" )
+    call check( nf90_put_var(ncid, varid_n_name, N_NAME), "nf90_put_var N_NAME_I" )
+    call check( nf90_put_var(ncid, varid_n_code, N_CODE), "nf90_put_var N_CODE_I" )
 
+    if( result_max_val > 0 ) then
+       call check( nf90_put_var(ncid, varid_xdello, XDELLO), "nf90_put_var XDELLO" )
+       call check( nf90_put_var(ncid, varid_xdella, XDELLA), "nf90_put_var XDELLA" )
+       call check( nf90_put_var(ncid, varid_nnorth, N_NORTH), "nf90_put_var N_NORTH" )
+       call check( nf90_put_var(ncid, varid_nsouth, N_SOUTH), "nf90_put_var N_SOUTH" )
+       call check( nf90_put_var(ncid, varid_neast, N_EAST), "nf90_put_var N_EAST" )
+       call check( nf90_put_var(ncid, varid_nwest, N_WEST), "nf90_put_var N_WEST" )
+
+       call check( nf90_put_var(ncid, varid_ijarc, IJARC), "nf90_put_var IJARC" )
+       call check( nf90_put_var(ncid, varid_blngc, BLNGC), "nf90_put_var BLNGC" )
+       call check( nf90_put_var(ncid, varid_blatc, BLATC), "nf90_put_var BLATC" )
+       call check( nf90_put_var(ncid, varid_n_zdel, N_ZDEL), "nf90_put_var N_ZDEL" )
+    end if
     
-    call check( nf90_put_var(ncid, varid_xdello, XDELLO), "nf90_def_var XDELLO" )
-    call check( nf90_put_var(ncid, varid_xdella, XDELLA), "nf90_def_var XDELLA" )
-    call check( nf90_put_var(ncid, varid_nnorth, N_NORTH), "nf90_def_var N_NORTH" )
-    call check( nf90_put_var(ncid, varid_nsouth, N_SOUTH), "nf90_def_var N_SOUTH" )
-    call check( nf90_put_var(ncid, varid_neast, N_EAST), "nf90_def_var N_EAST" )
-    call check( nf90_put_var(ncid, varid_nwest, N_WEST), "nf90_def_var N_WEST" )
-
-    call check( nf90_put_var(ncid, varid_ijarc, IJARC), "nf90_def_var IJARC" )
-    call check( nf90_put_var(ncid, varid_blngc, BLNGC), "nf90_def_var BLNGC" )
-    call check( nf90_put_var(ncid, varid_blatc, BLATC), "nf90_def_var BLATC" )
-    call check( nf90_put_var(ncid, varid_n_zdel, N_ZDEL), "nf90_def_var N_ZDEL" )
+    write( *, * ) "Writing of nr 2 ended ..."
 
     
     ! ---------------------------------------------------------------------------- !
@@ -1487,61 +1492,66 @@ CONTAINS
     !     3. WRITE FINE GRID BOUNDARY INPUT INFORMATION.                           !
     !        -------------------------------------------                           !
 
-    call check( nf90_put_var(ncid, varid_nbounf, NBOUNF), "nf90_def_var NBOUNF" )
-    call check( nf90_put_var(ncid, varid_nbinp, NBINP), "nf90_def_var NBINP" ) 
-    call check( nf90_put_var(ncid, varid_c_name, C_NAME), "nf90_def_var C_NAME" )
+    call check( nf90_put_var(ncid, varid_nbounf, NBOUNF), "nf90_put_var NBOUNF" )
+    call check( nf90_put_var(ncid, varid_nbinp, NBINP), "nf90_put_var NBINP" ) 
+    call check( nf90_put_var(ncid, varid_c_name, C_NAME), "nf90_put_var C_NAME" )
 
-    call check( nf90_put_var(ncid, varid_blngf, (/ dimid_nbounf /), BLNGF), "nf90_def_var BLNGF" )
-    call check( nf90_put_var(ncid, varid_blatf, (/ dimid_nbounf /), BLATF), "nf90_def_var BLATF" )
-    call check( nf90_put_var(ncid, varid_ijarf, (/ dimid_nbounf /), IJARF), "nf90_def_var IJARF" )
-    call check( nf90_put_var(ncid, varid_ibfl, (/ dimid_nbounf /), IBFL), "nf90_def_var IBFL" )
-    call check( nf90_put_var(ncid, varid_ibfr, (/ dimid_nbounf /), IBFR), "nf90_def_var IBFR" )
-    ! call check( nf90_put_var(ncid, varid_bfw, (/ dimid_nbounf /), BFW), "nf90_def_var BFW" )
-    ! before changing: call check( nf90_put_var(ncid, varid_bfw, BFW(1:NBOUNF)), "nf90_def_var BFW" )
-
+    if( NBOUNF > 0 ) then
+       call check( nf90_put_var(ncid, varid_blngf, BLNGF), "nf90_put_var BLNGF" )
+       call check( nf90_put_var(ncid, varid_blatf, BLATF), "nf90_put_var BLATF" )
+       call check( nf90_put_var(ncid, varid_ijarf, IJARF), "nf90_put_var IJARF" )
+       call check( nf90_put_var(ncid, varid_ibfl, IBFL), "nf90_put_var IBFL" )
+       call check( nf90_put_var(ncid, varid_ibfr, IBFR), "nf90_put_var IBFR" )
+       call check( nf90_put_var(ncid, varid_bfw, BFW), "nf90_put_var BFW" )
+       ! before changing: call check( nf90_put_var(ncid, varid_bfw, BFW(1:NBOUNF)), "nf90_put_var BFW" )
+    end if
        
+    write( *, * ) "Writing of nr 3 ended ..."
+
+
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
     !                4. WRITE FREQUENCY DIRECTION GRID. (write part)               !
     ! ---------------------------------------------------------------------------- !
 
-    call check( nf90_put_var(ncid, varid_ml, ML), "nf90_def_var ML" )
-    call check( nf90_put_var(ncid, varid_kl, KL), "nf90_def_var KL" )
-    call check( nf90_put_var(ncid, varid_fr, FR), "nf90_def_var FR" )
-    call check( nf90_put_var(ncid, varid_dfim, DFIM), "nf90_def_var DFIM" )
-    call check( nf90_put_var(ncid, varid_gom, GOM), "nf90_def_var GOM" )
+    call check( nf90_put_var(ncid, varid_ml, ML), "nf90_put_var ML" )
+    call check( nf90_put_var(ncid, varid_kl, KL), "nf90_put_var KL" )
+    call check( nf90_put_var(ncid, varid_fr, FR), "nf90_put_var FR" )
+    call check( nf90_put_var(ncid, varid_dfim, DFIM), "nf90_put_var DFIM" )
+    call check( nf90_put_var(ncid, varid_gom, GOM), "nf90_put_var GOM" )
 
     
-    call check( nf90_put_var(ncid, varid_c, C), "nf90_def_var C" )
-    call check( nf90_put_var(ncid, varid_delth, DELTH), "nf90_def_var DELTH" )
-    call check( nf90_put_var(ncid, varid_deltr, DELTR), "nf90_def_var DELTR" )
-    call check( nf90_put_var(ncid, varid_th, TH), "nf90_def_var TH" )
-    call check( nf90_put_var(ncid, varid_costh, COSTH), "nf90_def_var COSTH" )
-    call check( nf90_put_var(ncid, varid_sinth, SINTH), "nf90_def_var SINTH" )
+    call check( nf90_put_var(ncid, varid_c, C), "nf90_put_var C" )
+    call check( nf90_put_var(ncid, varid_delth, DELTH), "nf90_put_var DELTH" )
+    call check( nf90_put_var(ncid, varid_deltr, DELTR), "nf90_put_var DELTR" )
+    call check( nf90_put_var(ncid, varid_th, TH), "nf90_put_var TH" )
+    call check( nf90_put_var(ncid, varid_costh, COSTH), "nf90_put_var COSTH" )
+    call check( nf90_put_var(ncid, varid_sinth, SINTH), "nf90_put_var SINTH" )
     
-    call check( nf90_put_var(ncid, varid_inv_log_co, INV_LOG_CO), "nf90_def_var INV_LOG_CO" )
-    call check( nf90_put_var(ncid, varid_df, DF), "nf90_def_var DF" )
-    call check( nf90_put_var(ncid, varid_df_fr, DF_FR), "nf90_def_var DF_FR" )
-    call check( nf90_put_var(ncid, varid_df_fr2, DF_FR2), "nf90_def_var DF_FR2" )
-    call check( nf90_put_var(ncid, varid_dfim_ofr, DFIMOFR), "nf90_def_var DFIMOFR" )
+    call check( nf90_put_var(ncid, varid_inv_log_co, INV_LOG_CO), "nf90_put_var INV_LOG_CO" )
+    call check( nf90_put_var(ncid, varid_df, DF), "nf90_put_var DF" )
+    call check( nf90_put_var(ncid, varid_df_fr, DF_FR), "nf90_put_var DF_FR" )
+    call check( nf90_put_var(ncid, varid_df_fr2, DF_FR2), "nf90_put_var DF_FR2" )
+    call check( nf90_put_var(ncid, varid_dfim_ofr, DFIMOFR), "nf90_put_var DFIMOFR" )
 
-    call check( nf90_put_var(ncid, varid_dfim_fr, DFIM_FR), "nf90_def_var DFIM_FR" )
-    call check( nf90_put_var(ncid, varid_dfim_fr2, DFIM_FR2), "nf90_def_var DFIM_FR2" )
-    call check( nf90_put_var(ncid, varid_fr5, FR5), "nf90_def_var FR5" )
-    call check( nf90_put_var(ncid, varid_frm5, FRM5), "nf90_def_var FRM5" )
-    call check( nf90_put_var(ncid, varid_rhowg_dfim, RHOWG_DFIM), "nf90_def_var RHOWG_DFIM" )
+    call check( nf90_put_var(ncid, varid_dfim_fr, DFIM_FR), "nf90_put_var DFIM_FR" )
+    call check( nf90_put_var(ncid, varid_dfim_fr2, DFIM_FR2), "nf90_put_var DFIM_FR2" )
+    call check( nf90_put_var(ncid, varid_fr5, FR5), "nf90_put_var FR5" )
+    call check( nf90_put_var(ncid, varid_frm5, FRM5), "nf90_put_var FRM5" )
+    call check( nf90_put_var(ncid, varid_rhowg_dfim, RHOWG_DFIM), "nf90_put_var RHOWG_DFIM" )
 
-    call check( nf90_put_var(ncid, varid_fmin, FMIN), "nf90_def_var FMIN" )
-    call check( nf90_put_var(ncid, varid_mo_tail, MO_TAIL), "nf90_def_var MO_TAIL" )
-    call check( nf90_put_var(ncid, varid_mm1_tail, MM1_TAIL), "nf90_def_var MM1_TAIL" )
-    call check( nf90_put_var(ncid, varid_mp1_tail, MP1_TAIL), "nf90_def_var MP1_TAIL" )
-    call check( nf90_put_var(ncid, varid_mp2_tail, MP2_TAIL), "nf90_def_var MP2_TAIL" )
+    call check( nf90_put_var(ncid, varid_fmin, FMIN), "nf90_put_var FMIN" )
+    call check( nf90_put_var(ncid, varid_mo_tail, MO_TAIL), "nf90_put_var MO_TAIL" )
+    call check( nf90_put_var(ncid, varid_mm1_tail, MM1_TAIL), "nf90_put_var MM1_TAIL" )
+    call check( nf90_put_var(ncid, varid_mp1_tail, MP1_TAIL), "nf90_put_var MP1_TAIL" )
+    call check( nf90_put_var(ncid, varid_mp2_tail, MP2_TAIL), "nf90_put_var MP2_TAIL" )
 
-    call check( nf90_put_var(ncid, varid_mpm, MPM), "nf90_def_var MPM" )
-    call check( nf90_put_var(ncid, varid_kpm, KPM), "nf90_def_var KPM" )
-    call check( nf90_put_var(ncid, varid_jxo, JXO), "nf90_def_var JXO" )
-    call check( nf90_put_var(ncid, varid_jyo, JYO), "nf90_def_var JYO" )
-    write( *, *) "Wrote nr 4 ..."
+    call check( nf90_put_var(ncid, varid_mpm, MPM), "nf90_put_var MPM" )
+    call check( nf90_put_var(ncid, varid_kpm, KPM), "nf90_put_var KPM" )
+    call check( nf90_put_var(ncid, varid_jxo, JXO), "nf90_put_var JXO" )
+    call check( nf90_put_var(ncid, varid_jyo, JYO), "nf90_put_var JYO" )
+
+    write( *, * ) "Writing of nr 4 ended ..."
         
 
     ! ---------------------------------------------------------------------------- !
@@ -1549,70 +1559,77 @@ CONTAINS
     !     5. WRITE GRID INFORMATION.                                               !
     !        -----------------------                                               !
 
-    call check( nf90_put_var(ncid, varid_nx, NX), "nf90_def_var NX" )
-    call check( nf90_put_var(ncid, varid_ny, NY), "nf90_def_var NY" )
-    call check( nf90_put_var(ncid, varid_nsea, NSEA), "nf90_def_var NSEA" )
+    call check( nf90_put_var(ncid, varid_nx, NX), "nf90_put_var NX" )
+    call check( nf90_put_var(ncid, varid_ny, NY), "nf90_put_var NY" )
+    call check( nf90_put_var(ncid, varid_nsea, NSEA), "nf90_put_var NSEA" )
     
-    call check( nf90_put_var(ncid, varid_iper, merge(1, 0, IPER)), "nf90_def_var IPER" )
-    call check( nf90_put_var(ncid, varid_one_point, merge(1, 0, ONE_POINT)), "nf90_def_var one_point" )
-    call check( nf90_put_var(ncid, varid_reduced_grid, merge(1, 0, REDUCED_GRID)), "nf90_def_var REDUCED_GRID" )
-    call check( nf90_put_var(ncid, varid_l_obstruction_t, merge(1, 0, L_OBSTRUCTION_T)), "nf90_def_var L_OBSTRUCTION_T" )
-    call check( nf90_put_var(ncid, varid_nlon_rg, NLON_RG), "nf90_def_var NLON_RG" )
-    call check( nf90_put_var(ncid, varid_delphi, DELPHI), "nf90_def_var DELPHI" )
-    call check( nf90_put_var(ncid, varid_dellam, DELLAM), "nf90_def_var DELLAM" )
+    call check( nf90_put_var(ncid, varid_iper, merge(1, 0, IPER)), "nf90_put_var IPER" )
+    call check( nf90_put_var(ncid, varid_one_point, merge(1, 0, ONE_POINT)), "nf90_put_var one_point" )
+    call check( nf90_put_var(ncid, varid_reduced_grid, merge(1, 0, REDUCED_GRID)), "nf90_put_var REDUCED_GRID" )
+    call check( nf90_put_var(ncid, varid_l_obstruction_t, merge(1, 0, L_OBSTRUCTION_T)), "nf90_put_var L_OBSTRUCTION_T" )
+    call check( nf90_put_var(ncid, varid_nlon_rg, NLON_RG), "nf90_put_var NLON_RG" )
+    call check( nf90_put_var(ncid, varid_delphi, DELPHI), "nf90_put_var DELPHI" )
+    call check( nf90_put_var(ncid, varid_dellam, DELLAM), "nf90_put_var DELLAM" )
     
-    call check( nf90_put_var(ncid, varid_sinph, SINPH), "nf90_def_var SINPH" )
-    call check( nf90_put_var(ncid, varid_cosph, COSPH), "nf90_def_var COSPH" )
-    call check( nf90_put_var(ncid, varid_amowep, AMOWEP), "nf90_def_var AMOWEP" )
-    call check( nf90_put_var(ncid, varid_amosop, AMOSOP), "nf90_def_var AMOSOP" )
-    call check( nf90_put_var(ncid, varid_amoeap, AMOEAP), "nf90_def_var AMOEAP" )
-    call check( nf90_put_var(ncid, varid_amonop, AMONOP), "nf90_def_var AMONOP" )
+    call check( nf90_put_var(ncid, varid_sinph, SINPH), "nf90_put_var SINPH" )
+    call check( nf90_put_var(ncid, varid_cosph, COSPH), "nf90_put_var COSPH" )
+    call check( nf90_put_var(ncid, varid_amowep, AMOWEP), "nf90_put_var AMOWEP" )
+    call check( nf90_put_var(ncid, varid_amosop, AMOSOP), "nf90_put_var AMOSOP" )
+    call check( nf90_put_var(ncid, varid_amoeap, AMOEAP), "nf90_put_var AMOEAP" )
+    call check( nf90_put_var(ncid, varid_amonop, AMONOP), "nf90_put_var AMONOP" )
 
-    call check( nf90_put_var(ncid, varid_delphi, DELPHI), "nf90_def_var DELPHI" )
-    call check( nf90_put_var(ncid, varid_dellam, DELLAM), "nf90_def_var DELLAM" )
-    call check( nf90_put_var(ncid, varid_zdello, ZDELLO), "nf90_def_var ZDELLO" )
+    call check( nf90_put_var(ncid, varid_delphi, DELPHI), "nf90_put_var DELPHI" )
+    call check( nf90_put_var(ncid, varid_dellam, DELLAM), "nf90_put_var DELLAM" )
+    call check( nf90_put_var(ncid, varid_xdello, XDELLO), "nf90_put_var XDELLO" )
+    call check( nf90_put_var(ncid, varid_xdella, XDELLA), "nf90_put_var XDELLA" )
+    call check( nf90_put_var(ncid, varid_zdello, ZDELLO), "nf90_put_var ZDELLO" )
 
-    call check( nf90_put_var(ncid, varid_ixlg, IXLG), "nf90_def_var IXLG" )
-    call check( nf90_put_var(ncid, varid_kxlt, KXLT), "nf90_def_var KXLT" )
-!    call check( nf90_put_var(ncid, varid_l_s_mask, L_S_MASK), "nf90_def_var L_S_MASK" )
-    call check( nf90_put_var(ncid, varid_klat, KLAT), "nf90_def_var KLAT" )
-    call check( nf90_put_var(ncid, varid_klon, KLON), "nf90_def_var KLON" )
+    call check( nf90_put_var(ncid, varid_ixlg, IXLG), "nf90_put_var IXLG" )
+    call check( nf90_put_var(ncid, varid_kxlt, KXLT), "nf90_put_var KXLT" )
+!    call check( nf90_put_var(ncid, varid_l_s_mask, L_S_MASK), "nf90_put_var L_S_MASK" )
+    call check( nf90_put_var(ncid, varid_klat, KLAT), "nf90_put_var KLAT" )
+    call check( nf90_put_var(ncid, varid_klon, KLON), "nf90_put_var KLON" )
 
-    call check( nf90_put_var(ncid, varid_wlat, WLAT), "nf90_def_var WLAT" )
-    call check( nf90_put_var(ncid, varid_depth_b, DEPTH_B), "nf90_def_var DEPTH_B" )
+    call check( nf90_put_var(ncid, varid_wlat, WLAT), "nf90_put_var WLAT" )
+    call check( nf90_put_var(ncid, varid_depth_b, DEPTH_B), "nf90_put_var DEPTH_B" )
 
     if( L_OBSTRUCTION_T .eqv. .TRUE.) then
-       call check( nf90_put_var(ncid, varid_obslat, OBSLAT), "nf90_def_var OBSLAT" )
-       call check( nf90_put_var(ncid, varid_obslon, OBSLON), "nf90_def_var OBSLON" )
+       call check( nf90_put_var(ncid, varid_obslat, OBSLAT), "nf90_put_var OBSLAT" )
+       call check( nf90_put_var(ncid, varid_obslon, OBSLON), "nf90_put_var OBSLON" )
     end if
-    write( *, *) "Wrote nr 5 ..."
-    
+
+    write( *, * ) "Writing of nr 5 ended ..."
+
     
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
     !     6. WRITE TABLES.                                                         !
     !        -------------                                                         !
 
-    call check( nf90_put_var(ncid, varid_ndepth, NDEPTH), "nf90_def_var NDEPTH" )
-    call check( nf90_put_var(ncid, varid_deptha, DEPTHA), "nf90_def_var DEPTHA" )
-    call check( nf90_put_var(ncid, varid_depthd, DEPTHD), "nf90_def_var DEPTHD" )
-    call check( nf90_put_var(ncid, varid_depthe, DEPTHE), "nf90_def_var DEPTHE" )
+    call check( nf90_put_var(ncid, varid_ndepth, NDEPTH), "nf90_put_var NDEPTH" )
+    call check( nf90_put_var(ncid, varid_deptha, DEPTHA), "nf90_put_var DEPTHA" )
+    call check( nf90_put_var(ncid, varid_depthd, DEPTHD), "nf90_put_var DEPTHD" )
+    call check( nf90_put_var(ncid, varid_depthe, DEPTHE), "nf90_put_var DEPTHE" )
     
-    call check( nf90_put_var(ncid, varid_flminfr, FLMINFR), "nf90_def_var FLMINFR" )
-    call check( nf90_put_var(ncid, varid_tcgond, TCGOND), "nf90_def_var TCGOND" ) 
-    call check( nf90_put_var(ncid, varid_tfak, TFAK), "nf90_def_var TFAK" )
-    call check( nf90_put_var(ncid, varid_tfac_st, TFAC_ST), "nf90_def_var TFAC_ST" )
-    call check( nf90_put_var(ncid, varid_tsihkd, TSIHKD), "nf90_def_var TSIHKD" )
-    call check( nf90_put_var(ncid, varid_t_tail, T_TAIL), "nf90_def_var T_TAIL" )
-    call check( nf90_put_var(ncid, varid_delu, DELU), "nf90_def_var DELU" )
-    write( *, *) "Wrote nr 2 ..."
+    call check( nf90_put_var(ncid, varid_flminfr, FLMINFR), "nf90_put_var FLMINFR" )
+    call check( nf90_put_var(ncid, varid_tcgond, TCGOND), "nf90_put_var TCGOND" ) 
+    call check( nf90_put_var(ncid, varid_tfak, TFAK), "nf90_put_var TFAK" )
+    call check( nf90_put_var(ncid, varid_tfac_st, TFAC_ST), "nf90_put_var TFAC_ST" )
+    call check( nf90_put_var(ncid, varid_tsihkd, TSIHKD), "nf90_put_var TSIHKD" )
+    call check( nf90_put_var(ncid, varid_t_tail, T_TAIL), "nf90_put_var T_TAIL" )
+    call check( nf90_put_var(ncid, varid_delu, DELU), "nf90_put_var DELU" )
+
+    write( *, *) "Wroting of nr 6 ended ..."
+    
     
     !
     ! End of writing to netCDF file
     !
 
-    call check( nf90_close(ncid), "nf90_def_var NF90_CLOASE" )
- 
+    call check( nf90_close(ncid), "NF90_CLOSE" )
+
+    write(stdout, *) "netCDF file closed!"
+    
 
     !
     ! Binary format
@@ -1817,8 +1834,13 @@ CONTAINS
     ! OPEN (UNIT=IU07, FILE=FILE07(1:LEN), FORM='UNFORMATTED', STATUS='UNKNOWN')
     ! FILE07_NC = trim(FILE07(1:LEN) // "_netcdf.nc")
 
+    
     ! Open File
     call check( nf90_open("./grid/grind_info.nc", NF90_NOWRITE, ncid), "nf90_open" )
+    write(stdout, *)
+    write(stdout, *) "NetCDF file opened for reading ..."
+    write(stdout, *)
+
 
     call check( nf90_inquire( ncid, n_dims, n_vars, n_attrs, k_un ), "nf90_inquire" )
 
@@ -1833,7 +1855,7 @@ CONTAINS
 
     write(*, *) "zuweisung starts ..."
     write( stdout, * ) "n_dims = ", n_dims
-    name_of_dim(1) = "n_nests"
+    name_of_dim(1) = "n_nest"
     name_of_dim(2) = "ml"
     name_of_dim(3) = "kl"
     name_of_dim(4) = "nbounf"
@@ -1842,6 +1864,7 @@ CONTAINS
     name_of_dim(7) = "dim_nsea"
     name_of_dim(8) = "jumax"
     name_of_dim(9) = "dim_ndepth"
+    
 !    name_of_dim(10) = "header"
     write(*, *) "Zuweisung enss ..."
 
@@ -2078,9 +2101,12 @@ CONTAINS
     call check( nf90_get_var(ncid, id_of_var(76), klon), "nf90_get_var klon" )
     call check( nf90_get_var(ncid, id_of_var(77), wlat), "nf90_get_var wlat" )
     call check( nf90_get_var(ncid, id_of_var(78), depth_b), "nf90_get_var depth_b" )
-    call check( nf90_get_var(ncid, id_of_var(79), obslat), "nf90_get_var obslat" )
-    call check( nf90_get_var(ncid, id_of_var(80), obslon), "nf90_get_var obslon" )
 
+    if( L_OBSTRUCTION_T .eqv. .TRUE.) then
+       call check( nf90_get_var(ncid, id_of_var(79), obslat), "nf90_get_var obslat" )
+       call check( nf90_get_var(ncid, id_of_var(80), obslon), "nf90_get_var obslon" )
+    end if
+ 
     write( stdout, *) "After reading: zdello = ", zdello, ", ixlg = ", ixlg
 !    write( stdout, *) "After reading: kxlt = ", kxlt, ", l_s_mask = ", l_s_mask
     write( stdout, *) "After reading: klat = ", klat, ", klon = ", klon
@@ -2151,7 +2177,7 @@ CONTAINS
     ! End of reading to netCDF file
     !
 
-    call check( nf90_close(ncid), "nf90_def_var NF90_CLOASE" )
+    call check( nf90_close(ncid), "NF90_CLOSE" )
 
   end SUBROUTINE READ_PREPROC_FILE_NETCDF
 
