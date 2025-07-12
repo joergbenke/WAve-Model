@@ -1767,57 +1767,13 @@ CONTAINS
     implicit none
     
     character, dimension(200) :: FILE07_NC
-    INTEGER      :: LEN, I
 
+    INTEGER      :: LEN, i = 1
+    integer :: n_dims, n_vars, n_vars_fixed, n_attrs, k_un
     integer :: ncid, varid, status !dimids(NDIMS)
     integer :: dimid_n_nest, dimid_ml, dimid_kl, dimid_max_nbounc, dimid_nbounf
     integer :: dimid_nx, dimid_ny, dimid_nsea, dimid_jumax, dimid_ndepth
     
-    ! Section 1
-    integer :: varid_header
-    
-    ! Section 2
-    integer :: varid_nnest, varid_maxnest
-    integer :: varid_nbounc, varid_n_name, varid_n_code
-    integer :: varid_ijarc, varid_xdello, varid_xdella
-    integer :: varid_nsouth, varid_nnorth, varid_neast, varid_nwest
-
-    ! Section 2
-    integer :: varid_blngc, varid_blatc, varid_nzdel
-
-    integer :: varid_ml, varid_kl
-    integer :: varid_fr, varid_dfim, varid_gom, varid_c, varid_th, varid_costh, varid_sinth
-    integer :: varid_delth, varid_deltr, varid_inv_log_co, varid_df, varid_df_fr, varid_df_fr2
-    integer :: varid_dfim_ofr
-
-    integer :: varid_dfim_fr, varid_dfim_fr2, varid_fr5, varid_frm5, varid_rhowg_dfim
-    integer :: varid_fmin, varid_mo_tail, varid_mm1_tail, varid_mp1_tail, varid_mp2_tail 
-    integer :: varid_mpm, varid_kpm, varid_jxo, varid_jyo
-
-    ! Section 3
-    integer :: varid_nbounf, varid_nbinp, varid_c_name
-    integer :: varid_blngf, varid_blatf, varid_ijarf, varid_ibfl, varid_ibfr, varid_bfw
-
-    
-    ! Section 5
-    integer :: varid_nx, varid_ny, varid_nsea, varid_iper, varid_one_point
-    integer :: varid_reduced_grid, varid_l_obstruction_t, varid_nlon_rg, varid_delphi, varid_dellam 
-    integer :: varid_sinph, varid_cosph, varid_amowep, varid_amosop, varid_amoeap, varid_amonop
-
-    integer :: varid_zdello, varid_ixlg, varid_kxlt, varid_l_s_mask, varid_klat, varid_klon, varid_wlat
-    integer :: varid_depth_b, varid_obslat, varid_obslon
-
-    ! section 6 (grid definition)
-    integer :: varid_ndepth, varid_deptha, varid_depthd, varid_depthe
-    integer :: varid_flminfr, varid_tcgond, varid_tfak, varid_tsihkd, varid_tfac_st, varid_t_tail
-    integer :: varid_delu
-
-    integer :: len_n_nest, len_ml, len_kl, id
-    integer :: n_dims, n_vars, n_attrs, k_un
-    
-!    character(len = nf90_max_name) :: dim_name
- !   character(len = nf90_max_name) :: name_of_var
-
     integer, allocatable, dimension(:) :: len_of_dim, id_of_dim
     character(len = 50), allocatable, dimension(:) :: name_of_dim
 
@@ -1843,7 +1799,13 @@ CONTAINS
 
 
     call check( nf90_inquire( ncid, n_dims, n_vars, n_attrs, k_un ), "nf90_inquire" )
-
+    write(stdout, *)
+    write(stdout, *) "n_dims = ", n_dims
+    write(stdout, *) "n_vars = ", n_vars
+    write(stdout, *) "n_attrs = ", n_attrs
+    write(stdout, *) "k_un = ", k_un
+    write(stdout, *)
+    
     ! Create list of type dimension_attr and dimids
     write( stdout, *) "Allocation starts ..."
     allocate(len_of_dim(n_dims))
@@ -1864,9 +1826,13 @@ CONTAINS
     name_of_dim(7) = "dim_nsea"
     name_of_dim(8) = "jumax"
     name_of_dim(9) = "dim_ndepth"
+    name_of_dim(10) = "result_max_val"
+    name_of_dim(11) = "dim_three"
+    name_of_dim(12) = "dim_two"
+
     
 !    name_of_dim(10) = "header"
-    write(*, *) "Zuweisung enss ..."
+    write(*, *) "Zuweisung ends ..."
 
 
     ! Define dimensions
@@ -1897,22 +1863,29 @@ CONTAINS
     call check( nf90_inq_dimid(ncid, name_of_dim(9), id_of_dim(9)), "nf90_inq_dim NDEPTH" )
     call check( nf90_inquire_dimension(ncid, id_of_dim(9), name_of_dim(9), len_of_dim(9)), "nf90_inq_dim NDEPTH" )
 
+    call check( nf90_inq_dimid(ncid, name_of_dim(10), id_of_dim(10)), "nf90_inq_dim result_max_val" )
+    call check( nf90_inquire_dimension(ncid, id_of_dim(10), name_of_dim(10), len_of_dim(10)), "nf90_inq_dim result_max_val" )
+
+    call check( nf90_inq_dimid(ncid, name_of_dim(11), id_of_dim(11)), "nf90_inq_dim DIM_THREE" )
+    call check( nf90_inquire_dimension(ncid, id_of_dim(11), name_of_dim(11), len_of_dim(11)), "nf90_inq_dim DIM_THREE" )
+
+    call check( nf90_inq_dimid(ncid, name_of_dim(12), id_of_dim(12)), "nf90_inq_dim DIM_TWO" )
+    call check( nf90_inquire_dimension(ncid, id_of_dim(12), name_of_dim(12), len_of_dim(12)), "nf90_inq_dim DIM_TWO" )
+
     do i = 1, n_dims
-       write( stdout, * ) "len_of_dim(", i, "): ", len_of_dim(i)
-       write( stdout, * ) "id_of_dim(", i, "): ", id_of_dim(i)
        write( stdout, * ) "name_of_dim(", i, "): ", name_of_dim(i)
+       write( stdout, * ) "id_of_dim(", i, "): ", id_of_dim(i)
+       write( stdout, * ) "len_of_dim(", i, "): ", len_of_dim(i)
     end do
 
     ! DEfine all variabless
 
-    allocate( name_of_var( n_vars ) )
-    allocate( id_of_var( n_vars ) )
-    allocate( xtype_of_var( n_vars ) )
-    allocate( ndim_of_var( n_vars ) )
 
-    ! do i = 1, n_vars
-    !   name_of_var(i) = ""
-    !end do
+    n_vars_fixed = 91
+    allocate( name_of_var( n_vars_fixed ) )
+    allocate( id_of_var( n_vars_fixed ) )
+    allocate( xtype_of_var( n_vars_fixed ) )
+    allocate( ndim_of_var( n_vars_fixed ) )
 
     name_of_var = [ "n_nest", "max_nest", "nbounc", "n_name", "n_code", "xdello", "xdella", "n_south", "n_north", "n_east", &
          "n_west", "ijarc", "blngc", "blatc", "n_zdel", "ml", "kl", "fr", "dfim", "gom", &
@@ -1920,8 +1893,8 @@ CONTAINS
          "dfim_ofr", "dfim_fr", "dfim_fr2", "fr5", "frm5", "rhowg_dfim", "fmin", "mo_tail", "mm1_tail", "mp1_tail", &
          "mp2_tail", "mpm", "kpm", "jxo", "jyo", "nbounf", "nbinp", "c_name", "blngf", "blatf", &
          "ijarf", "ibfl", "ibfr", "bfw", "nx", "ny", "nsea", "iper", "one_point", "reduced_grid", &
-         "l_obstruction", "nlon_rg", "delphi", "dellam", "sinph", "cosph", "amowep", "amosop", "amoeap", "amonop", &
-         "zdello", "ixlg", "kxlt", "l_s_mask", "klat", "klon", "wlat", "depth_b", "obslat", "obslon", &
+         "l_obstruction", "obslat", "obslon", "nlon_rg", "delphi", "dellam", "sinph", "cosph", "amowep", "amosop", &
+         "amoeap", "amonop", "zdello", "ixlg", "kxlt", "l_s_mask", "klat", "klon", "wlat", "depth_b", &
          "ndepth", "deptha", "depthb", "depthe", "flminfr", "tcgond", "tfak", "tsihkd", "tfac_st", "t_tail", &
          "delu"]
 
@@ -1932,18 +1905,41 @@ CONTAINS
     ! call check( nf90_inq_varid(ncid, trim(name_of_var(2)), id ), "nf90_inq_varid max_nest" )
     ! call check( nf90_inq_varid(ncid, trim(name_of_var(3)), id ), "nf90_inq_varid nbounc" )
 
-    do i = 1, n_vars
+    i = 1
+    do 
        call check( nf90_inq_varid(ncid, trim(name_of_var(i)), id_of_var(i) ), "nf90_inq_varid " // trim(name_of_var(i)) )
+       if( (i == 46) .and. (NBOUNF <= 0)) then
+          i = i + 6
+       else if( (i == 61) .and. (l_obstruction .eqv. .true.)) then
+          i = i + 2
+       else
+          i = i + 1
+       end if
+
        write( stdout, * ), "Id of var: ", id_of_var(i)
+
+       
+       if( i > n_vars_fixed ) then
+          exit
+       endif
     end do
 
-
-
-    do i = 1, n_vars
+    i = 1
+    do 
        call check( nf90_inquire_variable( ncid = ncid, varid = id_of_var(i), xtype = xtype_of_var(i), &
             ndims = ndim_of_var(i), dimids = dimids ), "nf90_inquire_variable " // trim(name_of_var(i)) )
+       if( (i == 46) .and. (NBOUNF <= 0)) then
+          i = i + 6
+       else if( (i == 61) .and. (l_obstruction .eqv. .true.)) then
+          i = i + 2
+       else
+          i = i + 1
+       end if
 
        dimids = -999
+       if( i > n_vars_fixed ) then
+          exit
+       endif
     end do
 
     write( stdout, * ) "n_vars = ", n_vars
