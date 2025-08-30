@@ -1197,8 +1197,10 @@ CONTAINS
     
     character, dimension(200) :: FILE07_NC
     INTEGER      :: LEN, I, result_max_val
-
+    
+    
     integer :: ncid, varid, status !dimids(NDIMS)
+
     integer :: dimid_n_nest, dimid_ml, dimid_kl, dimid_max_nbounc, dimid_nbounf
     integer :: dimid_nx, dimid_ny, dimid_nsea, dimid_jumax, dimid_ndepth
     integer :: dimid_result_max_val, dimid_three, dimid_two
@@ -1220,8 +1222,8 @@ CONTAINS
 
     ! Section 4
     integer :: varid_ml, varid_kl
-    integer :: varid_fr, varid_dfim, varid_gom, varid_c, varid_th, varid_costh, varid_sinth
-    integer :: varid_delth, varid_deltr, varid_inv_log_co, varid_df, varid_df_fr, varid_df_fr2
+    integer :: varid_fr, varid_dfim, varid_gom, varid_c, varid_delth, varid_deltr, varid_th
+    integer :: varid_costh, varid_sinth, varid_inv_log_co, varid_df, varid_df_fr, varid_df_fr2
     integer :: varid_dfim_ofr
 
     integer :: varid_dfim_fr, varid_dfim_fr2, varid_fr5, varid_frm5, varid_rhowg_dfim
@@ -1279,7 +1281,6 @@ CONTAINS
     
     ! Define variables for netCDF
     call check( nf90_def_var(ncid, "header", NF90_STRING, varid_header), "nf90_def_var HEADER" )
-
     
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
@@ -1768,7 +1769,7 @@ CONTAINS
     
     character, dimension(200) :: FILE07_NC
 
-    INTEGER      :: LEN, i = 1
+    INTEGER :: LEN, i = 1
     integer :: n_dims, n_vars, n_vars_fixed, n_attrs, k_un
     integer :: ncid, varid, status !dimids(NDIMS)
     integer :: dimid_n_nest, dimid_ml, dimid_kl, dimid_max_nbounc, dimid_nbounf
@@ -1779,7 +1780,8 @@ CONTAINS
 
     integer, allocatable, dimension(:) :: id_of_var, ndim_of_var, xtype_of_var, dimids
     character(len = 500), allocatable, dimension(:) :: name_of_var
-!    character(len = *) :: name_of_string
+    !    character(len = *) :: name_of_string
+    logical l_obstruction 
     
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
@@ -1916,7 +1918,7 @@ CONTAINS
           i = i + 1
        end if
 
-       write( stdout, * ), "Id of var: ", id_of_var(i)
+       write( stdout, * ) "Id of var: ", id_of_var(i)
 
        
        if( i > n_vars_fixed ) then
