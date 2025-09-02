@@ -1740,7 +1740,7 @@ CONTAINS
 
     CLOSE (UNIT=IU07, STATUS="KEEP")
 
-!     call read_preproc_file_netcdf
+     call read_preproc_file_netcdf
     
   END SUBROUTINE WRITE_PREPROC_FILE
 
@@ -1903,16 +1903,108 @@ CONTAINS
     allocate( xtype_of_var( n_vars_fixed ) )
     allocate( ndim_of_var( n_vars_fixed ) )
 
-    name_of_var = [ "n_nest  ", "max_nest", "nbounc", "n_name", "n_code", "xdello", "xdella", "n_south", "n_north", "n_east", &
-         "n_west", "ijarc", "blngc", "blatc", "n_zdel", "ml", "kl", "fr", "dfim", "gom", &
-         "c", "th", "costh", "sinth", "delth", "deltr", "inv_log_co", "df", "df_fr", "df_fr2", &
-         "dfim_ofr", "dfim_fr", "dfim_fr2", "fr5", "frm5", "rhowg_dfim", "fmin", "mo_tail", "mm1_tail", "mp1_tail", &
-         "mp2_tail", "mpm", "kpm", "jxo", "jyo", "nbounf", "nbinp", "c_name", "blngf", "blatf", &
-         "ijarf", "ibfl", "ibfr", "bfw", "nx", "ny", "nsea", "iper", "one_point", "reduced_grid", &
-         "l_obstruction", "obslat", "obslon", "nlon_rg", "delphi", "dellam", "sinph", "cosph", "amowep", "amosop", &
-         "amoeap", "amonop", "zdello", "ixlg", "kxlt", "l_s_mask", "klat", "klon", "wlat", "depth_b", &
-         "ndepth", "deptha", "depthb", "depthe", "flminfr", "tcgond", "tfak", "tsihkd", "tfac_st", "t_tail", &
-         "delu"]
+    name_of_var(1) = "n_nest"
+    name_of_var(2) = "max_nest"
+    name_of_var(3) = "nbounc"      
+    name_of_var(4) = "n_name"
+    name_of_var(5) = "n_code"
+    name_of_var(6) = "xdello"
+    name_of_var(7) = "xdella"
+    name_of_var(8) = "n_south"
+    name_of_var(9) = "n_north"
+    name_of_var(10) = "n_east"
+    name_of_var(11) = "n_west" 
+    name_of_var(12) = "ijarc"
+    name_of_var(13) = "blngc"
+    name_of_var(14) = "blatc"
+    name_of_var(15) = "n_zdel"
+    name_of_var(16) = "ml"
+    name_of_var(17) = "kl"
+    name_of_var(18) = "fr"
+    name_of_var(19) = "dfim"
+    name_of_var(20) = "gom"
+    name_of_var(21) =  "c"
+    name_of_var(22) =  "th"
+    name_of_var(23) = "costh"
+    name_of_var(24) = "sinth"
+    name_of_var(25) = "delth"
+    name_of_var(26) = "deltr"
+    name_of_var(27) = "inv_log_co"
+    name_of_var(28) = "df"
+    name_of_var(29) = "df_fr"
+    name_of_var(30) = "df_fr2"
+!!$    name_of_var(3) = 
+!!$    name_of_var(2) = 
+!!$    name_of_var(3) = 
+!!$    name_of_var(2) = 
+!!$    name_of_var(3) = 
+!!$    name_of_var(2) = 
+!!$    name_of_var(3) = 
+!!$    name_of_var(2) = 
+!!$    name_of_var(3) = 
+!!$    name_of_var(2) = 
+!!$    name_of_var(3) = 
+!!$    name_of_var(2) = 
+!!$    name_of_var(3) = 
+!!$    name_of_var(2) = 
+!!$    name_of_var(3) = 
+!!$    name_of_var(2) = 
+!!$    name_of_var(3) = 
+!!$    name_of_var(2) = 
+!!$    name_of_var(3) = 
+!!$    name_of_var(2) = 
+!!$    name_of_var(3) = 
+!!$    name_of_var(2) = 
+!!$    name_of_var(3) = 
+!!$    name_of_var(2) = 
+!!$    name_of_var(3) = 
+!!$    name_of_var(2) = 
+!!$    name_of_var(3) = 
+!!$    name_of_var(2) = 
+!!$    name_of_var(3) = 
+!!$    name_of_var(2) = 
+!!$    name_of_var(3) = 
+!!$    name_of_var(2) = 
+!!$    name_of_var(3) = 
+!!$    name_of_var(2) = 
+!!$    name_of_var(3) = 
+!!$    name_of_var(2) = 
+!!$    name_of_var(3) = 
+!!$    name_of_var(2) = 
+!!$    name_of_var(3) = 
+!!$    name_of_var(2) = 
+!!$    name_of_var(3) = 
+!!$    name_of_var(2) = 
+!!$    name_of_var(3) = 
+!!$    name_of_var(2) = 
+!!$    name_of_var(3) = 
+!!$    name_of_var(2) = 
+!!$    name_of_var(3) = 
+!!$    name_of_var(2) = 
+!!$    name_of_var(3) = 
+!!$    name_of_var(2) = 
+!!$    name_of_var(3) = 
+!!$    name_of_var(2) = 
+!!$    name_of_var(3) = 
+!!$    name_of_var(2) = 
+!!$    name_of_var(3) = 
+!!$    name_of_var(2) = 
+!!$    name_of_var(3) = 
+!!$    name_of_var(2) = 
+!!$    name_of_var(3) = 
+!!$    
+
+    
+!!$    name_of_var = [ "n_nest  ", "max_nest", "nbounc", "n_name", "n_code", "xdello", "xdella", "n_south", "n_north", "n_east", &
+!!$         "n_west", "ijarc", "blngc", "blatc", "n_zdel", "ml", "kl", "fr", "dfim", "gom", &
+!!$         "c", "th", "costh", "sinth", "delth", "deltr", "inv_log_co", "df", "df_fr", "df_fr2", &
+!!$         "dfim_ofr", "dfim_fr", "dfim_fr2", "fr5", "frm5", "rhowg_dfim", "fmin", "mo_tail", "mm1_tail", "mp1_tail", &
+!!$         "mp2_tail", "mpm", "kpm", "jxo", "jyo", "nbounf", "nbinp", "c_name", "blngf", "blatf", &
+!!$         "ijarf", "ibfl", "ibfr", "bfw", "nx", "ny", "nsea", "iper", "one_point", "reduced_grid", &
+!!$         "l_obstruction", "obslat", "obslon", "nlon_rg", "delphi", "dellam", "sinph", "cosph", "amowep", "amosop", &
+!!$         "amoeap", "amonop", "zdello", "ixlg", "kxlt", "l_s_mask", "klat", "klon", "wlat", "depth_b", &
+!!$         "ndepth", "deptha", "depthb", "depthe", "flminfr", "tcgond", "tfak", "tsihkd", "tfac_st", "t_tail", &
+!!$         "delu"]
 
 
     ! call check( nf90_inq_varid(ncid, "n_nest", id ), "nf90_inq_varid n_nest" )
