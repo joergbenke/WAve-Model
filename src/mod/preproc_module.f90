@@ -1196,12 +1196,11 @@ CONTAINS
     implicit none
 
     integer, parameter            :: stringLen = 200
-    character(len = stringLen)    :: header_copy
+    character(len = stringLen)    :: header_copy, c_name_copy
 
     
     character, dimension(200) :: FILE07_NC
     INTEGER      :: LEN, I, result_max_val
-    integer, allocatable, dimension(:) :: xdello_array, xdella_array
     
     integer :: ncid, varid, status !dimids(NDIMS)
 
@@ -1286,7 +1285,6 @@ CONTAINS
     
     
     ! Define variables for netCDF
-!    call check( nf90_def_var(ncid, "header", NF90_STRING, varid_header), "nf90_def_var HEADER" )
     header_copy = HEADER
     call check( nf90_def_var(ncid, "header", NF90_CHAR, (/ dimid_stringlen /), varid_header), "nf90_def_var HEADER" )
     
@@ -1299,12 +1297,9 @@ CONTAINS
     call check( nf90_def_var(ncid, "max_nest", NF90_INT, varid_max_nest), "nf90_def_var MAX_NEST" )
 
     call check( nf90_def_var(ncid, "nbounc", NF90_INT, (/dimid_n_nest/), varid_nbounc), "nf90_def_var NBOUNC" )
-    call check( nf90_def_var(ncid, "n_name", NF90_STRING, (/dimid_n_nest/), varid_n_name), "nf90_def_var N_NAME" )
+    call check( nf90_def_var(ncid, "n_name", NF90_CHAR, (/dimid_stringlen, dimid_n_nest/), varid_n_name), "nf90_def_var N_NAME" )
     call check( nf90_def_var(ncid, "n_code", NF90_INT, (/dimid_n_nest/), varid_n_code), "nf90_def_var N_CODE" )
 
-!    do i = 1, nbounc
- !      
-  !  end do
     
     if( result_max_val > 0 ) then
        call check( nf90_def_var(ncid, "xdello", NF90_INT, varid_xdello), "nf90_def_var XDELLO" )
@@ -1334,8 +1329,10 @@ CONTAINS
 
     call check( nf90_def_var(ncid, "nbounf", NF90_INT, varid_nbounf), "nf90_def_var NBOUNF" )
     call check( nf90_def_var(ncid, "nbinp", NF90_INT, varid_nbinp), "nf90_def_var NBINP" )
-    call check( nf90_def_var(ncid, "c_name", NF90_STRING, varid_c_name), "nf90_def_var C_NAME" )
-
+    c_name_copy = C_NAME
+    call check( nf90_def_var(ncid, "c_name", NF90_CHAR, (/ dimid_stringlen /), varid_c_name), "nf90_def_var C_NAME" )
+    write(*, *) "C_NAME ... ", trim(C_NAME)
+    
     if( NBOUNF > 0 ) then
        call check( nf90_def_var(ncid, "blngf", NF90_INT, (/ dimid_nbounf /), varid_blngf), "nf90_def_var BLNGF" )
        call check( nf90_def_var(ncid, "blatf", NF90_INT, (/ dimid_nbounf /), varid_blatf), "nf90_def_var BLATF" )
@@ -1507,7 +1504,8 @@ CONTAINS
 
     call check( nf90_put_var(ncid, varid_nbounf, NBOUNF), "nf90_put_var NBOUNF" )
     call check( nf90_put_var(ncid, varid_nbinp, NBINP), "nf90_put_var NBINP" ) 
-    call check( nf90_put_var(ncid, varid_c_name, C_NAME), "nf90_put_var C_NAME" )
+    call check( nf90_put_var(ncid, varid_c_name, trim(c_name_copy)), "nf90_put_var C_NAME" )
+!    call check( nf90_put_var(ncid, varid_c_name, C_NAME), "nf90_put_var C_NAME" )
 
     if( NBOUNF > 0 ) then
        call check( nf90_put_var(ncid, varid_blngf, BLNGF), "nf90_put_var BLNGF" )
