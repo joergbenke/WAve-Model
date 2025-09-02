@@ -1301,7 +1301,7 @@ CONTAINS
     call check( nf90_def_var(ncid, "n_code", NF90_INT, (/dimid_n_nest/), varid_n_code), "nf90_def_var N_CODE" )
 
     
-    if( result_max_val > 0 ) then
+    if( result_max_val > 0 ) then 
        call check( nf90_def_var(ncid, "xdello", NF90_INT, varid_xdello), "nf90_def_var XDELLO" )
        call check( nf90_def_var(ncid, "xdella", NF90_INT, varid_xdella), "nf90_def_var XDELLA" )
        call check( nf90_def_var(ncid, "n_south", NF90_INT, (/dimid_n_nest/), varid_nsouth), "nf90_def_var N_SOUTH" )
