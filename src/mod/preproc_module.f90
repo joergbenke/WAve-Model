@@ -1195,8 +1195,10 @@ CONTAINS
 
     implicit none
 
-    integer, parameter            :: stringLen = 200
-    character(len = stringLen)    :: header_copy, c_name_copy
+    integer, parameter                 :: stringLen = 200
+    integer, parameter                 :: stringlen_c_name = 20
+    character(len = stringLen)         :: header_copy
+    character(len = stringLen_c_name)  :: c_name_copy
 
     
     character, dimension(200) :: FILE07_NC
@@ -1207,7 +1209,7 @@ CONTAINS
     integer :: dimid_n_nest, dimid_ml, dimid_kl, dimid_max_nbounc, dimid_nbounf
     integer :: dimid_nx, dimid_ny, dimid_nsea, dimid_jumax, dimid_ndepth
     integer :: dimid_result_max_val, dimid_three, dimid_two
-    integer :: dimid_stringlen
+    integer :: dimid_stringlen, dimid_stringlen_c_name
 
     
     ! Section 1
@@ -1282,6 +1284,7 @@ CONTAINS
     call check( nf90_def_dim(ncid, "dim_three", 3, dimid_three), "nf90_def_dim maxval dim_three")
     call check( nf90_def_dim(ncid, "dim_two", 2, dimid_two), "nf90_def_dim maxval dim_two")
     call check( nf90_def_dim(ncid, "stringlen", stringlen, dimid_stringlen), "nf90_def_dim stringLen")
+    call check( nf90_def_dim(ncid, "stringlen_c_name", stringlen_c_name, dimid_stringlen_c_name), "nf90_def_dim stringLen_c_name")
     
     
     ! Define variables for netCDF
@@ -1330,7 +1333,7 @@ CONTAINS
     call check( nf90_def_var(ncid, "nbounf", NF90_INT, varid_nbounf), "nf90_def_var NBOUNF" )
     call check( nf90_def_var(ncid, "nbinp", NF90_INT, varid_nbinp), "nf90_def_var NBINP" )
     c_name_copy = C_NAME
-    call check( nf90_def_var(ncid, "c_name", NF90_CHAR, (/ dimid_stringlen /), varid_c_name), "nf90_def_var C_NAME" )
+    call check( nf90_def_var(ncid, "c_name", NF90_CHAR, (/ dimid_stringlen_c_name /), varid_c_name), "nf90_def_var C_NAME" )
     write(*, *) "C_NAME ... ", trim(C_NAME)
     
     if( NBOUNF > 0 ) then
