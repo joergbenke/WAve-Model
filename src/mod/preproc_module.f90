@@ -1933,85 +1933,93 @@ CONTAINS
     name_of_var(28) = "df"
     name_of_var(29) = "df_fr"
     name_of_var(30) = "df_fr2"
-!!$    name_of_var(3) = 
-!!$    name_of_var(2) = 
-!!$    name_of_var(3) = 
-!!$    name_of_var(2) = 
-!!$    name_of_var(3) = 
-!!$    name_of_var(2) = 
-!!$    name_of_var(3) = 
-!!$    name_of_var(2) = 
-!!$    name_of_var(3) = 
-!!$    name_of_var(2) = 
-!!$    name_of_var(3) = 
-!!$    name_of_var(2) = 
-!!$    name_of_var(3) = 
-!!$    name_of_var(2) = 
-!!$    name_of_var(3) = 
-!!$    name_of_var(2) = 
-!!$    name_of_var(3) = 
-!!$    name_of_var(2) = 
-!!$    name_of_var(3) = 
-!!$    name_of_var(2) = 
-!!$    name_of_var(3) = 
-!!$    name_of_var(2) = 
-!!$    name_of_var(3) = 
-!!$    name_of_var(2) = 
-!!$    name_of_var(3) = 
-!!$    name_of_var(2) = 
-!!$    name_of_var(3) = 
-!!$    name_of_var(2) = 
-!!$    name_of_var(3) = 
-!!$    name_of_var(2) = 
-!!$    name_of_var(3) = 
-!!$    name_of_var(2) = 
-!!$    name_of_var(3) = 
-!!$    name_of_var(2) = 
-!!$    name_of_var(3) = 
-!!$    name_of_var(2) = 
-!!$    name_of_var(3) = 
-!!$    name_of_var(2) = 
-!!$    name_of_var(3) = 
-!!$    name_of_var(2) = 
-!!$    name_of_var(3) = 
-!!$    name_of_var(2) = 
-!!$    name_of_var(3) = 
-!!$    name_of_var(2) = 
-!!$    name_of_var(3) = 
-!!$    name_of_var(2) = 
-!!$    name_of_var(3) = 
-!!$    name_of_var(2) = 
-!!$    name_of_var(3) = 
-!!$    name_of_var(2) = 
-!!$    name_of_var(3) = 
-!!$    name_of_var(2) = 
-!!$    name_of_var(3) = 
-!!$    name_of_var(2) = 
-!!$    name_of_var(3) = 
-!!$    name_of_var(2) = 
-!!$    name_of_var(3) = 
-!!$    name_of_var(2) = 
-!!$    name_of_var(3) = 
-!!$    
+    name_of_var(31) = "dfim_ofr"
+    name_of_var(32) = "dfim_fr"
+    name_of_var(33) = "dfim_fr2"
+    name_of_var(34) = "fr5"
+    name_of_var(35) = "frm5"
+    name_of_var(36) = "rhowg_dfim"
+    name_of_var(37) = "fmin"
+    name_of_var(38) = "mo_tail"
+    name_of_var(39) = "mm1_tail"
+    name_of_var(40) = "mp1_tail"
+    name_of_var(41) = "mp2_tail"
+    name_of_var(42) = "mpm"
+    name_of_var(43) = "kpm"
+    name_of_var(44) = "jxo"
+    name_of_var(45) = "jyo"
+    name_of_var(46) = "nbounf"
+    name_of_var(47) = "nbinp"
+    name_of_var(48) = "c_name"
+    name_of_var(49) = "blngf"
+    name_of_var(50) = "blatf"
+    name_of_var(51) = "ijarf"
+    name_of_var(52) = "ibfl"
+    name_of_var(53) = "ibfr"
+    name_of_var(54) = "bfw"
+    name_of_var(55) = "nx"
+    name_of_var(56) = "ny"
+    name_of_var(57) = "nsea"
+    name_of_var(58) = "iper"
+    name_of_var(59) = "one_point"
+    name_of_var(60) = "reduced_grid"
+    name_of_var(61) = "l_obstruction"
+    name_of_var(62) = "obslat"
+    name_of_var(63) = "obslon"
+    name_of_var(64) = "nlon_rg"
+    name_of_var(65) = "delphi"
+    name_of_var(66) = "dellam"
+    name_of_var(67) = "sinph"
+    name_of_var(68) = "cosph"
+    name_of_var(69) = "amowep"
+    name_of_var(70) = "amosop"
+    name_of_var(71) = "amoeap"
+    name_of_var(72) = "amonop"
+    name_of_var(73) = "zdello"
+    name_of_var(74) = "ixlg"
+    name_of_var(75) = "kxlt"
+    name_of_var(76) = "l_s_mask"
+    name_of_var(77) = "klat"
+    name_of_var(78) = "klon"
+    name_of_var(79) = "wlat"
+    name_of_var(80) = "depth_b"
+    name_of_var(81) = "ndepth"
+    name_of_var(82) = "deptha"
+    name_of_var(83) = "depthb"
+    name_of_var(84) = "depthe"
+    name_of_var(85) = "flminfr"
+    name_of_var(86) = "tcgond"
+    name_of_var(87) = "tfak"
+    name_of_var(88) = "tsihkd"
+    name_of_var(89) = "tfac_st"
+    name_of_var(90) = "t_tail"
+    name_of_var(91) = "delu"
 
     
-!!$    name_of_var = [ "n_nest  ", "max_nest", "nbounc", "n_name", "n_code", "xdello", "xdella", "n_south", "n_north", "n_east", &
-!!$         "n_west", "ijarc", "blngc", "blatc", "n_zdel", "ml", "kl", "fr", "dfim", "gom", &
-!!$         "c", "th", "costh", "sinth", "delth", "deltr", "inv_log_co", "df", "df_fr", "df_fr2", &
-!!$         "dfim_ofr", "dfim_fr", "dfim_fr2", "fr5", "frm5", "rhowg_dfim", "fmin", "mo_tail", "mm1_tail", "mp1_tail", &
-!!$         "mp2_tail", "mpm", "kpm", "jxo", "jyo", "nbounf", "nbinp", "c_name", "blngf", "blatf", &
-!!$         "ijarf", "ibfl", "ibfr", "bfw", "nx", "ny", "nsea", "iper", "one_point", "reduced_grid", &
-!!$         "l_obstruction", "obslat", "obslon", "nlon_rg", "delphi", "dellam", "sinph", "cosph", "amowep", "amosop", &
-!!$         "amoeap", "amonop", "zdello", "ixlg", "kxlt", "l_s_mask", "klat", "klon", "wlat", "depth_b", &
-!!$         "ndepth", "deptha", "depthb", "depthe", "flminfr", "tcgond", "tfak", "tsihkd", "tfac_st", "t_tail", &
-!!$         "delu"]
+!    name_of_var = [ "n_nest  ", "max_nest", "nbounc", "n_name", "n_code", "xdello", "xdella", "n_south", "n_north", "n_east", &
+!         "n_west", "ijarc", "blngc", "blatc", "n_zdel", "ml", "kl", "fr", "dfim", "gom", &
+!         "c", "th", "costh", "sinth", "delth", "deltr", "inv_log_co", "df", "df_fr", "df_fr2", &
+!         "dfim_ofr", "dfim_fr", "dfim_fr2", "fr5", "frm5", "rhowg_dfim", "fmin", "mo_tail", "mm1_tail", "mp1_tail", &
+!         "mp2_tail", "mpm", "kpm", "jxo", "jyo", "nbounf", "nbinp", "c_name", "blngf", "blatf", &
+!         "ijarf", "ibfl", "ibfr", "bfw", "nx", "ny", "nsea", "iper", "one_point", "reduced_grid", &
+!         "l_obstruction", "obslat", "obslon", "nlon_rg", "delphi", "dellam", "sinph", "cosph", "amowep", "amosop", &
+!         "amoeap", "amonop", "zdello", "ixlg", "kxlt", "l_s_mask", "klat", "klon", "wlat", "depth_b", &
+!         "ndepth", "deptha", "depthb", "depthe", "flminfr", "tcgond", "tfak", "tsihkd", "tfac_st", "t_tail", &
+!         "delu"]
 
 
     ! call check( nf90_inq_varid(ncid, "n_nest", id ), "nf90_inq_varid n_nest" )
 
-    ! call check( nf90_inq_varid(ncid, trim(name_of_var(1)), id ), "nf90_inq_varid n_nest" )
-    ! call check( nf90_inq_varid(ncid, trim(name_of_var(2)), id ), "nf90_inq_varid max_nest" )
-    ! call check( nf90_inq_varid(ncid, trim(name_of_var(3)), id ), "nf90_inq_varid nbounc" )
+!    call check( nf90_inq_varid(ncid, trim(name_of_var(1)), id_of_var(1) ), "nf90_inq_varid n_nest" )
+!    call check( nf90_inq_varid(ncid, trim(name_of_var(2)), id_of_var(2) ), "nf90_inq_varid max_nest" )
+!    call check( nf90_inq_varid(ncid, trim(name_of_var(3)), id_of_var(3) ), "nf90_inq_varid nbounc" )
+!    call check( nf90_inq_varid(ncid, trim(name_of_var(4)), id_of_var(4) ), "nf90_inq_varid n_name" )
+!    call check( nf90_inq_varid(ncid, trim(name_of_var(5)), id_of_var(5) ), "nf90_inq_varid n_code" )
+!    call check( nf90_inq_varid(ncid, trim(name_of_var(6)), id_of_var(6) ), "nf90_inq_varid xdello" )
+!    call check( nf90_inq_varid(ncid, trim(name_of_var(7)), id_of_var(7) ), "nf90_inq_varid xdella" )
+!    call check( nf90_inq_varid(ncid, trim(name_of_var(8)), id_of_var(8) ), "nf90_inq_varid n_south" )
+!    call check( nf90_inq_varid(ncid, trim(name_of_var(9)), id_of_var(9) ), "nf90_inq_varid n_north" )
+!    call check( nf90_inq_varid(ncid, trim(name_of_var(10)), id_of_var(10) ), "nf90_inq_varid n_east" )
 
     i = 1
     do 
