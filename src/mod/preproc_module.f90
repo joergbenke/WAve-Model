@@ -1195,7 +1195,7 @@ CONTAINS
 
     implicit none
 
-    integer, parameter            :: stringLen = 20
+    integer, parameter            :: stringLen = 200
     character(len = stringLen)    :: header_copy
 
     
@@ -1468,9 +1468,8 @@ CONTAINS
     ! Write to netCDF file
     !
     
-!    call check( nf90_put_var(ncid, varid_header, HEADER), "nf90_put_var HEADER" )
-    call check( nf90_put_var(ncid, varid_header, header_copy), "nf90_put_var HEADER" )
-    write( *, *) "Wrote header ...", HEADER
+    call check( nf90_put_var(ncid, varid_header, trim(header_copy)), "nf90_put_var HEADER" )
+
     
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
