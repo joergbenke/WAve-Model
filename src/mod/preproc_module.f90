@@ -1267,7 +1267,7 @@ CONTAINS
     write( stdout, * ) "NBOUNC = ", NBOUNC
 
     ! Open File
-    call check( nf90_create("./grid/grind_info.nc", ior(ior(NF90_CLOBBER,NF90_SHARE),NF90_NETCDF4), ncid), "nf90_create" )
+    call check( nf90_create("./grid/grind_info.nc", NF90_NETCDF4, ncid), "nf90_create" )
 
 
     ! Define dimensions
@@ -1793,7 +1793,7 @@ CONTAINS
     character(len = 50), allocatable, dimension(:) :: name_of_dim
 
     integer, allocatable, dimension(:) :: id_of_var, ndim_of_var, xtype_of_var, dimids
-    character(len = 500), allocatable, dimension(:) :: name_of_var
+    character(len = 30), allocatable, dimension(:) :: name_of_var
     !    character(len = *) :: name_of_string
     logical l_obstruction 
     
@@ -2007,19 +2007,6 @@ CONTAINS
 !         "ndepth", "deptha", "depthb", "depthe", "flminfr", "tcgond", "tfak", "tsihkd", "tfac_st", "t_tail", &
 !         "delu"]
 
-
-    ! call check( nf90_inq_varid(ncid, "n_nest", id ), "nf90_inq_varid n_nest" )
-
-!    call check( nf90_inq_varid(ncid, trim(name_of_var(1)), id_of_var(1) ), "nf90_inq_varid n_nest" )
-!    call check( nf90_inq_varid(ncid, trim(name_of_var(2)), id_of_var(2) ), "nf90_inq_varid max_nest" )
-!    call check( nf90_inq_varid(ncid, trim(name_of_var(3)), id_of_var(3) ), "nf90_inq_varid nbounc" )
-!    call check( nf90_inq_varid(ncid, trim(name_of_var(4)), id_of_var(4) ), "nf90_inq_varid n_name" )
-!    call check( nf90_inq_varid(ncid, trim(name_of_var(5)), id_of_var(5) ), "nf90_inq_varid n_code" )
-!    call check( nf90_inq_varid(ncid, trim(name_of_var(6)), id_of_var(6) ), "nf90_inq_varid xdello" )
-!    call check( nf90_inq_varid(ncid, trim(name_of_var(7)), id_of_var(7) ), "nf90_inq_varid xdella" )
-!    call check( nf90_inq_varid(ncid, trim(name_of_var(8)), id_of_var(8) ), "nf90_inq_varid n_south" )
-!    call check( nf90_inq_varid(ncid, trim(name_of_var(9)), id_of_var(9) ), "nf90_inq_varid n_north" )
-!    call check( nf90_inq_varid(ncid, trim(name_of_var(10)), id_of_var(10) ), "nf90_inq_varid n_east" )
 
     i = 1
     do 
