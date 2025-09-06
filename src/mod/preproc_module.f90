@@ -2070,6 +2070,10 @@ CONTAINS
     n_code = -999
     xdello = -999
     xdella = -999
+
+    ml = -999
+    kl = -999
+    fr = -999
     
     call check( nf90_get_var(ncid, id_of_var(1), header), "nf90_get_var header" )
     call check( nf90_get_var(ncid, id_of_var(2), n_nest), "nf90_get_var n_nest" )
@@ -2077,6 +2081,13 @@ CONTAINS
     call check( nf90_get_var(ncid, id_of_var(4), nbounc), "nf90_get_var nbounc" )
     call check( nf90_get_var(ncid, id_of_var(5), n_name), "nf90_get_var n_name" )
     call check( nf90_get_var(ncid, id_of_var(6), n_code), "nf90_get_var n_code" )
+
+    write( stdout, *) "------------------- Output of Variables ------------------"
+    write( stdout, *) "After reading n_nest = ", n_nest
+    write( stdout, *) "After reading max_nest = ", max_nest
+    write( stdout, *) "After reading nbounc = ", nbounc
+    write( stdout, *) "After reading n_name = ", n_name
+    write( stdout, *) "After reading n_code = ", n_code
 
     if( maxval(NBOUNC) > 0) then
        call check( nf90_get_var(ncid, id_of_var(7), xdello), "nf90_get_var xdello" )
@@ -2090,12 +2101,6 @@ CONTAINS
        call check( nf90_get_var(ncid, id_of_var(15), blatc), "nf90_get_var blatc" )
        call check( nf90_get_var(ncid, id_of_var(16), n_zdel), "nf90_get_var n_zdel" )
 
-       write( stdout, *) "------------------- Output of Variables ------------------"
-       write( stdout, *) "After reading n_nest = ", n_nest
-       write( stdout, *) "After reading max_nest = ", max_nest
-       write( stdout, *) "After reading nbounc = ", nbounc
-       write( stdout, *) "After reading n_name = ", n_name
-       write( stdout, *) "After reading n_code = ", n_code
        write( stdout, *) "After reading xdello = ", xdello
        write( stdout, *) "After reading xdella = ", xdella
        write( stdout, *) "After reading n_south = ", n_south
@@ -2108,88 +2113,101 @@ CONTAINS
        write( stdout, *) "After reading n_zdel = ", n_zdel
     endif
 
+
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
-    !     3. WRITE FINE GRID BOUNDARY INPUT INFORMATION. (defintion part)          !
-    !        -------------------------------------------                           !
+    !                4. WRITE FREQUENCY DIRECTION GRID. (definition part)          !
+    ! ---------------------------------------------------------------------------- !
 
     call check( nf90_get_var(ncid, id_of_var(17), ml), "nf90_get_var ml" )
     call check( nf90_get_var(ncid, id_of_var(18), kl), "nf90_get_var kl" )
     call check( nf90_get_var(ncid, id_of_var(19), fr), "nf90_get_var fr" )
     call check( nf90_get_var(ncid, id_of_var(20), dfim), "nf90_get_var dfim" )
     call check( nf90_get_var(ncid, id_of_var(21), gom), "nf90_get_var gom" )
-
-    write( stdout, *) "After reading ml = ", ml
-    write( stdout, *) "After reading kl = ", kl
-    write( stdout, *) "After reading fr = ", fr
-    write( stdout, *) "After reading dfim = ", dfim
-    write( stdout, *) "After reading gom = ", gom
-    write( stdout, *)
-    
  
     call check( nf90_get_var(ncid, id_of_var(22), c), "nf90_get_var c" )
     call check( nf90_get_var(ncid, id_of_var(23), th), "nf90_get_var th" )
     call check( nf90_get_var(ncid, id_of_var(24), costh), "nf90_get_var costh" )
     call check( nf90_get_var(ncid, id_of_var(25), sinth), "nf90_get_var sinth" )
     call check( nf90_get_var(ncid, id_of_var(26), delth), "nf90_get_var delth" )
+    
     call check( nf90_get_var(ncid, id_of_var(27), deltr), "nf90_get_var deltr" )
     call check( nf90_get_var(ncid, id_of_var(28), inv_log_co), "nf90_get_var inv_log_co" )
     call check( nf90_get_var(ncid, id_of_var(29), df), "nf90_get_var df" )
     call check( nf90_get_var(ncid, id_of_var(30), df_fr), "nf90_get_var df_fr" )
     call check( nf90_get_var(ncid, id_of_var(31), df_fr2), "nf90_get_var df_fr2" )
-
-    write( stdout, *) "After reading c = ", c
-    write( stdout, *) "After reading th = ", th
-    write( stdout, *) "After reading costh = ", costh
-    write( stdout, *) "After reading sinth = ", sinth
-    write( stdout, *) "After reading delth = ", delth
-    write( stdout, *) "After reading deltr = ", deltr
-    write( stdout, *) "After reading inv_log_co = ", inv_log_co
-    write( stdout, *) "After reading df = ", df
-    write( stdout, *) "After reading df_fr = ", df_fr
-    write( stdout, *) "After reading df_fr2 = ", df_fr2
-    write( stdout, *)
     
     call check( nf90_get_var(ncid, id_of_var(32), dfimofr), "nf90_get_var dfimofr" )
     call check( nf90_get_var(ncid, id_of_var(33), dfim_fr), "nf90_get_var dfim_fr" )
     call check( nf90_get_var(ncid, id_of_var(34), dfim_fr2), "nf90_get_var dfim_fr2" )
     call check( nf90_get_var(ncid, id_of_var(35), fr5), "nf90_get_var fr5" )
     call check( nf90_get_var(ncid, id_of_var(36), frm5), "nf90_get_var frm5" )
+
     call check( nf90_get_var(ncid, id_of_var(37), rhowg_dfim), "nf90_get_var rhowg_dfim" )
     call check( nf90_get_var(ncid, id_of_var(38), fmin), "nf90_get_var fmin" )
     call check( nf90_get_var(ncid, id_of_var(39), mo_tail), "nf90_get_var mo_tail" )
     call check( nf90_get_var(ncid, id_of_var(40), mm1_tail), "nf90_get_var mm1_tail" )
     call check( nf90_get_var(ncid, id_of_var(41), mp1_tail), "nf90_get_var mp1_tail" )
 
-    write( stdout, *) "After reading dfimofr = ", dfimofr
-    write( stdout, *) "After reading dfim_fr = ", dfim_fr
-    write( stdout, *) "After reading dfim_fr2 = ", dfim_fr2
-    write( stdout, *) "After reading fr5 = ", fr5
-    write( stdout, *) "After reading frm5 = ", frm5
-    write( stdout, *) "After reading rhowg_dfim = ", rhowg_dfim
-    write( stdout, *) "After reading fmin = ", fmin
-    write( stdout, *) "After reading mo_tail = ", mo_tail
-    write( stdout, *) "After reading mm1_tail = ", mm1_tail
-    write( stdout, *) "After reading mp1_tail = ", mp1_tail
-    write( stdout, *) 
-    
     call check( nf90_get_var(ncid, id_of_var(42), mp2_tail), "nf90_get_var mp2_tail" )
     call check( nf90_get_var(ncid, id_of_var(43), mpm), "nf90_get_var mpm" )
     call check( nf90_get_var(ncid, id_of_var(44), kpm), "nf90_get_var kpm" )
     call check( nf90_get_var(ncid, id_of_var(45), jxo), "nf90_get_var jxo" )
     call check( nf90_get_var(ncid, id_of_var(46), jyo), "nf90_get_var jyo" )
-    call check( nf90_get_var(ncid, id_of_var(47), nbounf), "nf90_get_var nbounf" )
-    call check( nf90_get_var(ncid, id_of_var(48), nbinp), "nf90_get_var nbinp" )
-    call check( nf90_get_var(ncid, id_of_var(49), c_name), "nf90_get_var c_name" )
+
+    
+    write( stdout, *) "After reading ml = ", ml
+    write( stdout, *) "After reading kl = ", kl
+    write( stdout, *) "After reading fr = ", fr
+    write( stdout, *) "After reading dfim = ", dfim
+    write( stdout, *) "After reading gom = ", gom
+    
+    write( stdout, *) "After reading c = ", c
+    write( stdout, *) "After reading th = ", th
+    write( stdout, *) "After reading costh = ", costh
+    write( stdout, *) "After reading sinth = ", sinth
+    write( stdout, *) "After reading delth = ", delth
+
+    write( stdout, *) "After reading deltr = ", deltr
+    write( stdout, *) "After reading inv_log_co = ", inv_log_co
+    write( stdout, *) "After reading df = ", df
+    write( stdout, *) "After reading df_fr = ", df_fr
+    write( stdout, *) "After reading df_fr2 = ", df_fr2
+
+    write( stdout, *) "After reading dfimofr = ", dfimofr
+    write( stdout, *) "After reading dfim_fr = ", dfim_fr
+    write( stdout, *) "After reading dfim_fr2 = ", dfim_fr2
+    write( stdout, *) "After reading fr5 = ", fr5
+    write( stdout, *) "After reading frm5 = ", frm5
+
+    write( stdout, *) "After reading rhowg_dfim = ", rhowg_dfim
+    write( stdout, *) "After reading fmin = ", fmin
+    write( stdout, *) "After reading mo_tail = ", mo_tail
+    write( stdout, *) "After reading mm1_tail = ", mm1_tail
+    write( stdout, *) "After reading mp1_tail = ", mp1_tail
 
     write( stdout, *) "After reading mp2_tail = ", mp2_tail
     write( stdout, *) "After reading mpm = ", mpm
     write( stdout, *) "After reading kpm = ", kpm
     write( stdout, *) "After reading jxo = ", jxo
     write( stdout, *) "After reading jyo = ", jyo
+
+    write( stdout, *)
+
+
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !     3. WRITE FINE GRID BOUNDARY INPUT INFORMATION. (defintion part)          !
+    !        -------------------------------------------                           !
+
+    call check( nf90_get_var(ncid, id_of_var(47), nbounf), "nf90_get_var nbounf" )
+    call check( nf90_get_var(ncid, id_of_var(48), nbinp), "nf90_get_var nbinp" )
+    call check( nf90_get_var(ncid, id_of_var(49), c_name), "nf90_get_var c_name" )
+
     write( stdout, *) "After reading nbouf = ", nbounf
     write( stdout, *) "After reading nbinp = ", nbinp
     write( stdout, *) "After reading c_name = ", c_name
+    write( stdout, *)     
 
 
     if( NBOUNF > 0 ) then
@@ -2207,11 +2225,6 @@ CONTAINS
        write( stdout, *) "After reading ibfr = ", ibfr
        write( stdout, *) "After reading bfw = ", bfw
     end if
-
-    ! ---------------------------------------------------------------------------- !
-    !                                                                              !
-    !                4. WRITE FREQUENCY DIRECTION GRID. (definition part)          !
-    ! ---------------------------------------------------------------------------- !
 
 
     ! ---------------------------------------------------------------------------- !
@@ -2256,42 +2269,39 @@ CONTAINS
     call check( nf90_get_var(ncid, id_of_var(69), cosph), "nf90_get_var cosph" )
     call check( nf90_get_var(ncid, id_of_var(70), amowep), "nf90_get_var amowep" )
 
-    write( stdout, *) "After reading nlon_rg = ", nlon_rg
-    write( stdout, *) "After reading delphi = ", delphi
-    write( stdout, *) "After reading dellam = ", dellam
-    write( stdout, *) "After reading sinph = ", sinph
-    write( stdout, *) "After reading cosph = ", cosph
-    write( stdout, *) "After reading amowep = ", amowep
-    write( stdout, *)
-
-
     call check( nf90_get_var(ncid, id_of_var(71), amosop), "nf90_get_var amosop" )
     call check( nf90_get_var(ncid, id_of_var(72), amoeap), "nf90_get_var amoeap" )
     call check( nf90_get_var(ncid, id_of_var(73), amonop), "nf90_get_var amonop" )
     call check( nf90_get_var(ncid, id_of_var(74), zdello), "nf90_get_var zdello" )
     call check( nf90_get_var(ncid, id_of_var(75), ixlg), "nf90_get_var ixlg" )
 
+    call check( nf90_get_var(ncid, id_of_var(76), kxlt), "nf90_get_var kxlt" )
+    call check( nf90_get_var(ncid, id_of_var(77), l_s_mask_tmp), "nf90_get_var l_s_mask" )
+    l_s_mask = merge(.TRUE., .FALSE., l_s_mask_tmp /= 0)
+    call check( nf90_get_var(ncid, id_of_var(78), klat), "nf90_get_var klat" )
+    call check( nf90_get_var(ncid, id_of_var(79), klon), "nf90_get_var klon" )
+    call check( nf90_get_var(ncid, id_of_var(80), wlat), "nf90_get_var wlat" )
+    call check( nf90_get_var(ncid, id_of_var(81), depth_b), "nf90_get_var depth_b" )
+
+    write( stdout, *) "After reading nlon_rg = ", nlon_rg
+    write( stdout, *) "After reading delphi = ", delphi
+    write( stdout, *) "After reading dellam = ", dellam
+    write( stdout, *) "After reading sinph = ", sinph
+    write( stdout, *) "After reading cosph = ", cosph
+    write( stdout, *) "After reading amowep = ", amowep
+
     write( stdout, *) "After reading amosop = ", amosop
     write( stdout, *) "After reading amoeap = ", amoeap
     write( stdout, *) "After reading amonop = ", amonop
     write( stdout, *) "After reading zdello = ", zdello
     write( stdout, *) "After reading ixlg = ", ixlg
-    write( stdout, *)
-
-
-    call check( nf90_get_var(ncid, id_of_var(76), kxlt), "nf90_get_var kxlt" )
-    call check( nf90_get_var(ncid, id_of_var(77), l_s_mask_tmp), "nf90_get_var l_s_mask" )
-    l_s_mask = merge(.TRUE., .FALSE., l_s_mask_tmp /= 0)
-
-    call check( nf90_get_var(ncid, id_of_var(78), klat), "nf90_get_var klat" )
-    call check( nf90_get_var(ncid, id_of_var(79), klon), "nf90_get_var klon" )
-    call check( nf90_get_var(ncid, id_of_var(80), wlat), "nf90_get_var wlat" )
 
     write( stdout, *) "After reading kxlt = ", kxlt
     write( stdout, *) "After reading l_s_mask = ", l_s_mask
     write( stdout, *) "After reading klat = ", klat
     write( stdout, *) "After reading klon = ", klon
     write( stdout, *) "After reading wlat = ", wlat
+    write( stdout, *) "After reading depth_b = ", depth_b
     write( stdout, *)
 
     
@@ -2299,39 +2309,30 @@ CONTAINS
     !                                                                              !
     !     6. WRITE TABLES. (definition part)                                       !
     !        -------------                                                         !
-
     
-    call check( nf90_get_var(ncid, id_of_var(81), depth_b), "nf90_get_var depth_b" )
     call check( nf90_get_var(ncid, id_of_var(82), ndepth), "nf90_get_var ndepth" )
     call check( nf90_get_var(ncid, id_of_var(83), deptha), "nf90_get_var deptha" )
     call check( nf90_get_var(ncid, id_of_var(84), depthd), "nf90_get_var depthd" )
     call check( nf90_get_var(ncid, id_of_var(85), depthe), "nf90_get_var depthe" )
-
-    write( stdout, *) "After reading depth_b = ", depth_b
-    write( stdout, *) "After reading ndepth = ", ndepth
-    write( stdout, *) "After reading deptha = ", deptha
-    write( stdout, *) "After reading depthd = ", depthd
-    write( stdout, *) "After reading depthe = ", depthe
-    write( stdout, *)
-
 
     call check( nf90_get_var(ncid, id_of_var(86), flminfr), "nf90_get_var flminfr" )
     call check( nf90_get_var(ncid, id_of_var(87), tcgond), "nf90_get_var tcgond" )
     call check( nf90_get_var(ncid, id_of_var(88), tfak), "nf90_get_var tfak" )
     call check( nf90_get_var(ncid, id_of_var(89), tsihkd), "nf90_get_var tsihkd" )
     call check( nf90_get_var(ncid, id_of_var(90), tfac_st), "nf90_get_var tfac_st" )
+        
+    call check( nf90_get_var(ncid, id_of_var(91), t_tail), "nf90_get_var t_tail" )
+    call check( nf90_get_var(ncid, id_of_var(92), delu), "nf90_get_var delu" )
 
+    write( stdout, *) "After reading ndepth = ", ndepth
+    write( stdout, *) "After reading deptha = ", deptha
+    write( stdout, *) "After reading depthd = ", depthd
+    write( stdout, *) "After reading depthe = ", depthe
     write( stdout, *) "After reading flminfr = ", flminfr
     write( stdout, *) "After reading tcgond = ", tcgond
     write( stdout, *) "After reading tfak = ", tfak
     write( stdout, *) "After reading tsihkd = ", tsihkd
     write( stdout, *) "After reading tfac_st = ", tfac_st
-    write( stdout, *)
-
-    
-    call check( nf90_get_var(ncid, id_of_var(91), t_tail), "nf90_get_var t_tail" )
-    call check( nf90_get_var(ncid, id_of_var(92), delu), "nf90_get_var delu" )
-
     write( stdout, *) "After reading t_tail = ", t_tail
     write( stdout, *) "After reading delu = ", delu
     write( stdout, *)
