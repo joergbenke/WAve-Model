@@ -1910,6 +1910,7 @@ CONTAINS
     name_of_var(8) = "xdella"
     name_of_var(9) = "n_south"
     name_of_var(10) = "n_north"
+    
     name_of_var(11) = "n_east"
     name_of_var(12) = "n_west" 
     name_of_var(13) = "ijarc"
@@ -1920,6 +1921,7 @@ CONTAINS
     name_of_var(18) = "kl"
     name_of_var(19) = "fr"
     name_of_var(20) = "dfim"
+    
     name_of_var(21) = "gom"
     name_of_var(22) =  "c"
     name_of_var(23) =  "th"
@@ -1930,6 +1932,7 @@ CONTAINS
     name_of_var(28) = "inv_log_co"
     name_of_var(29) = "df"
     name_of_var(30) = "df_fr"
+    
     name_of_var(31) = "df_fr2"
     name_of_var(32) = "dfim_ofr"
     name_of_var(33) = "dfim_fr"
@@ -1940,9 +1943,9 @@ CONTAINS
     name_of_var(38) = "fmin"
     name_of_var(39) = "mo_tail"
     name_of_var(40) = "mm1_tail"
+    
     name_of_var(41) = "mp1_tail"
     name_of_var(42) = "mp2_tail"
-
     name_of_var(43) = "mpm"
     name_of_var(44) = "kpm"
     name_of_var(45) = "jxo"
@@ -1951,6 +1954,7 @@ CONTAINS
     name_of_var(48) = "nbinp"
     name_of_var(49) = "c_name"
     name_of_var(50) = "blngf"
+    
     name_of_var(51) = "blatf"
     name_of_var(52) = "ijarf"
     name_of_var(53) = "ibfl"
@@ -1961,6 +1965,7 @@ CONTAINS
     name_of_var(58) = "nsea"
     name_of_var(59) = "iper"
     name_of_var(60) = "one_point"
+    
     name_of_var(61) = "reduced_grid"
     name_of_var(62) = "l_obstruction_t"
     name_of_var(63) = "obslat"
@@ -1971,6 +1976,7 @@ CONTAINS
     name_of_var(68) = "sinph"
     name_of_var(69) = "cosph"
     name_of_var(70) = "amowep"
+    
     name_of_var(71) = "amosop"
     name_of_var(72) = "amoeap"
     name_of_var(73) = "amonop"
@@ -1981,6 +1987,7 @@ CONTAINS
     name_of_var(78) = "klat"
     name_of_var(79) = "klon"
     name_of_var(80) = "wlat"
+    
     name_of_var(81) = "depth_b"
     name_of_var(82) = "ndepth"
     name_of_var(83) = "deptha"
@@ -1991,6 +1998,7 @@ CONTAINS
     name_of_var(88) = "tfak"
     name_of_var(89) = "tsihkd"
     name_of_var(90) = "tfac_st"
+    
     name_of_var(91) = "t_tail"
     name_of_var(92) = "delu"
 
@@ -2016,7 +2024,7 @@ CONTAINS
        if( (i == 6) .and. (maxval(NBOUNC) <= 0) ) then
           i = i + 11
        else if( (i == 49) .and. (NBOUNF <= 0)) then
-          i = i + 6
+          i = i + 7
        else if( (i == 62) .and. (l_obstruction_t .eqv. .FALSE.)) then
           i = i + 3
        else
@@ -2035,7 +2043,7 @@ CONTAINS
        if( (i == 6) .and. (maxval(NBOUNC) <= 0) ) then
           i = i + 11
        elseif( (i == 49) .and. (NBOUNF <= 0)) then
-          i = i + 6
+          i = i + 7
        else if( (i == 62) .and. (l_obstruction_t .eqv. .FALSE.)) then
           i = i + 3
        else
