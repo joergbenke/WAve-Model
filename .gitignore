@@ -4,3 +4,5 @@
 bin/
 obj/
 SWAMPtest/
+SWAMPtest_*/
+src/mod/outsourcing_read_netcdf.txt
