@@ -457,13 +457,12 @@ CONTAINS
     implicit none
 
     INTEGER, intent (in) :: status
-    character( len = * ) :: var_name
+    character(len = *) :: var_name
 
     IF(status /= NF90_NOERR) THEN
        write(stderr, *) "Warning (",trim(var_name), "): ", TRIM(NF90_STRERROR(status))
        !       STOP "Error while netCDF operation ... Aborting!"                                                                                        
     END IF
-
   END SUBROUTINE check
 
 
@@ -491,14 +490,14 @@ CONTAINS
     !     PURPOSE.                                                                 !
     !     --------                                                                 !
     !                                                                              !
-    !       NETCDF INPUT OF NETCDF PREPROC OUTPUT.                                 !
+    !       NETCDF INPUT OF NETCDF PREPROC (GRIDINFO) OUTPUT.                      !
     !                                                                              ! 
     !     METHOD.                                                                  !
     !     -------                                                                  !
     !                                                                              !
     !       AFTER 2025:  NETCDF READ FROM FILE07                                   !
-    !       BEFORE 2025: UNFORMATTED READ FROM FILE07.                             !
-    !
+    !       BEFORE 2025: UNFORMATTED BINARY READ FROM FILE07.                      !
+    !                                                                              !  
     !     REFERENCE.                                                               !
     !     ----------                                                               !
     !                                                                              !
@@ -515,13 +514,13 @@ CONTAINS
     !     LOCAL VARIABLES.                                                         !
     !     ----------------                                                         !
 
-    INTEGER  :: IOS, LEN, I = 1
     LOGICAL  :: L_OBSTRUCTION_T
 
     character, dimension(200) :: FILE07_NC
     character(len = 50), allocatable, dimension(:) :: name_of_dim
-    character(len = 30), allocatable, dimension(:) :: name_of_var
+    character(len = 50), allocatable, dimension(:) :: name_of_var
 
+    INTEGER :: IOS, LEN, I = 1
     integer :: n_dims, n_vars, n_vars_fixed, n_attrs, k_un
     integer :: ncid, varid, status 
     integer :: dimid_n_nest, dimid_ml, dimid_kl, dimid_max_nbounc, dimid_nbounf
