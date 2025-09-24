@@ -750,7 +750,8 @@ INTEGER :: F_NEST_I(4), F_NEST_K(4)
 
 LEN = LEN_TRIM(FILE10)
 IO = 0
-OPEN (UNIT=IU10, FILE=FILE10(1:LEN), FORM='UNFORMATTED', STATUS='OLD',IOSTAT=IO)
+! OPEN (UNIT=IU10, FILE=FILE10(1:LEN), FORM='UNFORMATTED', STATUS='OLD',IOSTAT=IO)
+IO = nf90_open("./grid/grind_info.nc", NF90_NOWRITE, ncid)
 IF (IO.NE.0) THEN
    WRITE (IU06,*) '********************************************************'
    WRITE (IU06,*) '*                                                      *'
@@ -767,6 +768,307 @@ IF (IO.NE.0) THEN
    WRITE (IU06,*) '********************************************************'
    CALL ABORT1
 END IF
+
+!
+! Defining definitions etc
+!
+
+   call check( nf90_inquire( ncid, n_dims, n_vars, n_attrs, k_un ), "nf90_inquire" )
+    write(stdout, *)
+    write(stdout, *) "n_dims = ", n_dims
+    write(stdout, *) "n_vars = ", n_vars
+    write(stdout, *) "n_attrs = ", n_attrs
+    write(stdout, *) "k_un = ", k_un
+    write(stdout, *)
+
+    ! Create list of type dimension_attr and dimids                                                                                                     
+    if(.not. allocated(name_of_dim)) then
+       allocate( name_of_dim(n_dims), stat = status)
+       call error_msg_allocation( "len_of_dim" )
+    end if
+
+    if(.not. allocated(id_of_dim)) then
+       allocate( id_of_dim(n_dims), stat = status)
+       call error_msg_allocation( "id_of_dim" )
+    end if
+
+    if(.not. allocated(len_of_dim)) then
+       allocate( len_of_dim(n_dims), stat = status)
+       call error_msg_allocation( "len_of_dim" )
+    end if
+
+    if(.not. allocated(dimids)) then
+       allocate( dimids(n_dims), stat = status)
+       call error_msg_allocation( "dimids_of_dim" )
+    end if
+
+  name_of_dim(1) = "n_nest"
+    name_of_dim(2) = "ml"
+    name_of_dim(3) = "kl"
+    name_of_dim(4) = "nbounf"
+    name_of_dim(5) = "nx"
+    name_of_dim(6) = "ny"
+    name_of_dim(7) = "dim_nsea"
+    name_of_dim(8) = "jumax"
+    name_of_dim(9) = "dim_ndepth"
+    name_of_dim(10) = "result_max_val"
+    name_of_dim(11) = "dim_three"
+    name_of_dim(12) = "dim_two"
+    name_of_dim(13) = "stringlen"
+    name_of_dim(14) = "stringlen_c_name"
+
+       ! Define dimensions                                                                                                                                 
+    call check( nf90_inq_dimid(ncid, name_of_dim(1), id_of_dim(1)), "nf90_inq_dim N_NEST" )
+    call check( nf90_inquire_dimension(ncid, id_of_dim(1), name_of_dim(1), len_of_dim(1)), "nf90_inq_dim N_NEST" )
+
+    call check( nf90_inq_dimid(ncid, name_of_dim(2), id_of_dim(2)), "nf90_inq_dim ML" )
+    call check( nf90_inquire_dimension(ncid, id_of_dim(2), name_of_dim(2), len_of_dim(2)), "nf90_inq_dim ML" )
+
+    call check( nf90_inq_dimid(ncid, name_of_dim(3), id_of_dim(3)), "nf90_inq_dim KL" )
+    call check( nf90_inquire_dimension(ncid, id_of_dim(3), name_of_dim(3), len_of_dim(3)), "nf90_inq_dim KL" )
+
+    call check( nf90_inq_dimid(ncid, name_of_dim(4), id_of_dim(4)), "nf90_inq_dim NBOUNF" )
+    call check( nf90_inquire_dimension(ncid, id_of_dim(4), name_of_dim(4), len_of_dim(4)), "nf90_inq_dim NBOUNF" )
+
+    call check( nf90_inq_dimid(ncid, name_of_dim(5), id_of_dim(5)), "nf90_inq_dim NX" )
+    call check( nf90_inquire_dimension(ncid, id_of_dim(5), name_of_dim(5), len_of_dim(5)), "nf90_inq_dim NX" )
+
+    call check( nf90_inq_dimid(ncid, name_of_dim(6), id_of_dim(6)), "nf90_inq_dim NY" )
+    call check( nf90_inquire_dimension(ncid, id_of_dim(6), name_of_dim(6), len_of_dim(6)), "nf90_inq_dim NY" )
+
+    call check( nf90_inq_dimid(ncid, name_of_dim(7), id_of_dim(7)), "nf90_inq_dim DIM_NSEA" )
+    call check( nf90_inquire_dimension(ncid, id_of_dim(7), name_of_dim(7), len_of_dim(7)), "nf90_inq_dim DIM_NSEA" )
+
+    call check( nf90_inq_dimid(ncid, name_of_dim(8), id_of_dim(8)), "nf90_inq_dim JUMAX" )
+    call check( nf90_inquire_dimension(ncid, id_of_dim(8), name_of_dim(8), len_of_dim(8)), "nf90_inq_dim JUMAX" )
+
+    call check( nf90_inq_dimid(ncid, name_of_dim(9), id_of_dim(9)), "nf90_inq_dim DIM_NDEPTH" )
+    call check( nf90_inquire_dimension(ncid, id_of_dim(9), name_of_dim(9), len_of_dim(9)), "nf90_inq_dim DIM_NDEPTH" )
+
+    call check( nf90_inq_dimid(ncid, name_of_dim(10), id_of_dim(10)), "nf90_inq_dim result_max_val" )
+    call check( nf90_inquire_dimension(ncid, id_of_dim(10), name_of_dim(10), len_of_dim(10)), "nf90_inq_dim result_max_val" )
+
+       call check( nf90_inq_dimid(ncid, name_of_dim(11), id_of_dim(11)), "nf90_inq_dim DIM_THREE" )
+    call check( nf90_inquire_dimension(ncid, id_of_dim(11), name_of_dim(11), len_of_dim(11)), "nf90_inq_dim DIM_THREE" )
+
+    call check( nf90_inq_dimid(ncid, name_of_dim(12), id_of_dim(12)), "nf90_inq_dim DIM_TWO" )
+    call check( nf90_inquire_dimension(ncid, id_of_dim(12), name_of_dim(12), len_of_dim(12)), "nf90_inq_dim DIM_TWO" )
+
+    call check( nf90_inq_dimid(ncid, name_of_dim(13), id_of_dim(13)), "nf90_inq_dim STRINGLEN" )
+    call check( nf90_inquire_dimension(ncid, id_of_dim(13), name_of_dim(13), len_of_dim(13)), "nf90_inq_dim STRINGLEN" )
+
+    call check( nf90_inq_dimid(ncid, name_of_dim(14), id_of_dim(14)), "nf90_inq_dim STRINGLEN_C_NAME" )
+    call check( nf90_inquire_dimension(ncid, id_of_dim(14), name_of_dim(14), len_of_dim(14)), "nf90_inq_dim STRINGLEN_C_NAME" )
+
+       ! DEfine all variabless                                                                                                                           
+    n_vars_fixed = 92  ! If we take n_vars it could be that some variables are omited because they were not defined in file                             
+    if(.not. allocated(name_of_var)) then
+       allocate( name_of_var( n_vars_fixed ), stat = status )
+       call error_msg_allocation( "name_of_var" )
+    end if
+
+    if(.not. allocated(id_of_var)) then
+       allocate( id_of_var( n_vars_fixed ), stat = status )
+       call error_msg_allocation( "id_of_var" )
+    end if
+
+    if(.not. allocated(xtype_of_var)) then
+       allocate( xtype_of_var( n_vars_fixed ), stat = status )
+       call error_msg_allocation( "xtype_of_var" )
+    end if
+
+    if(.not. allocated(ndim_of_var)) then
+       allocate( ndim_of_var( n_vars_fixed ), stat = status )
+       call error_msg_allocation( "ndim_of_var" )
+    end if
+
+       name_of_var(1) = "header"
+    name_of_var(2) = "n_nest"
+    name_of_var(3) = "max_nest"
+    name_of_var(4) = "nbounc"
+    name_of_var(5) = "n_name"
+    name_of_var(6) = "n_code"
+    name_of_var(7) = "xdello"
+    name_of_var(8) = "xdella"
+    name_of_var(9) = "n_south"
+    name_of_var(10) = "n_north"
+
+    name_of_var(11) = "n_east"
+    name_of_var(12) = "n_west"
+    name_of_var(13) = "ijarc"
+    name_of_var(14) = "blngc"
+    name_of_var(15) = "blatc"
+    name_of_var(16) = "n_zdel"
+    name_of_var(17) = "ml"
+    name_of_var(18) = "kl"
+    name_of_var(19) = "fr"
+    name_of_var(20) = "dfim"
+
+    name_of_var(21) = "gom"
+    name_of_var(22) =  "c"
+    name_of_var(23) =  "th"
+    name_of_var(24) = "costh"
+    name_of_var(25) = "sinth"
+    name_of_var(26) = "delth"
+    name_of_var(27) = "deltr"
+    name_of_var(28) = "inv_log_co"
+   name_of_var(29) = "df"
+    name_of_var(30) = "df_fr"
+
+    name_of_var(31) = "df_fr2"
+    name_of_var(32) = "dfim_ofr"
+    name_of_var(33) = "dfim_fr"
+    name_of_var(34) = "dfim_fr2"
+    name_of_var(35) = "fr5"
+    name_of_var(36) = "frm5"
+    name_of_var(37) = "rhowg_dfim"
+    name_of_var(38) = "fmin"
+    name_of_var(39) = "mo_tail"
+    name_of_var(40) = "mm1_tail"
+
+    name_of_var(41) = "mp1_tail"
+    name_of_var(42) = "mp2_tail"
+    name_of_var(43) = "mpm"
+    name_of_var(44) = "kpm"
+    name_of_var(45) = "jxo"
+    name_of_var(46) = "jyo"
+    name_of_var(47) = "nbounf"
+    name_of_var(48) = "nbinp"
+    name_of_var(49) = "c_name"
+    name_of_var(50) = "blngf"
+
+    name_of_var(51) = "blatf"
+    name_of_var(52) = "ijarf"
+    name_of_var(53) = "ibfl"
+    name_of_var(54) = "ibfr"
+    name_of_var(55) = "bfw"
+    name_of_var(56) = "nx"
+   name_of_var(57) = "ny"
+    name_of_var(58) = "nsea"
+    name_of_var(59) = "iper"
+    name_of_var(60) = "one_point"
+
+    name_of_var(61) = "reduced_grid"
+    name_of_var(62) = "l_obstruction_t"
+    name_of_var(63) = "obslat"
+    name_of_var(64) = "obslon"
+    name_of_var(65) = "nlon_rg"
+    name_of_var(66) = "delphi"
+    name_of_var(67) = "dellam"
+    name_of_var(68) = "sinph"
+    name_of_var(69) = "cosph"
+    name_of_var(70) = "amowep"
+
+    name_of_var(71) = "amosop"
+    name_of_var(72) = "amoeap"
+    name_of_var(73) = "amonop"
+    name_of_var(74) = "zdello"
+    name_of_var(75) = "ixlg"
+    name_of_var(76) = "kxlt"
+    name_of_var(77) = "l_s_mask"
+    name_of_var(78) = "klat"
+    name_of_var(79) = "klon"
+    name_of_var(80) = "wlat"
+
+    name_of_var(81) = "depth_b"
+    name_of_var(82) = "ndepth"
+    name_of_var(83) = "deptha"
+    name_of_var(84) = "depthd"
+   name_of_var(85) = "depthe"
+    name_of_var(86) = "flminfr"
+    name_of_var(87) = "tcgond"
+    name_of_var(88) = "tfak"
+    name_of_var(89) = "tsihkd"
+    name_of_var(90) = "tfac_st"
+
+    name_of_var(91) = "t_tail"
+    name_of_var(92) = "delu"
+
+    !    name_of_var = [ "header", "n_nest  ", "max_nest", "nbounc", "n_name", "n_code", "xdello", "xdella", "n_south", "n_north", "n_east", &
+    !         "n_west", "ijarc", "blngc", "blatc", "n_zdel", "ml", "kl", "fr", "dfim", "gom", &
+    !         "c", "th", "costh", "sinth", "delth", "deltr", "inv_log_co", "df", "df_fr", "df_fr2", &
+    !         "dfim_ofr", "dfim_fr", "dfim_fr2", "fr5", "frm5", "rhowg_dfim", "fmin", "mo_tail", "mm1_tail", "mp1_tail", &
+    !         "mp2_tail", "mpm", "kpm", "jxo", "jyo", "nbounf", "nbinp", "c_name", "blngf", "blatf", &
+    !         "ijarf", "ibfl", "ibfr", "bfw", "nx", "ny", "nsea", "iper", "one_point", "reduced_grid", &
+    !         "l_obstruction_t", "obslat", "obslon", "nlon_rg", "delphi", "dellam", "sinph", "cosph", "amowep", "amosop", &
+    !         "amoeap", "amonop", "zdello", "ixlg", "kxlt", "l_s_mask", "klat", "klon", "wlat", "depth_b", &
+    !         "ndepth", "deptha", "depthb", "depthe", "flminfr", "tcgond", "tfak", "tsihkd", "tfac_st", "t_tail", &
+    !         "delu"] 
+
+    i = 1
+    do
+       call check( nf90_inq_varid(ncid, trim(name_of_var(i)), id_of_var(i) ), "nf90_inq_varid " // trim(name_of_var(i)) )
+       write( stdout, * ) "Id of var: ", id_of_var(i), " with index ", i
+       write( stdout, * ) "name of var: ", name_of_var(i), " with index ", i
+
+       if( (i == 6) .and. (maxval(NBOUNC) <= 0) ) then
+          i = i + 11
+       else if( (i == 49) .and. (NBOUNF <= 0)) then
+          i = i + 7
+       else if( (i == 62) .and. (l_obstruction_t .eqv. .FALSE.)) then
+          i = i + 3
+       else
+          i = i + 1
+       end if
+
+       if( i > n_vars_fixed ) then
+          exit
+       endif
+    end do
+
+    i = 1
+    do
+       call check( nf90_inquire_variable( ncid = ncid, varid = id_of_var(i), xtype = xtype_of_var(i), &
+            ndims = ndim_of_var(i), dimids = dimids ), "nf90_inquire_variable " // trim(name_of_var(i)) )
+       if( (i == 6) .and. (maxval(NBOUNC) <= 0) ) then
+          i = i + 11
+       elseif( (i == 49) .and. (NBOUNF <= 0)) then
+          i = i + 7
+       else if( (i == 62) .and. (l_obstruction_t .eqv. .FALSE.)) then
+          i = i + 3
+       else
+          i = i + 1
+       end if
+
+       dimids = -999
+       if( i > n_vars_fixed ) then
+          exit
+       endif
+    end do
+
+       write( stdout, * ) "n_vars = ", n_vars
+    do i = 0, 10
+       write( stdout, * ) "varid = ", id_of_var(i)
+       write( stdout, * ) "name of var = ", name_of_var(i)
+       write( stdout, * ) "xtype of var = ", xtype_of_var(i)
+       write( stdout, * ) "ndims of var = ", ndim_of_var(i)
+       write( stdout, * ) "dimids = ", dimids
+       write( stdout, * )
+    end do
+
+
+
+    ! Set values to "zero" to see later, if the correct values were read                                                                                
+    n_nest = -999
+    max_nest = -999
+    nbounc = -999
+    n_code = -999
+    xdello = -999
+    xdella = -999
+
+    ml = -999
+    kl = -999
+    fr = -999
+
+    call check( nf90_get_var(ncid, id_of_var(1), header), "nf90_get_var header" )
+
+
+
+
+    
+
+
+
 
 READ (IU10) HEADER_COARSE
 READ (IU10) N_NEST_C, MAX_NEST_C 
