@@ -1428,7 +1428,7 @@ CONTAINS
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
     !     6. WRITE TABLES. (definition part)                                       !
-    !        -------------                                                         !
+    !        -------------------------------                                       !
 
     call check( nf90_def_var(ncid, "ndepth", NF90_INT, varid_ndepth), "nf90_def_var NDEPTH" )
     call check( nf90_def_var(ncid, "deptha", NF90_DOUBLE, varid_deptha), "nf90_def_var DEPTHA" )
@@ -1451,7 +1451,7 @@ CONTAINS
 
 
     !
-    ! Write to netCDF file
+    ! Begin "Write to netCDF file"
     !
     
     
@@ -1616,7 +1616,10 @@ CONTAINS
 
     call check( nf90_close(ncid), "NF90_CLOSE" )
 
-
+    write(*, *) "---------------------------------------"
+    write(*, *) "--      END OF WRITING NETCDF        --"
+    write(*, *) "---------------------------------------"
+    
     !
     ! Binary format
     !
@@ -1712,7 +1715,11 @@ CONTAINS
 
     CLOSE (UNIT=IU07, STATUS="KEEP")
 
-     call read_preproc_file_netcdf
+    write(*, *) "---------------------------------------"
+    write(*, *) "--   END OF WRITING BINARY FORMAT    --"
+    write(*, *) "---------------------------------------"
+
+    call read_preproc_file_netcdf
     
   END SUBROUTINE WRITE_PREPROC_FILE
 
@@ -1776,7 +1783,10 @@ CONTAINS
     integer, allocatable, dimension(:) :: id_of_var, ndim_of_var, xtype_of_var, dimids
     character(len = 30), allocatable, dimension(:) :: name_of_var
     logical :: l_obstruction
-    
+    logical :: DEBUG = .true. 
+
+
+
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
     !     1. OPEN FILES and define dimensions                                      !
@@ -1786,18 +1796,25 @@ CONTAINS
     ! OPEN (UNIT=IU07, FILE=FILE07(1:LEN), FORM='UNFORMATTED', STATUS='UNKNOWN')
     ! FILE07_NC = trim(FILE07(1:LEN) // "_netcdf.nc")
 
+    write(*, *) "---------------------------------------"
+    write(*, *) "--   BEGIN OF READING NETCDF FORMAT    --"
+    write(*, *) "---------------------------------------"
+
     
     ! Open File
     call check( nf90_open("./grid/grind_info.nc", NF90_NOWRITE, ncid), "nf90_open" )
 
     call check( nf90_inquire( ncid, n_dims, n_vars, n_attrs, k_un ), "nf90_inquire" )
-    write(stdout, *)
-    write(stdout, *) "n_dims = ", n_dims
-    write(stdout, *) "n_vars = ", n_vars
-    write(stdout, *) "n_attrs = ", n_attrs
-    write(stdout, *) "k_un = ", k_un
-    write(stdout, *)
-    
+    if(DEBUG .eqv. .true.) then
+       write(*, *) "-- nf90_inquire start --"
+       write(stdout, *) "n_dims = ", n_dims
+       write(stdout, *) "n_vars = ", n_vars
+       write(stdout, *) "n_attrs = ", n_attrs
+       write(stdout, *) "k_un = ", k_un
+       write(*, *) "-- nf90_inquire end --"
+       write(stdout, *)
+    endif
+
     ! Create list of type dimension_attr and dimids
     if(.not. allocated(name_of_dim)) then
        allocate( name_of_dim(n_dims), stat = status)
@@ -1836,6 +1853,12 @@ CONTAINS
 
 
     ! Define dimensions
+    
+    write(*, *) "------------------------------"
+    write(*, *) "--      nf90_inq_dimid      --"
+    write(*, *) "--  nf90_inquire_dimension  --"  
+    write(*, *) "------------------------------"
+    
     call check( nf90_inq_dimid(ncid, name_of_dim(1), id_of_dim(1)), "nf90_inq_dim N_NEST" )
     call check( nf90_inquire_dimension(ncid, id_of_dim(1), name_of_dim(1), len_of_dim(1)), "nf90_inq_dim N_NEST" )
 
@@ -1878,7 +1901,7 @@ CONTAINS
     call check( nf90_inq_dimid(ncid, name_of_dim(14), id_of_dim(14)), "nf90_inq_dim STRINGLEN_C_NAME" )
     call check( nf90_inquire_dimension(ncid, id_of_dim(14), name_of_dim(14), len_of_dim(14)), "nf90_inq_dim STRINGLEN_C_NAME" )
 
-      ! DEfine all variabless
+    ! DEfine all variabless
     n_vars_fixed = 92  ! If we take n_vars it could be that some variables are omited because they were not defined in file
     if(.not. allocated(name_of_var)) then
        allocate( name_of_var( n_vars_fixed ), stat = status )
@@ -2351,10 +2374,13 @@ CONTAINS
 
     call check( nf90_close(ncid), "NF90_CLOSE" )
 
+    write(*, *) "---------------------------------------"
+    write(*, *) "--   END OF READING NETCDF FORMAT    --"
+    write(*, *) "---------------------------------------"
+
+    
   end SUBROUTINE READ_PREPROC_FILE_NETCDF
 
-
- 
 
   
   ! ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ !
