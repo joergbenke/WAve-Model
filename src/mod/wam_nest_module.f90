@@ -707,6 +707,38 @@ CONTAINS
 
   ! ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ !
 
+
+  SUBROUTINE check(status, var_name)
+    use iso_fortran_env, only: stderr => error_unit, &
+                               stdout => output_unit
+
+    use netcdf
+    
+    implicit none
+
+    INTEGER, intent (in) :: status
+    character( len = * ) :: var_name
+
+    IF(status /= NF90_NOERR) THEN
+       write(stderr, *) "Warning (",trim(var_name), "): ", TRIM(NF90_STRERROR(status))
+       !       STOP "Error while netCDF operation ... Aborting!"
+    END IF
+
+  END SUBROUTINE check
+
+ ! **************************************************************************** !
+
+ subroutine error_msg_allocation( error_msg )
+    character(len = *) :: error_msg
+    integer            :: status = 0
+    if (status /= 0) then
+       write(*, *) "Error while alllocating the array ", error_msg, ". STATUS =", status
+    end if
+  end subroutine error_msg_allocation
+
+  ! *************************************************************************** !
+
+  
   SUBROUTINE MAKE_FINE_BOUNDARY
 
     ! ---------------------------------------------------------------------------- !
@@ -734,6 +766,31 @@ CONTAINS
     !                                                                              !
     !     LOCAL VARIABLES.                                                         !
     !     ----------------                                                         !
+    
+    use netcdf
+    use iso_fortran_env, only: stdout => output_unit, stderr => error_unit
+
+    USE WAM_FRE_DIR_MODULE, ONLY: KL, ML, FR, CO, TH, DELTH, DELTR, COSTH, SINTH,  &
+         &                             GOM, C, INV_LOG_CO,                              &
+         &                             DF, DF_FR, DF_FR2,                               &
+         &                             DFIM, DFIMOFR, DFIM_FR, DFIM_FR2, FR5, FRM5,     &
+         &                             RHOWG_DFIM,                                      &
+         &                             FMIN, MO_TAIL, MM1_TAIL, MP1_TAIL, MP2_TAIL,     &
+         &                             MPM, KPM, JXO, JYO
+
+    USE WAM_GRID_MODULE,    ONLY: HEADER, NX, NY, NSEA, NLON_RG, IPER,             &
+         &                             AMOWEP, AMOSOP, AMOEAP, AMONOP,                  &
+         &                             XDELLA, XDELLO, DELLAM, ZDELLO, DELPHI,          &
+         &                             SINPH, COSPH, DEPTH_B, KLAT, KLON, WLAT,         &
+         &                             IXLG, KXLT, L_S_MASK, ONE_POINT, REDUCED_GRID,   &
+         &                             OBSLAT, OBSLON
+
+    USE WAM_TABLES_MODULE,  ONLY: NDEPTH, DEPTHA, DEPTHD, DEPTHE,                  &
+         &                             FLMINFR, TCGOND, TFAK, TSIHKD, TFAC_ST, T_TAIL,  &
+         &                             DELU, JUMAX
+
+    
+    implicit none
 
     INTEGER              :: I, IO, NBOUNEW, LEN, N_NEST_C, MAX_NEST_C 
     INTEGER              :: SOUTH_C, NORTH_C, EAST_C, WEST_C
@@ -743,6 +800,16 @@ CONTAINS
 
     INTEGER :: F_NEST_I(4), F_NEST_K(4)
 
+    character(len = 50), allocatable, dimension(:) :: name_of_dim
+    integer, allocatable, dimension(:) :: id_of_var, ndim_of_var, xtype_of_var, dimids
+    character(len = 30), allocatable, dimension(:) :: name_of_var
+    integer, allocatable, dimension(:) :: len_of_dim, id_of_dim
+    integer :: n_dims, n_vars, n_vars_fixed, n_attrs, k_un
+    integer :: ncid, varid, status
+    
+   logical :: l_obstruction_t
+   logical :: DEBUG = .true.
+   
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
     !     1. READ INFO ABOUT COARSE GRID.                                          !
@@ -1056,18 +1123,11 @@ CONTAINS
     xdello = -999
     xdella = -999
 
-    ml = -999
-    kl = -999
-    fr = -999
+!    ml = -999
+!    kl = -999
+!    fr = -999
 
     call check( nf90_get_var(ncid, id_of_var(1), header), "nf90_get_var header" )
-
-
-
-
-
-
-
 
 
     READ (IU10) HEADER_COARSE
