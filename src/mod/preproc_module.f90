@@ -1202,7 +1202,7 @@ CONTAINS
     implicit none
 
     integer, parameter                 :: stringLen = 200
-    integer, parameter                 :: stringLen_c_name = 200
+    integer, parameter                 :: stringLen_c_name = 20
 
     
     character(len = stringLen)         :: header_copy
@@ -1284,14 +1284,15 @@ CONTAINS
     call check( nf90_def_dim(ncid, "ny", NY, dimid_ny), "nf90_def_dim NY" ) 
     call check( nf90_def_dim(ncid, "dim_nsea", NSEA, dimid_nsea), "nf90_def_dim NSEA" ) 
     call check( nf90_def_dim(ncid, "jumax", JUMAX, dimid_jumax), "nf90_def_dim JUMAX" ) 
-    call check( nf90_def_dim(ncid, "dim_ndepth", NDEPTH, dimid_ndepth), "nf90_def_dim NDEPTH" ) 
+    call check( nf90_def_dim(ncid, "dim_ndepth", NDEPTH, dimid_ndepth), "nf90_def_dim DIM_NDEPTH" ) 
     call check( nf90_def_dim(ncid, "result_max_val", result_max_val, dimid_result_max_val), "nf90_def_dim maxval nbounc")
-    call check( nf90_def_dim(ncid, "dim_three", 3, dimid_three), "nf90_def_dim maxval dim_three")
-    call check( nf90_def_dim(ncid, "dim_two", 2, dimid_two), "nf90_def_dim maxval dim_two")
-    call check( nf90_def_dim(ncid, "stringlen", stringlen, dimid_stringlen), "nf90_def_dim stringLen")
-    call check( nf90_def_dim(ncid, "stringlen_c_name", stringlen_c_name, dimid_stringlen_c_name), "nf90_def_dim stringLen")
+    call check( nf90_def_dim(ncid, "dim_three", 3, dimid_three), "nf90_def_dim maxval DIM_THREE")
+    call check( nf90_def_dim(ncid, "dim_two", 2, dimid_two), "nf90_def_dim maxval DIM_TWO")
+    call check( nf90_def_dim(ncid, "stringlen", stringlen, dimid_stringlen), "nf90_def_dim STRINGLEN")
+    call check( nf90_def_dim(ncid, "stringlen_c_name", stringlen_c_name, dimid_stringlen_c_name), "nf90_def_dim STRINGLEN_C_NAME")
     
-    
+
+    !
     ! Define variables for netCDF
 
     write(*, *) "----------------------------------------"
@@ -1339,9 +1340,10 @@ CONTAINS
 
     call check( nf90_def_var(ncid, "nbounf", NF90_INT, varid_nbounf), "nf90_def_var NBOUNF" )
     call check( nf90_def_var(ncid, "nbinp", NF90_INT, varid_nbinp), "nf90_def_var NBINP" )
+    
     c_name_copy = C_NAME
     call check( nf90_def_var(ncid, "c_name", NF90_CHAR, (/ dimid_stringlen_c_name /), varid_c_name), "nf90_def_var C_NAME" )
-!    write(*, *) "C_NAME ... ", trim(C_NAME)
+    write(*, *) "C_NAME ... ", trim(C_NAME)
     
     if( NBOUNF > 0 ) then
        call check( nf90_def_var(ncid, "blngf", NF90_INT, (/ dimid_nbounf /), varid_blngf), "nf90_def_var BLNGF" )
@@ -1376,7 +1378,7 @@ CONTAINS
     call check( nf90_def_var(ncid, "df_fr", NF90_DOUBLE, (/ dimid_ml /),varid_df_fr), "nf90_def_var DF_FR" )
     call check( nf90_def_var(ncid, "df_fr2", NF90_DOUBLE, (/ dimid_ml /), varid_df_fr2), "nf90_def_var DF_FR2" )
 
-    call check( nf90_def_var(ncid, "dfim_ofr", NF90_DOUBLE, (/ dimid_ml /), varid_dfimofr), "nf90_def_var DFIMOFR" )
+    call check( nf90_def_var(ncid, "dfim_ofr", NF90_DOUBLE, (/ dimid_ml /), varid_dfimofr), "nf90_def_var DFIM_OFR" )
     call check( nf90_def_var(ncid, "dfim_fr", NF90_DOUBLE, (/ dimid_ml /), varid_dfim_fr), "nf90_def_var DFIM_FR" )
     call check( nf90_def_var(ncid, "dfim_fr2", NF90_DOUBLE, (/ dimid_ml /), varid_dfim_fr2), "nf90_def_var DFIM_FR2" )
     call check( nf90_def_var(ncid, "fr5", NF90_DOUBLE, (/ dimid_ml /), varid_fr5), "nf90_def_var FR5" )
@@ -1454,7 +1456,6 @@ CONTAINS
     call check( nf90_def_var(ncid, "t_tail", NF90_DOUBLE, (/ dimid_ndepth, dimid_ml /), varid_t_tail), "nf90_def_var T_TAIL" )
     call check( nf90_def_var(ncid, "delu", NF90_DOUBLE, varid_delu), "nf90_def_var DELU" )
 
-
     call check( nf90_enddef(ncid), "nf90_enddef" )
 
     write(*, *) "---------------------------------------"
@@ -1471,7 +1472,7 @@ CONTAINS
     !
 
     write(*, *) "---------------------------------------"
-    write(*, *) "--    BEGIN OF WRITING NETCDF        --"
+    write(*, *) "--   BEGINNING OF WRITING NETCDF     --"
     write(*, *) "---------------------------------------"
         
     ! ---------------------------------------------------------------------------- !
@@ -1483,9 +1484,9 @@ CONTAINS
 
     call check( nf90_put_var(ncid, varid_n_nest, N_NEST), "nf90_put_var N_NEST" )
     call check( nf90_put_var(ncid, varid_max_nest, MAX_NEST), "nf90_put_var MAX_NEST" )
-    call check( nf90_put_var(ncid, varid_nbounc, NBOUNC), "nf90_put_var NBOUNC_I" )
-    call check( nf90_put_var(ncid, varid_n_name, N_NAME), "nf90_put_var N_NAME_I" )
-    call check( nf90_put_var(ncid, varid_n_code, N_CODE), "nf90_put_var N_CODE_I" )
+    call check( nf90_put_var(ncid, varid_nbounc, NBOUNC), "nf90_put_var NBOUNC" )
+    call check( nf90_put_var(ncid, varid_n_name, N_NAME), "nf90_put_var N_NAME" )
+    call check( nf90_put_var(ncid, varid_n_code, N_CODE), "nf90_put_var N_CODE" )
 
     if( result_max_val > 0 ) then
        call check( nf90_put_var(ncid, varid_ijarc, IJARC), "nf90_put_var IJARC" )
@@ -1574,7 +1575,7 @@ CONTAINS
     call check( nf90_put_var(ncid, varid_ny, NY), "nf90_put_var NY" )
     call check( nf90_put_var(ncid, varid_nsea, NSEA), "nf90_put_var NSEA" )
     call check( nf90_put_var(ncid, varid_iper, merge(1, 0, IPER)), "nf90_put_var IPER" )
-    call check( nf90_put_var(ncid, varid_one_point, merge(1, 0, ONE_POINT)), "nf90_put_var one_point" )
+    call check( nf90_put_var(ncid, varid_one_point, merge(1, 0, ONE_POINT)), "nf90_put_var ONE_POINT" )
 
     call check( nf90_put_var(ncid, varid_reduced_grid, merge(1, 0, REDUCED_GRID)), "nf90_put_var REDUCED_GRID" )
     call check( nf90_put_var(ncid, varid_l_obstruction_t, merge(1, 0, L_OBSTRUCTION_T)), "nf90_put_var L_OBSTRUCTION_T" )
@@ -1681,6 +1682,7 @@ CONTAINS
     !        -------------------------------------------                           !
 
     WRITE(IU07) NBOUNF, NBINP, C_NAME
+    write(*, *) "Binary unformatted C_NAME = ", C_NAME
     IF (NBOUNF.GT.0) THEN
        WRITE(IU07) BLNGF(1:NBOUNF), BLATF(1:NBOUNF), IJARF(1:NBOUNF),              &
             &              IBFL(1:NBOUNF), IBFR(1:NBOUNF), BFW(1:NBOUNF)
