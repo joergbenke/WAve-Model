@@ -1141,19 +1141,17 @@ CONTAINS
   ! **************************************************************************** !
 
   SUBROUTINE check(status, var_name)
-    use iso_fortran_env, only: stderr => error_unit, &
-                               stdout => output_unit
+    use iso_fortran_env, only: stderr => error_unit
 
     implicit none
 
-    INTEGER, intent (in) :: status
-    character( len = * ) :: var_name
+    integer, intent(in) :: status
+    character(len = *), intent(in) :: var_name
 
     IF(status /= NF90_NOERR) THEN
        write(stderr, *) "Warning (",trim(var_name), "): ", TRIM(NF90_STRERROR(status))
        !       STOP "Error while netCDF operation ... Aborting!"
     END IF
-
   END SUBROUTINE check
 
   
