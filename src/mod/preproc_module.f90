@@ -1141,6 +1141,14 @@ CONTAINS
   ! **************************************************************************** !
 
   SUBROUTINE check(status, var_name)
+    !----------------------------------------------------------------------------!
+    !                                                                            !
+    !   CHECK - Error handling for netCDF API                                    !
+    !                                                                            !
+    !     J. BENKE              FZJ       10/2025                                !
+    !                                                                            !
+    !----------------------------------------------------------------------------!
+    
     use iso_fortran_env, only: stderr => error_unit
 
     implicit none
@@ -1189,27 +1197,31 @@ CONTAINS
     !     LOCAL VARIABLES.                                                         !
     !     ----------------                                                         !
 
-    use iso_fortran_env, only: stdout => output_unit, stderr => error_unit
+    use iso_fortran_env, only: stdout => output_unit
 
     implicit none
 
     integer, parameter                 :: stringLen = 200
-    integer, parameter                 :: stringLen_c_name = 20
+    integer, parameter                 :: stringLen_c_name = 200
 
+    
     character(len = stringLen)         :: header_copy
     character(len = stringLen_c_name)  :: c_name_copy
-    character, dimension(200) :: FILE07_NC
+    character(len = 80) :: FILE07_NC
 
-
-    INTEGER :: LEN, I, result_max_val
+    integer :: LEN, I, result_max_val
     integer :: ncid, varid, status 
 
+    !
     ! Define dimension ids
+
     integer :: dimid_n_nest, dimid_ml, dimid_kl, dimid_max_nbounc, dimid_nbounf
     integer :: dimid_nx, dimid_ny, dimid_nsea, dimid_jumax, dimid_ndepth
     integer :: dimid_result_max_val, dimid_three, dimid_two
     integer :: dimid_stringlen, dimid_stringlen_c_name
     
+    !
+    ! Define variable ids
     
     ! Section 1 variable id definition
     integer :: varid_header
@@ -1243,7 +1255,7 @@ CONTAINS
     integer :: varid_zdello, varid_ixlg, varid_kxlt, varid_l_s_mask, varid_klat, varid_klon, varid_wlat
     integer :: varid_depth_b, varid_obslat, varid_obslon
 
-    ! section 6 variable id definition (grid definition)
+    ! section 6 variable id definition 
     integer :: varid_ndepth, varid_deptha, varid_depthd, varid_depthe
     integer :: varid_flminfr, varid_tcgond, varid_tfak, varid_tsihkd, varid_tfac_st, varid_t_tail
     integer :: varid_delu
@@ -1255,15 +1267,12 @@ CONTAINS
     !        --------------------------------                                      !
 
     LEN = LEN_TRIM(FILE07)
-    FILE07_NC = trim(FILE07) !// "nc"
-
-    ! OPEN (UNIT=IU07, FILE=FILE07(1:LEN), FORM='UNFORMATTED', STATUS='UNKNOWN')
-    ! FILE07_NC = trim(FILE07(1:LEN)) !// "nc"
+    FILE07_NC = trim(FILE07) // ".nc"
 
     result_max_val = maxval(NBOUNC)
 
     ! Open File
-    call check( nf90_create("./grid/grind_info.nc", NF90_NETCDF4, ncid), "nf90_create" )
+    call check( nf90_create(FILE07_NC, NF90_NETCDF4, ncid), "nf90_create" )
 
 
     ! Define dimensions
@@ -1793,7 +1802,7 @@ CONTAINS
     integer, allocatable, dimension(:) :: len_of_dim, id_of_dim
     integer, allocatable, dimension(:) :: id_of_var, ndim_of_var, xtype_of_var, dimids
     integer, parameter                 :: stringLen = 200
-    integer, parameter                 :: stringLen_c_name = 20
+    integer, parameter                 :: stringLen_c_name = 200
 
 
 
