@@ -1746,10 +1746,13 @@ CONTAINS
 
   
   subroutine error_msg_allocation( error_msg )
-    character(len = *) :: error_msg
-    integer            :: status = 0
+    use iso_fortran_env, only: stderr => error_unit
+
+    character(len = *), intent(in) :: error_msg
+    integer                        :: status = 0
+    
     if (status /= 0) then
-       write(*, *) "Error while alllocating the array ", error_msg, ". STATUS =", status
+       write(stderr, *) "Error while alllocating the array ", error_msg, ". STATUS =", status
     end if
   end subroutine error_msg_allocation
 
@@ -1758,14 +1761,14 @@ CONTAINS
 
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
-    !   WRITE_PREPROC_FILE - ROUTINE TO READ PREPROC NETCDF OUTPUT FROMO FILE      !
+    !  READ_PREPROC_FILE_NETCDF - ROUTINE TO READ PREPROC NETCDF OUTPUT FROM FILE  !
     !                                                                              !
     !     J. BENKE               FZJ          06/2025                              !
     !                                                                              !
     !     PURPOSE.                                                                 !
     !     --------                                                                 !
     !                                                                              !
-    !       TO READ IN THE COMPUTED CONSTANTS FROM NETCDF WHICH ARE STORED         !
+    !       READ THE COMPUTED CONSTANTS FROM NETCDF FILE WHICH ARE STORED          !
     !       IN MODULE WAM_CONST_MODULE.                                            !
     !                                                                              !
     !     METHOD.                                                                  !
@@ -1784,28 +1787,28 @@ CONTAINS
     !     LOCAL VARIABLES.                                                         !
     !     ----------------                                                         !
 
-    use iso_fortran_env, only: stdout => output_unit, stderr => error_unit
+    use iso_fortran_env, only: stdout => output_unit
     
     implicit none
     
     logical :: l_obstruction
     logical :: DEBUG = .false. 
 
-    character, dimension(200) :: FILE07_NC
+    character(len = 80) :: FILE07_NC
     character(len = 50), allocatable, dimension(:) :: name_of_dim
-    character(len = 30), allocatable, dimension(:) :: name_of_var
+    character(len = 50), allocatable, dimension(:) :: name_of_var
 
-    INTEGER :: LEN, i = 1
+    integer :: LEN, i = 1
     integer :: n_dims, n_vars, n_vars_fixed, n_attrs, k_un
     integer :: ncid, varid, status 
+
+    ! Define dimids
     integer :: dimid_n_nest, dimid_ml, dimid_kl, dimid_max_nbounc, dimid_nbounf
     integer :: dimid_nx, dimid_ny, dimid_nsea, dimid_jumax, dimid_ndepth
+    
     integer :: iper_tmp, one_point_tmp, reduced_grid_tmp, l_obstruction_t_tmp, l_s_mask_tmp
     integer, allocatable, dimension(:) :: len_of_dim, id_of_dim
     integer, allocatable, dimension(:) :: id_of_var, ndim_of_var, xtype_of_var, dimids
-    integer, parameter                 :: stringLen = 200
-    integer, parameter                 :: stringLen_c_name = 200
-
 
 
     ! ---------------------------------------------------------------------------- !
@@ -1814,25 +1817,26 @@ CONTAINS
     !        --------------------------------                                      !
 
     LEN = LEN_TRIM(FILE07)
-    ! OPEN (UNIT=IU07, FILE=FILE07(1:LEN), FORM='UNFORMATTED', STATUS='UNKNOWN')
-    ! FILE07_NC = trim(FILE07(1:LEN) // "_netcdf.nc")
+    FILE07_NC = trim(FILE07) // ".nc"
 
+    
     write(*, *) "---------------------------------------"
     write(*, *) "--   BEGIN OF READING NETCDF FORMAT    --"
     write(*, *) "---------------------------------------"
 
     
     ! Open File
-    call check( nf90_open("./grid/grind_info.nc", NF90_NOWRITE, ncid), "nf90_open" )
+    call check( nf90_open(FILE07_NC, NF90_NOWRITE, ncid), "nf90_open" )
 
+    ! Inquire dimensions, variables, attributes, ...
     call check( nf90_inquire( ncid, n_dims, n_vars, n_attrs, k_un ), "nf90_inquire" )
     if(DEBUG .eqv. .true.) then
-       write(*, *) "-- nf90_inquire start --"
+       write(stdout, *) "-- nf90_inquire start --"
        write(stdout, *) "n_dims = ", n_dims
        write(stdout, *) "n_vars = ", n_vars
        write(stdout, *) "n_attrs = ", n_attrs
        write(stdout, *) "k_un = ", k_un
-       write(*, *) "-- nf90_inquire end --"
+       write(stdout, *) "-- nf90_inquire end --"
        write(stdout, *)
     endif
 
