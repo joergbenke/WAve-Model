@@ -1818,12 +1818,6 @@ CONTAINS
 
     LEN = LEN_TRIM(FILE07)
     FILE07_NC = trim(FILE07) // ".nc"
-
-    
-    write(*, *) "---------------------------------------"
-    write(*, *) "--   BEGIN OF READING NETCDF FORMAT    --"
-    write(*, *) "---------------------------------------"
-
     
     ! Open File
     call check( nf90_open(FILE07_NC, NF90_NOWRITE, ncid), "nf90_open" )
@@ -1843,7 +1837,7 @@ CONTAINS
     ! Create list of type dimension_attr and dimids
     if(.not. allocated(name_of_dim)) then
        allocate( name_of_dim(n_dims), stat = status)
-       call error_msg_allocation( "len_of_dim" )
+       call error_msg_allocation( "name_of_dim" )
     end if
 
     if(.not. allocated(id_of_dim)) then
@@ -1858,7 +1852,7 @@ CONTAINS
 
     if(.not. allocated(dimids)) then
        allocate( dimids(n_dims), stat = status)
-       call error_msg_allocation( "dimids_of_dim" )
+       call error_msg_allocation( "dimids" )
     end if
     
     name_of_dim(1) = "n_nest"
@@ -2139,6 +2133,11 @@ CONTAINS
     kl = -999
     fr = -999
     
+    
+    write(*, *) "---------------------------------------"
+    write(*, *) "--   BEGIN OF READING NETCDF FORMAT    --"
+    write(*, *) "---------------------------------------"
+
     call check( nf90_get_var(ncid, id_of_var(1), header), "nf90_get_var header" )
     call check( nf90_get_var(ncid, id_of_var(2), n_nest), "nf90_get_var n_nest" )
     call check( nf90_get_var(ncid, id_of_var(3), max_nest), "nf90_get_var max_nest" )
