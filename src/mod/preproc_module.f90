@@ -1197,13 +1197,13 @@ CONTAINS
 
     integer, parameter                 :: stringLen = 200
     integer, parameter                 :: stringLen_c_name = 20
+
     character(len = stringLen)         :: header_copy
     character(len = stringLen_c_name)  :: c_name_copy
-
-    
     character, dimension(200) :: FILE07_NC
-    INTEGER      :: LEN, I, result_max_val
-    
+
+
+    INTEGER :: LEN, I, result_max_val
     integer :: ncid, varid, status 
 
     ! Define dimension ids
@@ -1286,6 +1286,11 @@ CONTAINS
     
     
     ! Define variables for netCDF
+
+    write(*, *) "----------------------------------------"
+    write(*, *) "-- BEGIN OF DEFINING NETCDF VARIABLES --"
+    write(*, *) "----------------------------------------"
+
     header_copy = HEADER
     call check( nf90_def_var(ncid, "header", NF90_CHAR, (/ dimid_stringlen /), varid_header), "nf90_def_var HEADER" )
     
@@ -1329,7 +1334,7 @@ CONTAINS
     call check( nf90_def_var(ncid, "nbinp", NF90_INT, varid_nbinp), "nf90_def_var NBINP" )
     c_name_copy = C_NAME
     call check( nf90_def_var(ncid, "c_name", NF90_CHAR, (/ dimid_stringlen_c_name /), varid_c_name), "nf90_def_var C_NAME" )
-    write(*, *) "C_NAME ... ", trim(C_NAME)
+!    write(*, *) "C_NAME ... ", trim(C_NAME)
     
     if( NBOUNF > 0 ) then
        call check( nf90_def_var(ncid, "blngf", NF90_INT, (/ dimid_nbounf /), varid_blngf), "nf90_def_var BLNGF" )
@@ -1445,6 +1450,10 @@ CONTAINS
 
     call check( nf90_enddef(ncid), "nf90_enddef" )
 
+    write(*, *) "---------------------------------------"
+    write(*, *) "-- END OF DEFINING NETCDF VARIABLES  --"
+    write(*, *) "---------------------------------------"
+
     !
     ! End of definition
     !
@@ -1453,8 +1462,11 @@ CONTAINS
     !
     ! Begin "Write to netCDF file"
     !
-    
-    
+
+    write(*, *) "---------------------------------------"
+    write(*, *) "--    BEGIN OF WRITING NETCDF        --"
+    write(*, *) "---------------------------------------"
+        
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
     !      2. WRITE COARSE GRID BOUNDARY OUTPUT INFORMATION. (write part)          ! 
@@ -1486,7 +1498,7 @@ CONTAINS
     
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
-    !     3. WRITE FINE GRID BOUNDARY INPUT INFORMATION.                           !
+    !     3. WRITE FINE GRID BOUNDARY INPUT INFORMATION. (write part)              !
     !        -------------------------------------------                           !
 
     call check( nf90_put_var(ncid, varid_nbounf, NBOUNF), "nf90_put_var NBOUNF" )
@@ -1767,23 +1779,23 @@ CONTAINS
     
     implicit none
     
+    logical :: l_obstruction
+    logical :: DEBUG = .false. 
+
     character, dimension(200) :: FILE07_NC
+    character(len = 50), allocatable, dimension(:) :: name_of_dim
+    character(len = 30), allocatable, dimension(:) :: name_of_var
 
     INTEGER :: LEN, i = 1
     integer :: n_dims, n_vars, n_vars_fixed, n_attrs, k_un
     integer :: ncid, varid, status 
     integer :: dimid_n_nest, dimid_ml, dimid_kl, dimid_max_nbounc, dimid_nbounf
     integer :: dimid_nx, dimid_ny, dimid_nsea, dimid_jumax, dimid_ndepth
-
     integer :: iper_tmp, one_point_tmp, reduced_grid_tmp, l_obstruction_t_tmp, l_s_mask_tmp
-    
     integer, allocatable, dimension(:) :: len_of_dim, id_of_dim
-    character(len = 50), allocatable, dimension(:) :: name_of_dim
-
     integer, allocatable, dimension(:) :: id_of_var, ndim_of_var, xtype_of_var, dimids
-    character(len = 30), allocatable, dimension(:) :: name_of_var
-    logical :: l_obstruction
-    logical :: DEBUG = .true. 
+    integer, parameter                 :: stringLen = 200
+    integer, parameter                 :: stringLen_c_name = 20
 
 
 
@@ -1854,10 +1866,12 @@ CONTAINS
 
     ! Define dimensions
     
-    write(*, *) "------------------------------"
-    write(*, *) "--      nf90_inq_dimid      --"
-    write(*, *) "--  nf90_inquire_dimension  --"  
-    write(*, *) "------------------------------"
+    if(DEBUG .eqv. .true.) then
+       write(*, *) "------------------------------"
+       write(*, *) "--      nf90_inq_dimid      --"
+       write(*, *) "--  nf90_inquire_dimension  --"  
+       write(*, *) "------------------------------"
+    endif
     
     call check( nf90_inq_dimid(ncid, name_of_dim(1), id_of_dim(1)), "nf90_inq_dim N_NEST" )
     call check( nf90_inquire_dimension(ncid, id_of_dim(1), name_of_dim(1), len_of_dim(1)), "nf90_inq_dim N_NEST" )
@@ -2039,10 +2053,13 @@ CONTAINS
 
 
     i = 1
-    do 
+    do while (i <= n_vars_fixed)
+       write(*, *) "Loop 1, Index: ", i
        call check( nf90_inq_varid(ncid, trim(name_of_var(i)), id_of_var(i) ), "nf90_inq_varid " // trim(name_of_var(i)) )
-       write( stdout, * ) "Id of var: ", id_of_var(i), " with index ", i
-       write( stdout, * ) "name of var: ", name_of_var(i), " with index ", i
+       if(DEBUG .eqv. .true.) then
+          write( stdout, * ) "Id of var: ", id_of_var(i), " with index ", i
+          write( stdout, * ) "name of var: ", name_of_var(i), " with index ", i
+       endif
        
        if( (i == 6) .and. (maxval(NBOUNC) <= 0) ) then
           i = i + 11
@@ -2054,13 +2071,14 @@ CONTAINS
           i = i + 1
        end if
        
-       if( i > n_vars_fixed ) then
-          exit
-       endif
+!       if( i > n_vars_fixed ) then
+!          exit
+!       endif
     end do
 
     i = 1
-    do 
+    do while(i <= n_vars_fixed)
+       write(*, *) "Loop 1, Index: ", i
        call check( nf90_inquire_variable( ncid = ncid, varid = id_of_var(i), xtype = xtype_of_var(i), &
             ndims = ndim_of_var(i), dimids = dimids ), "nf90_inquire_variable " // trim(name_of_var(i)) )
        if( (i == 6) .and. (maxval(NBOUNC) <= 0) ) then
@@ -2074,21 +2092,23 @@ CONTAINS
        end if
 
        dimids = -999
-       if( i > n_vars_fixed ) then
-          exit
-       endif
+!       if( i > n_vars_fixed ) then
+!          exit
+!       endif
     end do
 
-    write( stdout, * ) "n_vars = ", n_vars
-    do i = 0, 10
-       write( stdout, * ) "varid = ", id_of_var(i)
-       write( stdout, * ) "name of var = ", name_of_var(i)
-       write( stdout, * ) "xtype of var = ", xtype_of_var(i)
-       write( stdout, * ) "ndims of var = ", ndim_of_var(i)
-       write( stdout, * ) "dimids = ", dimids 
-       write( stdout, * )
-    end do
-
+    if(DEBUG .eqv. .true.) then
+       write( stdout, * ) "n_vars = ", n_vars
+       do i = 0, 10
+          write( stdout, * ) "varid = ", id_of_var(i)
+          write( stdout, * ) "name of var = ", name_of_var(i)
+          write( stdout, * ) "xtype of var = ", xtype_of_var(i)
+          write( stdout, * ) "ndims of var = ", ndim_of_var(i)
+          write( stdout, * ) "dimids = ", dimids 
+          write( stdout, * )
+       end do
+    endif
+       
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
     !    2. READ COARSE GRID BOUNDARY OUTPUT INFORMATION.  (definition part)      !
@@ -2113,13 +2133,16 @@ CONTAINS
     call check( nf90_get_var(ncid, id_of_var(5), n_name), "nf90_get_var n_name" )
     call check( nf90_get_var(ncid, id_of_var(6), n_code), "nf90_get_var n_code" )
 
-    write( stdout, *) "------------------- Output of Variables ------------------"
-    write( stdout, *) "After reading n_nest = ", n_nest
-    write( stdout, *) "After reading max_nest = ", max_nest
-    write( stdout, *) "After reading nbounc = ", nbounc
-    write( stdout, *) "After reading n_name = ", n_name
-    write( stdout, *) "After reading n_code = ", n_code
-
+    
+    if(DEBUG .eqv. .true.) then
+       write( stdout, *) "------------------- Output of Variables ------------------"
+       write( stdout, *) "After reading n_nest = ", n_nest
+       write( stdout, *) "After reading max_nest = ", max_nest
+       write( stdout, *) "After reading nbounc = ", nbounc
+       write( stdout, *) "After reading n_name = ", n_name
+       write( stdout, *) "After reading n_code = ", n_code
+    endif
+    
     if( maxval(NBOUNC) > 0) then
        call check( nf90_get_var(ncid, id_of_var(7), xdello), "nf90_get_var xdello" )
        call check( nf90_get_var(ncid, id_of_var(8), xdella), "nf90_get_var xdella" )
@@ -2132,16 +2155,18 @@ CONTAINS
        call check( nf90_get_var(ncid, id_of_var(15), blatc), "nf90_get_var blatc" )
        call check( nf90_get_var(ncid, id_of_var(16), n_zdel), "nf90_get_var n_zdel" )
 
-       write( stdout, *) "After reading xdello = ", xdello
-       write( stdout, *) "After reading xdella = ", xdella
-       write( stdout, *) "After reading n_south = ", n_south
-       write( stdout, *) "After reading n_north = ", n_north
-       write( stdout, *) "After reading n_south = ", n_east
-       write( stdout, *) "After reading n_north = ", n_west
-       write( stdout, *) "After reading IJARC = ", ijarc
-       write( stdout, *) "After reading blngc = ", blngc
-       write( stdout, *) "After reading blatc = ", blatc
-       write( stdout, *) "After reading n_zdel = ", n_zdel
+       if(DEBUG .eqv. .true.) then
+          write( stdout, *) "After reading xdello = ", xdello
+          write( stdout, *) "After reading xdella = ", xdella
+          write( stdout, *) "After reading n_south = ", n_south
+          write( stdout, *) "After reading n_north = ", n_north
+          write( stdout, *) "After reading n_south = ", n_east
+          write( stdout, *) "After reading n_north = ", n_west
+          write( stdout, *) "After reading IJARC = ", ijarc
+          write( stdout, *) "After reading blngc = ", blngc
+          write( stdout, *) "After reading blatc = ", blatc
+          write( stdout, *) "After reading n_zdel = ", n_zdel
+       endif
     endif
 
 
@@ -2186,45 +2211,46 @@ CONTAINS
     call check( nf90_get_var(ncid, id_of_var(45), jxo), "nf90_get_var jxo" )
     call check( nf90_get_var(ncid, id_of_var(46), jyo), "nf90_get_var jyo" )
 
+    if(DEBUG .eqv. .true.) then
+       write( stdout, *) "After reading ml = ", ml
+       write( stdout, *) "After reading kl = ", kl
+       write( stdout, *) "After reading fr = ", fr
+       write( stdout, *) "After reading dfim = ", dfim
+       write( stdout, *) "After reading gom = ", gom
+
+       write( stdout, *) "After reading c = ", c
+       write( stdout, *) "After reading th = ", th
+       write( stdout, *) "After reading costh = ", costh
+       write( stdout, *) "After reading sinth = ", sinth
+       write( stdout, *) "After reading delth = ", delth
+
+       write( stdout, *) "After reading deltr = ", deltr
+       write( stdout, *) "After reading inv_log_co = ", inv_log_co
+       write( stdout, *) "After reading df = ", df
+       write( stdout, *) "After reading df_fr = ", df_fr
+       write( stdout, *) "After reading df_fr2 = ", df_fr2
+
+       write( stdout, *) "After reading dfimofr = ", dfimofr
+       write( stdout, *) "After reading dfim_fr = ", dfim_fr
+       write( stdout, *) "After reading dfim_fr2 = ", dfim_fr2
+       write( stdout, *) "After reading fr5 = ", fr5
+       write( stdout, *) "After reading frm5 = ", frm5
+
+       write( stdout, *) "After reading rhowg_dfim = ", rhowg_dfim
+       write( stdout, *) "After reading fmin = ", fmin
+       write( stdout, *) "After reading mo_tail = ", mo_tail
+       write( stdout, *) "After reading mm1_tail = ", mm1_tail
+       write( stdout, *) "After reading mp1_tail = ", mp1_tail
+
+       write( stdout, *) "After reading mp2_tail = ", mp2_tail
+       write( stdout, *) "After reading mpm = ", mpm
+       write( stdout, *) "After reading kpm = ", kpm
+       write( stdout, *) "After reading jxo = ", jxo
+       write( stdout, *) "After reading jyo = ", jyo
+
+       write( stdout, *)
+    endif
     
-    write( stdout, *) "After reading ml = ", ml
-    write( stdout, *) "After reading kl = ", kl
-    write( stdout, *) "After reading fr = ", fr
-    write( stdout, *) "After reading dfim = ", dfim
-    write( stdout, *) "After reading gom = ", gom
-    
-    write( stdout, *) "After reading c = ", c
-    write( stdout, *) "After reading th = ", th
-    write( stdout, *) "After reading costh = ", costh
-    write( stdout, *) "After reading sinth = ", sinth
-    write( stdout, *) "After reading delth = ", delth
-
-    write( stdout, *) "After reading deltr = ", deltr
-    write( stdout, *) "After reading inv_log_co = ", inv_log_co
-    write( stdout, *) "After reading df = ", df
-    write( stdout, *) "After reading df_fr = ", df_fr
-    write( stdout, *) "After reading df_fr2 = ", df_fr2
-
-    write( stdout, *) "After reading dfimofr = ", dfimofr
-    write( stdout, *) "After reading dfim_fr = ", dfim_fr
-    write( stdout, *) "After reading dfim_fr2 = ", dfim_fr2
-    write( stdout, *) "After reading fr5 = ", fr5
-    write( stdout, *) "After reading frm5 = ", frm5
-
-    write( stdout, *) "After reading rhowg_dfim = ", rhowg_dfim
-    write( stdout, *) "After reading fmin = ", fmin
-    write( stdout, *) "After reading mo_tail = ", mo_tail
-    write( stdout, *) "After reading mm1_tail = ", mm1_tail
-    write( stdout, *) "After reading mp1_tail = ", mp1_tail
-
-    write( stdout, *) "After reading mp2_tail = ", mp2_tail
-    write( stdout, *) "After reading mpm = ", mpm
-    write( stdout, *) "After reading kpm = ", kpm
-    write( stdout, *) "After reading jxo = ", jxo
-    write( stdout, *) "After reading jyo = ", jyo
-
-    write( stdout, *)
-
 
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
@@ -2234,13 +2260,15 @@ CONTAINS
     call check( nf90_get_var(ncid, id_of_var(47), nbounf), "nf90_get_var nbounf" )
     call check( nf90_get_var(ncid, id_of_var(48), nbinp), "nf90_get_var nbinp" )
     call check( nf90_get_var(ncid, id_of_var(49), c_name), "nf90_get_var c_name" )
+    
+    if(DEBUG .eqv. .true.) then
+       write( stdout, *) "After reading nbouf = ", nbounf
+       write( stdout, *) "After reading nbinp = ", nbinp
+       write( stdout, *) "After reading c_name = ", c_name
+       write( stdout, *)     
+    endif
 
-    write( stdout, *) "After reading nbouf = ", nbounf
-    write( stdout, *) "After reading nbinp = ", nbinp
-    write( stdout, *) "After reading c_name = ", c_name
-    write( stdout, *)     
-
-
+    
     if( NBOUNF > 0 ) then
        call check( nf90_get_var(ncid, id_of_var(50), blngf), "nf90_get_var blngf" )
        call check( nf90_get_var(ncid, id_of_var(51), blatf), "nf90_get_var blatf" )
@@ -2249,14 +2277,16 @@ CONTAINS
        call check( nf90_get_var(ncid, id_of_var(54), ibfr), "nf90_get_var ibfr" )
        call check( nf90_get_var(ncid, id_of_var(55), bfw), "nf90_get_var bfw" )
 
-       write( stdout, *) "After reading blngf = ", blngf
-       write( stdout, *) "After reading blatf = ", blatf
-       write( stdout, *) "After reading ijarf = ", ijarf
-       write( stdout, *) "After reading ibfl = ", ibfl
-       write( stdout, *) "After reading ibfr = ", ibfr
-       write( stdout, *) "After reading bfw = ", bfw
+       if(DEBUG .eqv. .true.) then
+          write( stdout, *) "After reading blngf = ", blngf
+          write( stdout, *) "After reading blatf = ", blatf
+          write( stdout, *) "After reading ijarf = ", ijarf
+          write( stdout, *) "After reading ibfl = ", ibfl
+          write( stdout, *) "After reading ibfr = ", ibfr
+          write( stdout, *) "After reading bfw = ", bfw
+       end if
     end if
-
+    
 
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
@@ -2275,22 +2305,26 @@ CONTAINS
     call check( nf90_get_var(ncid, id_of_var(62), l_obstruction_t_tmp), "nf90_get_var l_obstruction_t" )
     l_obstruction_t = merge(.TRUE., .FALSE., l_obstruction_t_tmp /= 0)
 
-    write( stdout, *) "After reading nx = ", nx
-    write( stdout, *) "After reading ny = ", ny
-    write( stdout, *) "After reading nx = ", nsea
-    write( stdout, *) "After reading IPER = ", iper
-    write( stdout, *) "After reading one_point = ", one_point
-    write( stdout, *) "After reading reduced_grid = ", reduced_grid
-    write( stdout, *) "After reading l_obstruction_t = ", l_obstruction_t
-    write( stdout, *)
-    
+    if(DEBUG .eqv. .true.) then
+       write( stdout, *) "After reading nx = ", nx
+       write( stdout, *) "After reading ny = ", ny
+       write( stdout, *) "After reading nx = ", nsea
+       write( stdout, *) "After reading IPER = ", iper
+       write( stdout, *) "After reading one_point = ", one_point
+       write( stdout, *) "After reading reduced_grid = ", reduced_grid
+       write( stdout, *) "After reading l_obstruction_t = ", l_obstruction_t
+       write( stdout, *)
+    endif
+
     if( L_OBSTRUCTION_T .eqv. .TRUE.) then
        call check( nf90_get_var(ncid, id_of_var(63), obslat), "nf90_get_var obslat" )
        call check( nf90_get_var(ncid, id_of_var(64), obslon), "nf90_get_var obslon" )
 
-       write( stdout, *) "After reading obslat = ", obslat
-       write( stdout, *) "After reading obslon = ", obslon
-       write( stdout, *)
+       if(DEBUG .eqv. .true.) then
+          write( stdout, *) "After reading obslat = ", obslat
+          write( stdout, *) "After reading obslon = ", obslon
+          write( stdout, *)
+       endif
     end if
  
     call check( nf90_get_var(ncid, id_of_var(65), nlon_rg), "nf90_get_var nlon_rg" )
@@ -2314,27 +2348,29 @@ CONTAINS
     call check( nf90_get_var(ncid, id_of_var(80), wlat), "nf90_get_var wlat" )
     call check( nf90_get_var(ncid, id_of_var(81), depth_b), "nf90_get_var depth_b" )
 
-    write( stdout, *) "After reading nlon_rg = ", nlon_rg
-    write( stdout, *) "After reading delphi = ", delphi
-    write( stdout, *) "After reading dellam = ", dellam
-    write( stdout, *) "After reading sinph = ", sinph
-    write( stdout, *) "After reading cosph = ", cosph
-    write( stdout, *) "After reading amowep = ", amowep
+    if(DEBUG .eqv. .true.) then
+       write( stdout, *) "After reading nlon_rg = ", nlon_rg
+       write( stdout, *) "After reading delphi = ", delphi
+       write( stdout, *) "After reading dellam = ", dellam
+       write( stdout, *) "After reading sinph = ", sinph
+       write( stdout, *) "After reading cosph = ", cosph
+       write( stdout, *) "After reading amowep = ", amowep
 
-    write( stdout, *) "After reading amosop = ", amosop
-    write( stdout, *) "After reading amoeap = ", amoeap
-    write( stdout, *) "After reading amonop = ", amonop
-    write( stdout, *) "After reading zdello = ", zdello
-    write( stdout, *) "After reading ixlg = ", ixlg
+       write( stdout, *) "After reading amosop = ", amosop
+       write( stdout, *) "After reading amoeap = ", amoeap
+       write( stdout, *) "After reading amonop = ", amonop
+       write( stdout, *) "After reading zdello = ", zdello
+       write( stdout, *) "After reading ixlg = ", ixlg
 
-    write( stdout, *) "After reading kxlt = ", kxlt
-    write( stdout, *) "After reading l_s_mask = ", l_s_mask
-    write( stdout, *) "After reading klat = ", klat
-    write( stdout, *) "After reading klon = ", klon
-    write( stdout, *) "After reading wlat = ", wlat
-    write( stdout, *) "After reading depth_b = ", depth_b
-    write( stdout, *)
-
+       write( stdout, *) "After reading kxlt = ", kxlt
+       write( stdout, *) "After reading l_s_mask = ", l_s_mask
+       write( stdout, *) "After reading klat = ", klat
+       write( stdout, *) "After reading klon = ", klon
+       write( stdout, *) "After reading wlat = ", wlat
+       write( stdout, *) "After reading depth_b = ", depth_b
+       write( stdout, *)
+    endif
+    
     
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
@@ -2355,19 +2391,21 @@ CONTAINS
     call check( nf90_get_var(ncid, id_of_var(91), t_tail), "nf90_get_var t_tail" )
     call check( nf90_get_var(ncid, id_of_var(92), delu), "nf90_get_var delu" )
 
-    write( stdout, *) "After reading ndepth = ", ndepth
-    write( stdout, *) "After reading deptha = ", deptha
-    write( stdout, *) "After reading depthd = ", depthd
-    write( stdout, *) "After reading depthe = ", depthe
-    write( stdout, *) "After reading flminfr = ", flminfr
-    write( stdout, *) "After reading tcgond = ", tcgond
-    write( stdout, *) "After reading tfak = ", tfak
-    write( stdout, *) "After reading tsihkd = ", tsihkd
-    write( stdout, *) "After reading tfac_st = ", tfac_st
-    write( stdout, *) "After reading t_tail = ", t_tail
-    write( stdout, *) "After reading delu = ", delu
-    write( stdout, *)
-
+    if(DEBUG .eqv. .true.) then
+       write( stdout, *) "After reading ndepth = ", ndepth
+       write( stdout, *) "After reading deptha = ", deptha
+       write( stdout, *) "After reading depthd = ", depthd
+       write( stdout, *) "After reading depthe = ", depthe
+       write( stdout, *) "After reading flminfr = ", flminfr
+       write( stdout, *) "After reading tcgond = ", tcgond
+       write( stdout, *) "After reading tfak = ", tfak
+       write( stdout, *) "After reading tsihkd = ", tsihkd
+       write( stdout, *) "After reading tfac_st = ", tfac_st
+       write( stdout, *) "After reading t_tail = ", t_tail
+       write( stdout, *) "After reading delu = ", delu
+       write( stdout, *)
+    endif
+    
     !
     ! End of reading to netCDF file
     !
@@ -2377,7 +2415,6 @@ CONTAINS
     write(*, *) "---------------------------------------"
     write(*, *) "--   END OF READING NETCDF FORMAT    --"
     write(*, *) "---------------------------------------"
-
     
   end SUBROUTINE READ_PREPROC_FILE_NETCDF
 
