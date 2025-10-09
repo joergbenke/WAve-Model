@@ -451,24 +451,24 @@ CONTAINS
   ! **************************************************************************** !                                                                      
 
   SUBROUTINE check(status, var_name)
-    use iso_fortran_env, only: stderr => error_unit, &
-         stdout => output_unit
-
+    use iso_fortran_env, only: stderr => error_unit
+       
     implicit none
 
-    INTEGER, intent (in) :: status
-    character(len = *) :: var_name
+    INTEGER, intent(in)           :: status
+    character(len = *), intent(in) :: var_name
 
     IF(status /= NF90_NOERR) THEN
        write(stderr, *) "Warning (",trim(var_name), "): ", TRIM(NF90_STRERROR(status))
-       !       STOP "Error while netCDF operation ... Aborting!"                                                                                        
+       STOP "Error while netCDF operation ... Aborting!"                                                                                        
     END IF
   END SUBROUTINE check
 
 
   subroutine error_msg_allocation( error_msg )
-    character(len = *) :: error_msg
-    integer            :: status = 0
+    character(len = *), intent(in) :: error_msg
+    integer                        :: status = 0
+    
     if (status /= 0) then
        write(*, *) "Error while alllocating the array ", error_msg, ". STATUS =", status
     end if
@@ -514,10 +514,10 @@ CONTAINS
     !     LOCAL VARIABLES.                                                         !
     !     ----------------                                                         !
 
-    LOGICAL  :: L_OBSTRUCTION_T
+    logical  :: L_OBSTRUCTION_T
     logical  :: DEBUG = .true.
     
-    character, dimension(200) :: FILE07_NC
+    character(len = 80) :: FILE07_NC, FILE07
     character(len = 50), allocatable, dimension(:) :: name_of_dim
     character(len = 50), allocatable, dimension(:) :: name_of_var
 
@@ -541,11 +541,13 @@ CONTAINS
     !        ----------------------------------------                              !
 
     IOS = 0
-    !LEN = LEN_TRIM(FILE07)
-    !OPEN (UNIT=IU07, FILE=FILE07(1:LEN), FORM='UNFORMATTED', STATUS='OLD',         &
-    !     &                                                                 IOSTAT=IOS)
+    LEN = LEN_TRIM(FILE07)
+    FILE07_NC = trim(FILE07) // ".nc"
+    
+    ! Open File
+!    call check( nf90_open(FILE07_NC, NF90_NOWRITE, ncid), "nf90_open" )
 
-    IOS = nf90_open("./grid/grind_info.nc", NF90_NOWRITE, ncid)
+    IOS = nf90_open(FILE07_NC, NF90_NOWRITE, ncid)
     IF (IOS.NE.0) THEN
        WRITE (IU06,*) ' ****************************************************'
        WRITE (IU06,*) ' *                                                  *'
@@ -569,19 +571,19 @@ CONTAINS
 
     call check( nf90_inquire( ncid, n_dims, n_vars, n_attrs, k_un ), "nf90_inquire" )
     if(DEBUG .eqv. .true.) then
-       write(stdout, *)
+       write(stdout, *) "-- nf90_inquire start --"
        write(stdout, *) "n_dims = ", n_dims
        write(stdout, *) "n_vars = ", n_vars
        write(stdout, *) "n_attrs = ", n_attrs
        write(stdout, *) "k_un = ", k_un
-       write(stdout, *)
+       write(stdout, *) "-- nf90_inquire end --"
     endif
     
     ! Create list of type dimension_attr and dimids                                                                                                     
     if(DEBUG .eqv. .true.) then
-       write(*, *) "-------------------------------------------------------"
-       write(*, *) "-- Allocate dimension arrays (name, id, len, dimid)  --"
-       write(*, *) "-------------------------------------------------------"
+       write(stdout, *) "-------------------------------------------------------"
+       write(stdout, *) "-- Allocate dimension arrays (name, id, len, dimid)  --"
+       write(stdout, *) "-------------------------------------------------------"
     endif
     
     if(.not. allocated(name_of_dim)) then
@@ -594,22 +596,11 @@ CONTAINS
        call error_msg_allocation( "id_of_dim" )
     end if
 
-    if(.not. allocated(len_of_dim)) then
-       allocate( len_of_dim(n_dims), stat = status)
-       call error_msg_allocation( "len_of_dim" )
-    end if
-
-    if(.not. allocated(dimids)) then
-       allocate( dimids(n_dims), stat = status)
-       call error_msg_allocation( "dimids_of_dim" )
-    end if
-
-    
     if(DEBUG .eqv. .true.) then
-       write(*, *) "-------------------------------------------------"
-       write(*, *) "-- Dimension part                              --" 
-       write(*, *) "-- nf90_inq_dimid and nf90_inquire_dimension   --"
-       write(*, *) "-------------------------------------------------"
+       write(stdout, *) "-------------------------------------------------"
+       write(stdout, *) "-- Dimension part                              --" 
+       write(stdout, *) "-- nf90_inq_dimid and nf90_inquire_dimension   --"
+       write(stdout, *) "-------------------------------------------------"
     endif
     
     name_of_dim(1) = "n_nest"
@@ -629,59 +620,34 @@ CONTAINS
 
     ! Define dimensions                                                                                                                                 
     call check( nf90_inq_dimid(ncid, name_of_dim(1), id_of_dim(1)), "nf90_inq_dim N_NEST" )
-    call check( nf90_inquire_dimension(ncid, id_of_dim(1), name_of_dim(1), len_of_dim(1)), "nf90_inq_dim N_NEST" )
-
+!    call check( nf90_inquire_dimension(ncid, id_of_dim(1), name_of_dim(1), len_of_dim(1)), "nf90_inq_dim N_NEST" )
     call check( nf90_inq_dimid(ncid, name_of_dim(2), id_of_dim(2)), "nf90_inq_dim ML" )
-    call check( nf90_inquire_dimension(ncid, id_of_dim(2), name_of_dim(2), len_of_dim(2)), "nf90_inq_dim ML" )
-
     call check( nf90_inq_dimid(ncid, name_of_dim(3), id_of_dim(3)), "nf90_inq_dim KL" )
-    call check( nf90_inquire_dimension(ncid, id_of_dim(3), name_of_dim(3), len_of_dim(3)), "nf90_inq_dim KL" )
-
     call check( nf90_inq_dimid(ncid, name_of_dim(4), id_of_dim(4)), "nf90_inq_dim NBOUNF" )
-    call check( nf90_inquire_dimension(ncid, id_of_dim(4), name_of_dim(4), len_of_dim(4)), "nf90_inq_dim NBOUNF" )
-
     call check( nf90_inq_dimid(ncid, name_of_dim(5), id_of_dim(5)), "nf90_inq_dim NX" )
-    call check( nf90_inquire_dimension(ncid, id_of_dim(5), name_of_dim(5), len_of_dim(5)), "nf90_inq_dim NX" )
-
     call check( nf90_inq_dimid(ncid, name_of_dim(6), id_of_dim(6)), "nf90_inq_dim NY" )
-    call check( nf90_inquire_dimension(ncid, id_of_dim(6), name_of_dim(6), len_of_dim(6)), "nf90_inq_dim NY" )
-
     call check( nf90_inq_dimid(ncid, name_of_dim(7), id_of_dim(7)), "nf90_inq_dim DIM_NSEA" )
-    call check( nf90_inquire_dimension(ncid, id_of_dim(7), name_of_dim(7), len_of_dim(7)), "nf90_inq_dim DIM_NSEA" )
-
     call check( nf90_inq_dimid(ncid, name_of_dim(8), id_of_dim(8)), "nf90_inq_dim JUMAX" )
-    call check( nf90_inquire_dimension(ncid, id_of_dim(8), name_of_dim(8), len_of_dim(8)), "nf90_inq_dim JUMAX" )
-
     call check( nf90_inq_dimid(ncid, name_of_dim(9), id_of_dim(9)), "nf90_inq_dim DIM_NDEPTH" )
-    call check( nf90_inquire_dimension(ncid, id_of_dim(9), name_of_dim(9), len_of_dim(9)), "nf90_inq_dim DIM_NDEPTH" )
-
     call check( nf90_inq_dimid(ncid, name_of_dim(10), id_of_dim(10)), "nf90_inq_dim result_max_val" )
-    call check( nf90_inquire_dimension(ncid, id_of_dim(10), name_of_dim(10), len_of_dim(10)), "nf90_inq_dim result_max_val" )
-
     call check( nf90_inq_dimid(ncid, name_of_dim(11), id_of_dim(11)), "nf90_inq_dim DIM_THREE" )
-    call check( nf90_inquire_dimension(ncid, id_of_dim(11), name_of_dim(11), len_of_dim(11)), "nf90_inq_dim DIM_THREE" )
-
     call check( nf90_inq_dimid(ncid, name_of_dim(12), id_of_dim(12)), "nf90_inq_dim DIM_TWO" )
-    call check( nf90_inquire_dimension(ncid, id_of_dim(12), name_of_dim(12), len_of_dim(12)), "nf90_inq_dim DIM_TWO" )
-
     call check( nf90_inq_dimid(ncid, name_of_dim(13), id_of_dim(13)), "nf90_inq_dim STRINGLEN" )
-    call check( nf90_inquire_dimension(ncid, id_of_dim(13), name_of_dim(13), len_of_dim(13)), "nf90_inq_dim STRINGLEN" )
-
     call check( nf90_inq_dimid(ncid, name_of_dim(14), id_of_dim(14)), "nf90_inq_dim STRINGLEN_C_NAME" )
-    call check( nf90_inquire_dimension(ncid, id_of_dim(14), name_of_dim(14), len_of_dim(14)), "nf90_inq_dim STRINGLEN_C_NAME" )
+
 
     ! DEfine all variabless                                                                                                                           
     if(DEBUG .eqv. .true.) then
-       write(*, *) "-------------------------------------------------"
-       write(*, *) "-- Variable part                               --" 
-       write(*, *) "-- nf90_inq_varid and nf90_inquire_variable    --"
-       write(*, *) "-------------------------------------------------"
+       write(stdout, *) "-------------------------------------------------"
+       write(stdout, *) "-- Variable part                               --" 
+       write(stdout, *) "-- nf90_inq_varid and nf90_inquire_variable    --"
+       write(stdout, *) "-------------------------------------------------"
     endif
 
     if(DEBUG .eqv. .true.) then
-       write(*, *) "------------------------------------------------------------------------"
-       write(*, *) "----- Allocation of name_var, if_of_var, ndim_of_var, xtype_of_var -----"
-       write(*, *) "------------------------------------------------------------------------"
+       write(stdout, *) "------------------------------------------------------------------------"
+       write(stdout, *) "----- Allocation of name_var, if_of_var, ndim_of_var, xtype_of_var -----"
+       write(stdout, *) "------------------------------------------------------------------------"
     endif
 
     if(.not. allocated(name_of_var)) then
@@ -706,9 +672,9 @@ CONTAINS
 
     
     if(DEBUG .eqv. .true.) then
-       write(*, *) "--------------------------------------"
-       write(*, *) "----- Initialization of name_var -----"
-       write(*, *) "--------------------------------------"
+       write(stdout, *) "--------------------------------------"
+       write(stdout, *) "----- Initialization of name_var -----"
+       write(stdout, *) "--------------------------------------"
     endif
 
     n_vars_fixed = 92  ! If we take n_vars it could be that some variables are omited because they were not defined in file                             
@@ -827,20 +793,21 @@ CONTAINS
     !         "delu"] 
 
     if(DEBUG .eqv. .true.) then
-       write(*, *) "-----------------------------"
-       write(*, *) "----- nf90_inq_varid    -----"
-       write(*, *) "-----------------------------"
+       write(stdout, *) "-----------------------------"
+       write(stdout, *) "----- nf90_inq_varid    -----"
+       write(stdout, *) "-----------------------------"
     endif
 
     i = 1
     do while (i <= n_vars_fixed)
-       write(*, *) "Loop 1, Index: ", i
+       write(stdout, *) "Loop 1, Index: ", i
        call check( nf90_inq_varid(ncid, trim(name_of_var(i)), id_of_var(i) ), "nf90_inq_varid " // trim(name_of_var(i)) )
-!       write( stdout, * ) "Id of var: ", id_of_var(i), " with index ", i
-!       write( stdout, * ) "name of var: ", name_of_var(i), " with index ", i
-    !   write(stdout, *) "maxval(NBOUNC) = ", maxval(NBOUNC)
+       write(stdout, * ) "Id of var: ", id_of_var(i), " with index ", i
+       write(stdout, * ) "name of var: ", name_of_var(i), " with index ", i
+       write(stdout, *) "maxval(NBOUNC) = ", maxval(NBOUNC)
        write(stdout, *) "NBOUNF = ", NBOUNF
        write(stdout, *) "l_obstr = ", l_obstruction_t
+       write(stdout, *)
        
        if( (i == 6) .and. (maxval(NBOUNC) <= 0) ) then
           i = i + 11
@@ -850,13 +817,9 @@ CONTAINS
           i = i + 3
        else
           i = i + 1
-          write(stdout, *) "i (in if) = ", i
+!          write(stdout, *) "i (in if) = ", i
        end if
-       write(stdout, *) "(after) i = ", i
-
-!       if( i > n_vars_fixed ) then
-!          exit
-!       endif
+!       write(stdout, *) "(after) i = ", i
     end do
 
     
@@ -883,16 +846,13 @@ CONTAINS
        end if
 
        dimids = -999
-!       if( i > n_vars_fixed ) then
-!          exit
-!       endif
     end do
 
     if(DEBUG .eqv. .true.) then
-       write(*, *) "-------------------------------------------------"
-       write(*, *) "-- Output of inquire variables                 --" 
-       write(*, *) "-- nf90_inq_varid and nf90_inquire_variable    --"
-       write(*, *) "-------------------------------------------------"
+       write(stdout, *) "-------------------------------------------------"
+       write(stdout, *) "-- Output of inquire variables                 --" 
+       write(stdout, *) "-- nf90_inq_varid and nf90_inquire_variable    --"
+       write(stdout, *) "-------------------------------------------------"
 
        write( stdout, * ) "n_vars = ", n_vars
        do i = 0, 10
@@ -920,10 +880,10 @@ CONTAINS
 
     
     if(DEBUG .eqv. .true.) then
-       write(*, *) "-------------------------------------------------"
-       write(*, *) "--  Reading of variables                       --"
-       write(*, *) "--  nf90_get_var and test for allocation       --"
-       write(*, *) "-------------------------------------------------"
+       write(stdout, *) "-------------------------------------------------"
+       write(stdout, *) "--  Reading of variables                       --"
+       write(stdout, *) "--  nf90_get_var and test for allocation       --"
+       write(stdout, *) "-------------------------------------------------"
     endif
     
     call check( nf90_get_var(ncid, id_of_var(1), header), "nf90_get_var header" )
