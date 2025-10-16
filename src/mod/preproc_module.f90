@@ -1421,7 +1421,7 @@ CONTAINS
     call check( nf90_def_var(ncid, "amoeap", NF90_INT, varid_amoeap), "nf90_def_var AMOEAP" )
 
     call check( nf90_def_var(ncid, "amonop", NF90_INT, varid_amonop), "nf90_def_var AMONOP" )
-    call check( nf90_def_var(ncid, "zdello", NF90_DOUBLE, (/ dimid_ny /), varid_zdello), "nf90_def_var ZDELLO" )
+    call check( nf90_def_var(ncid, "zdello", NF90_INT, (/ dimid_ny /), varid_zdello), "nf90_def_var ZDELLO" )
     call check( nf90_def_var(ncid, "ixlg", NF90_INT, (/ dimid_nsea /), varid_ixlg), "nf90_def_var IXLG" )
     call check( nf90_def_var(ncid, "kxlt", NF90_INT, (/ dimid_nsea /), varid_kxlt), "nf90_def_var KXLT" )
     call check( nf90_def_var(ncid, "l_s_mask", NF90_INT, varid_l_s_mask), "nf90_def_var L_S_MASK" )
@@ -2050,6 +2050,7 @@ CONTAINS
     call check( nf90_inq_varid(ncid, "df_fr", varid_df_fr ), "nf90_inq_varid " // "df_fr")
     call check( nf90_inq_varid(ncid, "df_fr2", varid_df_fr2 ), "nf90_inq_varid " // "df_fr2")
 
+    call check( nf90_inq_varid(ncid, "dfimofr", varid_dfimofr ), "nf90_inq_varid " // "dfimofr" )
     call check( nf90_inq_varid(ncid, "dfim_fr", varid_dfim_fr ), "nf90_inq_varid " // "dfim_fr")
     call check( nf90_inq_varid(ncid, "dfim_fr2", varid_dfim_fr2 ), "nf90_inq_varid " // "dfim_fr2")
     call check( nf90_inq_varid(ncid, "fr5", varid_fr5 ), "nf90_inq_varid " // "fr5")
@@ -2093,7 +2094,17 @@ CONTAINS
     call check( nf90_inq_varid(ncid, "amoeap", varid_amoeap ), "nf90_inq_varid " // "amoeap")
     call check( nf90_inq_varid(ncid, "amonop", varid_amonop ), "nf90_inq_varid " // "amonop")
 
+    call check( nf90_inq_varid(ncid, "zdello", varid_zdello ), "nf90_inq_varid " // "zdello")
+    call check( nf90_inq_varid(ncid, "ixlg", varid_ixlg ), "nf90_inq_varid " // "ixlg")
+    call check( nf90_inq_varid(ncid, "kxlt", varid_kxlt ), "nf90_inq_varid " // "kxlt")
+    call check( nf90_inq_varid(ncid, "l_s_mask", varid_l_s_mask ), "nf90_inq_varid " // "l_s_mask")
+    call check( nf90_inq_varid(ncid, "klat", varid_klat ), "nf90_inq_varid " // "klat")
+    call check( nf90_inq_varid(ncid, "klon", varid_klon ), "nf90_inq_varid " // "klon")
+    call check( nf90_inq_varid(ncid, "wlat", varid_wlat ), "nf90_inq_varid " // "wlat")
+    call check( nf90_inq_varid(ncid, "depth_b", varid_depth_b ), "nf90_inq_varid " // "depth_b")
 
+
+    
     ! Section 6 variable id definition
     call check( nf90_inq_varid(ncid, "ndepth", varid_ndepth ), "nf90_inq_varid " // "ndepth")
     call check( nf90_inq_varid(ncid, "deptha", varid_deptha ), "nf90_inq_varid " // "deptha")
@@ -2310,13 +2321,13 @@ CONTAINS
     call check( nf90_get_var(ncid, varid_nx, nx), "nf90_get_var nx" )
     call check( nf90_get_var(ncid, varid_ny, ny), "nf90_get_var ny" )
     call check( nf90_get_var(ncid, varid_nsea, nsea), "nf90_get_var nsea" )
-    call check( nf90_get_var(ncid, varid_iper_tmp, iper_tmp), "nf90_get_var iper" )
+    call check( nf90_get_var(ncid, varid_iper, iper_tmp), "nf90_get_var iper" )
     iper = merge(.TRUE., .FALSE., iper_tmp /= 0)
-    call check( nf90_get_var(ncid, varid_one_point_tmp, one_point_tmp), "nf90_get_var one_point" )
+    call check( nf90_get_var(ncid, varid_one_point, one_point_tmp), "nf90_get_var one_point" )
     one_point = merge(.TRUE., .FALSE., one_point_tmp /= 0)
-    call check( nf90_get_var(ncid, varid_reduced_grid_tmp, reduced_grid_tmp), "nf90_get_var reduced_grid" )
+    call check( nf90_get_var(ncid, varid_reduced_grid, reduced_grid_tmp), "nf90_get_var reduced_grid" )
     reduced_grid = merge(.TRUE., .FALSE., reduced_grid_tmp /= 0)
-    call check( nf90_get_var(ncid, varid_l_obstruction_t_tmp, l_obstruction_t_tmp), "nf90_get_var l_obstruction_t" )
+    call check( nf90_get_var(ncid, varid_l_obstruction_t, l_obstruction_t_tmp), "nf90_get_var l_obstruction_t" )
     l_obstruction_t = merge(.TRUE., .FALSE., l_obstruction_t_tmp /= 0)
 
     if(DEBUG .eqv. .true.) then
@@ -2346,7 +2357,7 @@ CONTAINS
     call check( nf90_get_var(ncid, varid_ixlg, ixlg), "nf90_get_var ixlg" )
 
     call check( nf90_get_var(ncid, varid_kxlt, kxlt), "nf90_get_var kxlt" )
-    call check( nf90_get_var(ncid, varid_l_s_mask_tmp, l_s_mask_tmp), "nf90_get_var l_s_mask" )
+    call check( nf90_get_var(ncid, varid_l_s_mask, l_s_mask_tmp), "nf90_get_var l_s_mask" )
     l_s_mask = merge(.TRUE., .FALSE., l_s_mask_tmp /= 0)
     call check( nf90_get_var(ncid, varid_klat, klat), "nf90_get_var klat" )
     call check( nf90_get_var(ncid, varid_klon, klon), "nf90_get_var klon" )
@@ -2393,19 +2404,19 @@ CONTAINS
     !     6. WRITE TABLES. (definition part)                                       !
     !        -------------                                                         !
     
-    call check( nf90_get_var(ncid, id_of_var(82), ndepth), "nf90_get_var ndepth" )
-    call check( nf90_get_var(ncid, id_of_var(83), deptha), "nf90_get_var deptha" )
-    call check( nf90_get_var(ncid, id_of_var(84), depthd), "nf90_get_var depthd" )
-    call check( nf90_get_var(ncid, id_of_var(85), depthe), "nf90_get_var depthe" )
+    call check( nf90_get_var(ncid, varid_ndepth, ndepth), "nf90_get_var ndepth" )
+    call check( nf90_get_var(ncid, varid_deptha, deptha), "nf90_get_var deptha" )
+    call check( nf90_get_var(ncid, varid_depthd, depthd), "nf90_get_var depthd" )
+    call check( nf90_get_var(ncid, varid_depthe, depthe), "nf90_get_var depthe" )
 
-    call check( nf90_get_var(ncid, id_of_var(86), flminfr), "nf90_get_var flminfr" )
-    call check( nf90_get_var(ncid, id_of_var(87), tcgond), "nf90_get_var tcgond" )
-    call check( nf90_get_var(ncid, id_of_var(88), tfak), "nf90_get_var tfak" )
-    call check( nf90_get_var(ncid, id_of_var(89), tsihkd), "nf90_get_var tsihkd" )
-    call check( nf90_get_var(ncid, id_of_var(90), tfac_st), "nf90_get_var tfac_st" )
+    call check( nf90_get_var(ncid, varid_flminfr, flminfr), "nf90_get_var flminfr" )
+    call check( nf90_get_var(ncid, varid_tcgond, tcgond), "nf90_get_var tcgond" )
+    call check( nf90_get_var(ncid, varid_tfak, tfak), "nf90_get_var tfak" )
+    call check( nf90_get_var(ncid, varid_tsihkd, tsihkd), "nf90_get_var tsihkd" )
+    call check( nf90_get_var(ncid, varid_tfac_st, tfac_st), "nf90_get_var tfac_st" )
         
-    call check( nf90_get_var(ncid, id_of_var(91), t_tail), "nf90_get_var t_tail" )
-    call check( nf90_get_var(ncid, id_of_var(92), delu), "nf90_get_var delu" )
+    call check( nf90_get_var(ncid, varid_t_tail, t_tail), "nf90_get_var t_tail" )
+    call check( nf90_get_var(ncid, varid_delu, delu), "nf90_get_var delu" )
 
     if(DEBUG .eqv. .true.) then
        write( stdout, *) "After reading ndepth = ", ndepth
