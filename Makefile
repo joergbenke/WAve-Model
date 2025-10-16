@@ -38,11 +38,12 @@ MODOP=-module
 # Advanced Fortran compiler options
 #-------------------------------------------------------------------------------
 FFLAGS = -heap-arrays 64
-FFLAGS+= -fp-model precise
-#FFLAGS+= -O0
-FFLAGS+= -O3
+#FFLAGS+= -fp-model precise
+FFLAGS+= -O0
+#FFLAGS+= -O3
 #FFLAGS+= -march=native
 #FFLAGS+= -g -traceback -check all 
+FFLAGS+= -g -traceback -fcheck=all -Wall 
 
 #-------------------------------------------------------------------------------
 # System specific libraries
