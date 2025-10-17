@@ -1210,12 +1210,12 @@ CONTAINS
     character(len = 80) :: FILE07_NC
 
     integer :: LEN, I, result_max_val
-    integer :: ncid, varid, status 
+    integer :: ncid
 
     !
     ! Define dimension ids
 
-    integer :: dimid_n_nest, dimid_ml, dimid_kl, dimid_max_nbounc, dimid_nbounf
+    integer :: dimid_n_nest, dimid_ml, dimid_kl, dimid_nbounf
     integer :: dimid_nx, dimid_ny, dimid_nsea, dimid_jumax, dimid_ndepth
     integer :: dimid_result_max_val, dimid_three, dimid_two
     integer :: dimid_stringlen, dimid_stringlen_c_name
@@ -1800,7 +1800,7 @@ CONTAINS
     
     integer :: LEN, i = 1
     integer :: n_dims, n_vars, n_vars_fixed = 92, n_attrs, k_un
-    integer :: ncid, varid, status 
+    integer :: ncid, status 
 
     
     ! Section 1 variable id definition
@@ -1844,7 +1844,7 @@ CONTAINS
     integer :: iper_tmp, one_point_tmp, reduced_grid_tmp, l_obstruction_t_tmp, l_s_mask_tmp
 
     ! Define dimids
-    integer, allocatable, dimension(:) :: id_of_dim, id_of_var, ndim_of_var
+    integer, allocatable, dimension(:) :: id_of_dim, id_of_var
 
 
     ! ---------------------------------------------------------------------------- !
@@ -1949,7 +1949,7 @@ CONTAINS
 
     if(DEBUG .eqv. .true.) then
        write(*, *) "------------------------------------------------------------------------"
-       write(*, *) "----- Allocation of name_var, if_of_var, ndim_of_var, xtype_of_var -----"
+       write(*, *) "-----                  Allocation of name_var, id_of_var           -----"
        write(*, *) "------------------------------------------------------------------------"
     endif
 
