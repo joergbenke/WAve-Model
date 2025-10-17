@@ -1204,7 +1204,6 @@ CONTAINS
     integer, parameter                 :: stringLen = 80
     integer, parameter                 :: stringLen_c_name = 20
 
-    character(len = stringLen_c_name)  :: c_name_copy
     character(len = 80) :: FILE07_NC
 
     integer :: LEN, I, result_max_val
@@ -1333,8 +1332,6 @@ CONTAINS
 
     call check( nf90_def_var(ncid, "nbounf", NF90_INT, varid_nbounf), "nf90_def_var NBOUNF" )
     call check( nf90_def_var(ncid, "nbinp", NF90_INT, varid_nbinp), "nf90_def_var NBINP" )
-    
-    c_name_copy = C_NAME
     call check( nf90_def_var(ncid, "c_name", NF90_CHAR, (/ dimid_stringlen_c_name /), varid_c_name), "nf90_def_var C_NAME" )
     write(*, *) "C_NAME ... ", trim(C_NAME)
     
@@ -1451,10 +1448,6 @@ CONTAINS
 
     call check( nf90_enddef(ncid), "nf90_enddef" )
 
-    write(*, *) "---------------------------------------"
-    write(*, *) "-- END OF DEFINING NETCDF VARIABLES  --"
-    write(*, *) "---------------------------------------"
-
     !
     ! End of definition
     !
@@ -1464,10 +1457,6 @@ CONTAINS
     ! Begin "Write to netCDF file"
     !
 
-    write(*, *) "---------------------------------------"
-    write(*, *) "--   BEGINNING OF WRITING NETCDF     --"
-    write(*, *) "---------------------------------------"
-        
     ! ---------------------------------------------------------------------------- !
     !                                                                              !
     !      2. WRITE COARSE GRID BOUNDARY OUTPUT INFORMATION. (write part)          ! 
@@ -1788,10 +1777,9 @@ CONTAINS
 
     character(len = 80) :: FILE07_NC
     character(len = 50), allocatable, dimension(:) :: name_of_dim
-    character(len = 50), allocatable, dimension(:) :: name_of_var
     
-    integer :: LEN, i = 1
-    integer :: n_dims, n_vars, n_vars_fixed = 92, n_attrs, k_un
+    integer :: LEN
+    integer :: n_dims, n_vars, n_attrs, k_un  ! n_vars_fixed = 92
     integer :: ncid, status 
 
     
@@ -1836,7 +1824,7 @@ CONTAINS
     integer :: iper_tmp, one_point_tmp, reduced_grid_tmp, l_obstruction_t_tmp, l_s_mask_tmp
 
     ! Define dimids
-    integer, allocatable, dimension(:) :: id_of_dim, id_of_var
+    integer, allocatable, dimension(:) :: id_of_dim
 
 
     ! ---------------------------------------------------------------------------- !
@@ -1844,22 +1832,13 @@ CONTAINS
     !     1. OPEN FILES and define dimensions                                      !
     !        --------------------------------                                      !
 
-    write(stdout, *) "---------------------------------------"
-    write(stdout, *) "--  Opening NETCDF FILE              --"
-    write(stdout, *) "---------------------------------------"
-
     LEN = LEN_TRIM(FILE07)
     FILE07_NC = trim(FILE07) // ".nc"
-    write(stdout, *) "FILE07_NC = ", FILE07_NC
     
     ! Open File
     call check( nf90_open(FILE07_NC, NF90_NOWRITE, ncid), "nf90_open" )
 
     ! Inquire dimensions, variables, attributes, ...
-    write(stdout, *) "---------------------------------------"
-    write(stdout, *) "--  NF90_INQUIRE NETCDF FILE              --"
-    write(stdout, *) "---------------------------------------"
-
     call check( nf90_inquire( ncid, n_dims, n_vars, n_attrs, k_un ), "nf90_inquire" )
     if(DEBUG .eqv. .true.) then
        write(stdout, *) "-- nf90_inquire start --"
@@ -1904,15 +1883,6 @@ CONTAINS
     name_of_dim(13) = "stringlen"
     name_of_dim(14) = "stringlen_c_name"
 
-
-    ! Define dimensions
-    if(DEBUG .eqv. .true.) then
-       write(*, *) "-------------------------------------------------"
-       write(*, *) "-- Dimension part                              --" 
-       write(*, *) "-- nf90_inq_dimid and nf90_inquire_dimension   --"
-       write(*, *) "-------------------------------------------------"
-    endif
-    
     call check( nf90_inq_dimid(ncid, name_of_dim(1), id_of_dim(1)), "nf90_inq_dim N_NEST" )
 !    call check( nf90_inquire_dimension(ncid, id_of_dim(1), name_of_dim(1), len_of_dim(1)), "nf90_inq_dim N_NEST" )
 
@@ -1932,46 +1902,18 @@ CONTAINS
 
     
     ! Define all variabless
-    if(DEBUG .eqv. .true.) then
-       write(*, *) "-------------------------------------------------"
-       write(*, *) "-- Variable part                               --" 
-       write(*, *) "-- nf90_inq_varid and nf90_inquire_variable    --"
-       write(*, *) "-------------------------------------------------"
-    endif
-
-    if(DEBUG .eqv. .true.) then
-       write(*, *) "------------------------------------------------------------------------"
-       write(*, *) "-----                  Allocation of name_var, id_of_var           -----"
-       write(*, *) "------------------------------------------------------------------------"
-    endif
-
-    if(.not. allocated(name_of_var)) then
-       allocate( name_of_var( n_vars_fixed ), stat = status )
-       call error_msg_allocation( "name_of_var" )
-    end if
     
-    if(.not. allocated(id_of_var)) then
-       allocate( id_of_var( n_vars_fixed ), stat = status )
-       call error_msg_allocation( "id_of_var" )
-    end if
-
-    if(DEBUG .eqv. .true.) then
-       write(*, *) "--------------------------------------"
-       write(*, *) "----- Initialization of name_var -----"
-       write(*, *) "--------------------------------------"
-    endif
-
+    !    name_of_var = [ "header", "n_nest  ", "max_nest", "nbounc", "n_name", "n_code", "xdello", "xdella", "n_south", "n_north", "n_east", &
+    !         "n_west", "ijarc", "blngc", "blatc", "n_zdel", "ml", "kl", "fr", "dfim", "gom", &
+    !         "c", "th", "costh", "sinth", "delth", "deltr", "inv_log_co", "df", "df_fr", "df_fr2", &
+    !         "dfim_ofr", "dfim_fr", "dfim_fr2", "fr5", "frm5", "rhowg_dfim", "fmin", "mo_tail", "mm1_tail", "mp1_tail", &
+    !         "mp2_tail", "mpm", "kpm", "jxo", "jyo", "nbounf", "nbinp", "c_name", "blngf", "blatf", &
+    !         "ijarf", "ibfl", "ibfr", "bfw", "nx", "ny", "nsea", "iper", "one_point", "reduced_grid", &
+    !         "l_obstruction_t", "obslat", "obslon", "nlon_rg", "delphi", "dellam", "sinph", "cosph", "amowep", "amosop", &
+    !         "amoeap", "amonop", "zdello", "ixlg", "kxlt", "l_s_mask", "klat", "klon", "wlat", "depth_b", &
+    !         "ndepth", "deptha", "depthb", "depthe", "flminfr", "tcgond", "tfak", "tsihkd", "tfac_st", "t_tail", &
+    !         "delu"]
     
-!    name_of_var = [ "header", "n_nest  ", "max_nest", "nbounc", "n_name", "n_code", "xdello", "xdella", "n_south", "n_north", "n_east", &
-!         "n_west", "ijarc", "blngc", "blatc", "n_zdel", "ml", "kl", "fr", "dfim", "gom", &
-!         "c", "th", "costh", "sinth", "delth", "deltr", "inv_log_co", "df", "df_fr", "df_fr2", &
-!         "dfim_ofr", "dfim_fr", "dfim_fr2", "fr5", "frm5", "rhowg_dfim", "fmin", "mo_tail", "mm1_tail", "mp1_tail", &
-!         "mp2_tail", "mpm", "kpm", "jxo", "jyo", "nbounf", "nbinp", "c_name", "blngf", "blatf", &
-!         "ijarf", "ibfl", "ibfr", "bfw", "nx", "ny", "nsea", "iper", "one_point", "reduced_grid", &
-!         "l_obstruction_t", "obslat", "obslon", "nlon_rg", "delphi", "dellam", "sinph", "cosph", "amowep", "amosop", &
-!         "amoeap", "amonop", "zdello", "ixlg", "kxlt", "l_s_mask", "klat", "klon", "wlat", "depth_b", &
-!         "ndepth", "deptha", "depthb", "depthe", "flminfr", "tcgond", "tfak", "tsihkd", "tfac_st", "t_tail", &
-!         "delu"]
 
     ! section 1 nf90_inq_varid
     call check( nf90_inq_varid(ncid, "header", varid_header ), "nf90_inq_varid " // "header")
@@ -2013,7 +1955,6 @@ CONTAINS
        call check( nf90_inq_varid(ncid, "bfw", varid_bfw ), "nf90_inq_varid " // "bfw")
     endif
 
-    
     ! Section 4 nf90_inq_varid
     call check( nf90_inq_varid(ncid, "ml", varid_ml ), "nf90_inq_varid " // "ml")
     call check( nf90_inq_varid(ncid, "kl", varid_kl ), "nf90_inq_varid " // "kl")
@@ -2051,7 +1992,6 @@ CONTAINS
     call check( nf90_inq_varid(ncid, "jxo", varid_jxo ), "nf90_inq_varid " // "jxo")
     call check( nf90_inq_varid(ncid, "jyo", varid_jyo ), "nf90_inq_varid " // "jyo")
 
-
     ! Section 5 variable id definition
     call check( nf90_inq_varid(ncid, "nx", varid_nx ), "nf90_inq_varid " // "nx")
     call check( nf90_inq_varid(ncid, "ny", varid_ny ), "nf90_inq_varid " // "ny")
@@ -2086,8 +2026,6 @@ CONTAINS
     call check( nf90_inq_varid(ncid, "wlat", varid_wlat ), "nf90_inq_varid " // "wlat")
     call check( nf90_inq_varid(ncid, "depth_b", varid_depth_b ), "nf90_inq_varid " // "depth_b")
 
-
-    
     ! Section 6 variable id definition
     call check( nf90_inq_varid(ncid, "ndepth", varid_ndepth ), "nf90_inq_varid " // "ndepth")
     call check( nf90_inq_varid(ncid, "deptha", varid_deptha ), "nf90_inq_varid " // "deptha")
@@ -2101,12 +2039,6 @@ CONTAINS
     call check( nf90_inq_varid(ncid, "tfac_st", varid_tfac_st ), "nf90_inq_varid " // "tfac_st")
     call check( nf90_inq_varid(ncid, "t_tail", varid_t_tail ), "nf90_inq_varid " // "t_tail")
     call check( nf90_inq_varid(ncid, "delu", varid_delu ), "nf90_inq_varid " // "delu")
-
-
-    if(DEBUG .eqv. .true.) then
-       write( stdout, * ) "Id of var: ", varid_header, " with index ", i
-       write( stdout, * ) "name of var: header;  with index ", i
-    endif
 
     
     ! ---------------------------------------------------------------------------- !
@@ -2126,16 +2058,8 @@ CONTAINS
     kl = -999
     fr = -999
     
-    
-    write(stdout, *) "---------------------------------------"
-    write(stdout, *) "--   BEGIN OF READING NETCDF FORMAT    --"
-    write(stdout, *) "---------------------------------------"
-
     call check( nf90_get_var(ncid, varid_header, header), "nf90_get_var header" )
-    write( stdout, *) "After reading header = ", header
-
     call check( nf90_get_var(ncid, varid_n_nest, n_nest), "nf90_get_var n_nest" )
-    write( stdout, *) "After reading n_nest = ", n_nest
     call check( nf90_get_var(ncid, varid_max_nest, max_nest), "nf90_get_var max_nest" )
     call check( nf90_get_var(ncid, varid_nbounc, nbounc), "nf90_get_var nbounc" )
     call check( nf90_get_var(ncid, varid_n_name, n_name), "nf90_get_var n_name" )
@@ -2422,10 +2346,6 @@ CONTAINS
 
     call check( nf90_close(ncid), "NF90_CLOSE" )
 
-    write(stdout, *) "---------------------------------------"
-    write(stdout, *) "--   END OF READING NETCDF FORMAT    --"
-    write(stdout, *) "---------------------------------------"
-    
   end SUBROUTINE READ_PREPROC_FILE_NETCDF
 
 
