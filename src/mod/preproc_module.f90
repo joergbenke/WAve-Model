@@ -1172,7 +1172,7 @@ CONTAINS
     !   WRITE_PREPROC_FILE - ROUTINE TO WRITE PREPROC OUTPUT TO FILE               !
     !                                                                              !
     !     H.GUNTHER            ECMWF       04/04/1990                              !
-    !     H.GUNTHER            GKSS       SEPTEMBER 2000   FT90                    !
+    !     H.GUNTHER            GKSS        SEPTEMBER 2000   FT90                   !
     !     J. BENKE             FZJ         06/2025                                 !
     !                                                                              !
     !     PURPOSE.                                                                 !
@@ -1792,10 +1792,8 @@ CONTAINS
     
     implicit none
     
-    logical :: l_obstruction
     logical :: DEBUG = .true. 
 
-    character(len = 50) :: varname_header
     character(len = 80) :: FILE07_NC
     character(len = 50), allocatable, dimension(:) :: name_of_dim
     character(len = 50), allocatable, dimension(:) :: name_of_var
@@ -1804,9 +1802,6 @@ CONTAINS
     integer :: n_dims, n_vars, n_vars_fixed = 92, n_attrs, k_un
     integer :: ncid, varid, status 
 
-    ! Define dimids
-    integer :: dimid_n_nest, dimid_ml, dimid_kl, dimid_max_nbounc, dimid_nbounf
-    integer :: dimid_nx, dimid_ny, dimid_nsea, dimid_jumax, dimid_ndepth
     
     ! Section 1 variable id definition
     integer :: varid_header
@@ -1848,8 +1843,8 @@ CONTAINS
     
     integer :: iper_tmp, one_point_tmp, reduced_grid_tmp, l_obstruction_t_tmp, l_s_mask_tmp
 
-    integer, allocatable, dimension(:) :: len_of_dim, id_of_dim
-    integer, allocatable, dimension(:) :: id_of_var, ndim_of_var, xtype_of_var, dimids
+    ! Define dimids
+    integer, allocatable, dimension(:) :: id_of_dim, id_of_var, ndim_of_var
 
 
     ! ---------------------------------------------------------------------------- !
@@ -1973,10 +1968,6 @@ CONTAINS
        write(*, *) "----- Initialization of name_var -----"
        write(*, *) "--------------------------------------"
     endif
-
-    
-!    n_vars_fixed = 92  ! If we take n_vars it could be that some variables are omited because they were not defined in file
-
 
     
 !    name_of_var = [ "header", "n_nest  ", "max_nest", "nbounc", "n_name", "n_code", "xdello", "xdella", "n_south", "n_north", "n_east", &
