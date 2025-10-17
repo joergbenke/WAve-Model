@@ -1204,8 +1204,6 @@ CONTAINS
     integer, parameter                 :: stringLen = 80
     integer, parameter                 :: stringLen_c_name = 20
 
-    
-    character(len = stringLen)         :: header_copy
     character(len = stringLen_c_name)  :: c_name_copy
     character(len = 80) :: FILE07_NC
 
@@ -1295,11 +1293,6 @@ CONTAINS
     !
     ! Define variables for netCDF
 
-    write(*, *) "----------------------------------------"
-    write(*, *) "-- BEGIN OF DEFINING NETCDF VARIABLES --"
-    write(*, *) "----------------------------------------"
-
-    header_copy = HEADER
     call check( nf90_def_var(ncid, "header", NF90_CHAR, (/ dimid_stringlen /), varid_header), "nf90_def_var HEADER" )
     
     ! ---------------------------------------------------------------------------- !
@@ -1480,7 +1473,6 @@ CONTAINS
     !      2. WRITE COARSE GRID BOUNDARY OUTPUT INFORMATION. (write part)          ! 
     ! ---------------------------------------------------------------------------- !
 
-!    call check( nf90_put_var(ncid, varid_header, trim(header_copy)), "nf90_put_var HEADER" )
     call check( nf90_put_var(ncid, varid_header, trim(HEADER)), "nf90_put_var HEADER" )
 
     call check( nf90_put_var(ncid, varid_n_nest, N_NEST), "nf90_put_var N_NEST" )
@@ -1512,7 +1504,7 @@ CONTAINS
 
     call check( nf90_put_var(ncid, varid_nbounf, NBOUNF), "nf90_put_var NBOUNF" )
     call check( nf90_put_var(ncid, varid_nbinp, NBINP), "nf90_put_var NBINP" ) 
-    call check( nf90_put_var(ncid, varid_c_name, trim(c_name_copy)), "nf90_put_var C_NAME" )
+    call check( nf90_put_var(ncid, varid_c_name, trim(C_NAME)), "nf90_put_var C_NAME" )
 
     if( NBOUNF > 0 ) then
        call check( nf90_put_var(ncid, varid_blngf, BLNGF), "nf90_put_var BLNGF" )
