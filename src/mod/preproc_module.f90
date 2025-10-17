@@ -1851,12 +1851,6 @@ CONTAINS
     endif
 
     ! Create list of type dimension_attr and dimids
-    if(DEBUG .eqv. .true.) then
-       write(stdout, *) "-------------------------------------------------------"
-       write(stdout, *) "-- Allocate dimension arrays (name, id, len, dimid)  --"
-       write(stdout, *) "-------------------------------------------------------"
-    endif
-
     if(.not. allocated(name_of_dim)) then
        allocate( name_of_dim(n_dims), stat = status)
        call error_msg_allocation( "name_of_dim" )
@@ -1866,7 +1860,6 @@ CONTAINS
        allocate( id_of_dim(n_dims), stat = status)
        call error_msg_allocation( "id_of_dim" )
     end if
-
     
     name_of_dim(1) = "n_nest"
     name_of_dim(2) = "ml"
@@ -2067,11 +2060,11 @@ CONTAINS
     
     if(DEBUG .eqv. .true.) then
        write( stdout, *) "------------------- Output of Variables ------------------"
-       write( stdout, *) "After reading header = ", header
+       write( stdout, *) "After reading header = ", trim(header)
        write( stdout, *) "After reading n_nest = ", n_nest
        write( stdout, *) "After reading max_nest = ", max_nest
        write( stdout, *) "After reading nbounc = ", nbounc
-       write( stdout, *) "After reading n_name = ", n_name
+       write( stdout, *) "After reading n_name = ", trim(n_name(1)), trim(n_name(2))
        write( stdout, *) "After reading n_code = ", n_code
     endif
     
