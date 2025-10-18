@@ -475,28 +475,42 @@ USE WAM_OASIS_MODULE,     ONLY: USE_OASIS,WAM_OASIS_WRITE_GRID !! ModR04: Includ
 !     LOCAL VARIABLES.                                                         !
 !     ----------------                                                         !
 
-INTEGER  :: IOS, LEN, I
+use iso_fortran_env, only: stdout => output_unit, stderr => error_unit
+use netcdf
+
 LOGICAL  :: L_OBSTRUCTION_T
+
+character(len = 80) :: FILE07_NC
+
+INTEGER  :: IOS = 0, LEN, I
+integer  :: ncid
+
 
 ! ---------------------------------------------------------------------------- !
 !                                                                              !
 !     0. OPEN GRID_INFO FILE FROM PREPROC OUTPUT.                              !
 !        ----------------------------------------                              !
 
-IOS = 0
+!LEN = LEN_TRIM(FILE07)
+!OPEN (UNIT=IU07, FILE=FILE07(1:LEN), FORM='UNFORMATTED', STATUS='OLD', IOSTAT=IOS)
+
 LEN = LEN_TRIM(FILE07)
-OPEN (UNIT=IU07, FILE=FILE07(1:LEN), FORM='UNFORMATTED', STATUS='OLD',         &
-&                                                                 IOSTAT=IOS)
-IF (IOS.NE.0) THEN
+FILE07_NC = trim(FILE07) // ".nc"
+
+! Open File
+IOS = nf90_open(FILE07_NC, NF90_NOWRITE, ncid)
+write(stdout, *) "FILE07_NC ",trim(FILE07_NC), " IOS = ", IOS     
+
+IF (IOS .NE. 0) THEN
    WRITE (IU06,*) ' ****************************************************'
    WRITE (IU06,*) ' *                                                  *'
    WRITE (IU06,*) ' *     FATAL ERROR IN SUB. READ_PREPROC_FILE        *'
    WRITE (IU06,*) ' *     =====================================        *'
    WRITE (IU06,*) ' *                                                  *'
    WRITE (IU06,*) ' * PREPROC OUTPUT FILE COULD NOT BE OPENED          *'
-   WRITE (IU06,*) ' *    ERROR CODE IS IOSTAT = ', IOS
-   WRITE (IU06,*) ' *    FILE NAME IS  FILE07 = ', FILE07(1:LEN)
-   WRITE (IU06,*) ' *    UNIT IS         IU07 = ', IU07
+   WRITE (IU06,*) ' *    ERROR CODE IS IOSTAT = ', IOS                 
+   WRITE (IU06,*) ' *    FILE NAME IS  FILE07 = ', FILE07_NC           
+   WRITE (IU06,*) ' *    UNIT IS         IU07 = ', IU07                
    WRITE (IU06,*) ' *                                                  *'
    WRITE (IU06,*) ' *         PROGRAM ABORTS  PROGRAM ABORTS           *'
    WRITE (IU06,*) ' *                                                  *'
