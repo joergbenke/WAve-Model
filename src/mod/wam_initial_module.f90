@@ -98,6 +98,8 @@ USE WAM_ICE_MODULE,         ONLY: ICE_RUN
 use wam_mpi_module,     only: nijs, nijl, ninf, nsup
 use wam_special_module, only: readyf
 
+use netcdf
+
 ! ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ !
 !                                                                              !
 !     C. MODULE VARIABLES.                                                     !
@@ -445,6 +447,42 @@ END SUBROUTINE PREPARE_START
 
 ! ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ !
 
+ SUBROUTINE check(status, var_name)
+    !----------------------------------------------------------------------------!
+    !                                                                            !
+    !   CHECK - Error handling for netCDF API                                    !
+    !                                                                            !
+    !     J. BENKE              FZJ       10/2025                                !
+    !                                                                            !
+    !----------------------------------------------------------------------------!
+    
+    use iso_fortran_env, only: stderr => error_unit
+
+    implicit none
+
+    integer, intent(in) :: status
+    character(len = *), intent(in) :: var_name
+
+    write(stderr, *) "Warning (",trim(var_name), "): ", TRIM(NF90_STRERROR(status))
+    IF(status /= NF90_NOERR) THEN
+       STOP "Error while netCDF operation ... Aborting!"
+    END IF
+  END SUBROUTINE check
+
+
+   subroutine error_msg_allocation( error_msg )
+    use iso_fortran_env, only: stderr => error_unit
+
+    character(len = *), intent(in) :: error_msg
+    integer                        :: status = 0
+
+    if (status /= 0) then
+       write(stderr, *) "Error while alllocating the array ", error_msg, ". STATUS =", status
+       STOP "NETCDF ERROR"
+    end if
+  end subroutine error_msg_allocation
+
+
 SUBROUTINE READ_PREPROC_FILE
 
 USE WAM_OASIS_MODULE,     ONLY: USE_OASIS,WAM_OASIS_WRITE_GRID !! ModR04: Include OASIS
@@ -476,14 +514,27 @@ USE WAM_OASIS_MODULE,     ONLY: USE_OASIS,WAM_OASIS_WRITE_GRID !! ModR04: Includ
 !     ----------------                                                         !
 
 use iso_fortran_env, only: stdout => output_unit, stderr => error_unit
-use netcdf
+!use netcdf
 
-LOGICAL  :: L_OBSTRUCTION_T
+LOGICAL  :: L_OBSTRUCTION_T, debug = .true.
 
 character(len = 80) :: FILE07_NC
+character(len = 50), allocatable, dimension(:) :: name_of_dim
 
 INTEGER  :: IOS = 0, LEN, I
-integer  :: ncid
+integer  :: ncid, status
+integer  :: n_dims, n_vars, n_attrs, k_un
+integer, allocatable, dimension(:) :: id_of_dim
+
+! Section 1 variable id definition
+integer :: varid_header
+    
+! Section 2 variable id definition
+integer :: varid_n_nest, varid_max_nest
+integer :: varid_nbounc, varid_n_name, varid_n_code
+integer :: varid_ijarc, varid_xdello, varid_xdella
+integer :: varid_n_south, varid_n_north, varid_n_east, varid_n_west
+integer :: varid_blngc, varid_blatc, varid_n_zdel
 
 
 ! ---------------------------------------------------------------------------- !
@@ -491,11 +542,14 @@ integer  :: ncid
 !     0. OPEN GRID_INFO FILE FROM PREPROC OUTPUT.                              !
 !        ----------------------------------------                              !
 
-!LEN = LEN_TRIM(FILE07)
-!OPEN (UNIT=IU07, FILE=FILE07(1:LEN), FORM='UNFORMATTED', STATUS='OLD', IOSTAT=IOS)
-
 LEN = LEN_TRIM(FILE07)
 FILE07_NC = trim(FILE07) // ".nc"
+
+
+IOS = 0
+LEN = LEN_TRIM(FILE07)
+OPEN (UNIT=IU07, FILE=FILE07(1:LEN), FORM='UNFORMATTED', STATUS='OLD',         &
+&                                                                 IOSTAT=IOS)
 
 ! Open File
 IOS = nf90_open(FILE07_NC, NF90_NOWRITE, ncid)
@@ -517,14 +571,87 @@ IF (IOS .NE. 0) THEN
    WRITE (IU06,*) ' ****************************************************'
    CALL ABORT1
 END IF
-READ (IU07) HEADER
+
+call check( nf90_inquire( ncid, n_dims, n_vars, n_attrs, k_un ), "nf90_inquire" )
+if(DEBUG .eqv. .true.) then
+   write(stdout, *) "-- nf90_inquire start --"
+   write(stdout, *) "n_dims = ", n_dims
+   write(stdout, *) "n_vars = ", n_vars
+   write(stdout, *) "n_attrs = ", n_attrs
+   write(stdout, *) "k_un = ", k_un
+   write(stdout, *) "-- nf90_inquire end --"
+   write(stdout, *)
+endif
+
+! Create list of type dimension_attr and dimids                                                                                                                                     
+if(.not. allocated(name_of_dim)) then
+   allocate( name_of_dim(n_dims), stat = status)
+   call error_msg_allocation( "name_of_dim" )
+end if
+
+if(.not. allocated(id_of_dim)) then
+   allocate( id_of_dim(n_dims), stat = status)
+   call error_msg_allocation( "id_of_dim" )
+end if
+
+name_of_dim(1) = "n_nest"
+name_of_dim(2) = "ml"
+name_of_dim(3) = "kl"
+name_of_dim(4) = "nbounf"
+name_of_dim(5) = "nx"
+name_of_dim(6) = "ny"
+name_of_dim(7) = "dim_nsea"
+name_of_dim(8) = "jumax"
+name_of_dim(9) = "dim_ndepth"
+name_of_dim(10) = "result_max_val"
+name_of_dim(11) = "dim_three"
+name_of_dim(12) = "dim_two"
+name_of_dim(13) = "stringlen"
+name_of_dim(14) = "stringlen_c_name"
+
+call check( nf90_inq_dimid(ncid, name_of_dim(1), id_of_dim(1)), "nf90_inq_dim N_NEST" )
+!    call check( nf90_inquire_dimension(ncid, id_of_dim(1), name_of_dim(1), len_of_dim(1)), "nf90_inq_dim N_NEST" )                                                                     
+call check( nf90_inq_dimid(ncid, name_of_dim(2), id_of_dim(2)), "nf90_inq_dim ML" )
+call check( nf90_inq_dimid(ncid, name_of_dim(3), id_of_dim(3)), "nf90_inq_dim KL" )
+call check( nf90_inq_dimid(ncid, name_of_dim(4), id_of_dim(4)), "nf90_inq_dim NBOUNF" )
+call check( nf90_inq_dimid(ncid, name_of_dim(5), id_of_dim(5)), "nf90_inq_dim NX" )
+call check( nf90_inq_dimid(ncid, name_of_dim(6), id_of_dim(6)), "nf90_inq_dim NY" )
+call check( nf90_inq_dimid(ncid, name_of_dim(7), id_of_dim(7)), "nf90_inq_dim DIM_NSEA" )
+call check( nf90_inq_dimid(ncid, name_of_dim(8), id_of_dim(8)), "nf90_inq_dim JUMAX" )
+call check( nf90_inq_dimid(ncid, name_of_dim(9), id_of_dim(9)), "nf90_inq_dim DIM_NDEPTH" )
+call check( nf90_inq_dimid(ncid, name_of_dim(10), id_of_dim(10)), "nf90_inq_dim result_max_val" )
+call check( nf90_inq_dimid(ncid, name_of_dim(11), id_of_dim(11)), "nf90_inq_dim DIM_THREE" )
+call check( nf90_inq_dimid(ncid, name_of_dim(12), id_of_dim(12)), "nf90_inq_dim DIM_TWO" )
+call check( nf90_inq_dimid(ncid, name_of_dim(13), id_of_dim(13)), "nf90_inq_dim STRINGLEN" )
+call check( nf90_inq_dimid(ncid, name_of_dim(14), id_of_dim(14)), "nf90_inq_dim STRINGLEN_C_NAME" )
+
+
+
+
+
+! section 1 nf90_inq_varid
+call check( nf90_inq_varid(ncid, "header", varid_header ), "nf90_inq_varid " // "header")
+call check( nf90_get_var(ncid, varid_header, header), "nf90_get_var header" )
+
+!READ (IU07) HEADER
 
 ! ---------------------------------------------------------------------------- !
 !                                                                              !
 !     1. READ COARSE GRID BOUNDARY OUTPUT INFORMATION.                         !
 !        ---------------------------------------------                         !
 
-READ(IU07) N_NEST, MAX_NEST
+    ! section 2 nf90_inq_varid
+call check( nf90_inq_varid(ncid, "n_nest", varid_n_nest ), "nf90_inq_varid " // "n_nest")
+call check( nf90_inq_varid(ncid, "max_nest", varid_max_nest ), "nf90_inq_varid " // "max_nest")
+call check( nf90_inq_varid(ncid, "nbounc", varid_nbounc ), "nf90_inq_varid " // "nbounc")
+call check( nf90_inq_varid(ncid, "n_name", varid_n_name ), "nf90_inq_varid " // "n_name")
+call check( nf90_inq_varid(ncid, "n_code", varid_n_code ), "nf90_inq_varid " // "n_code")
+
+call check( nf90_get_var(ncid, varid_n_nest, n_nest), "nf90_get_var n_nest" )
+call check( nf90_get_var(ncid, varid_max_nest, max_nest), "nf90_get_var max_nest" )
+
+
+!READ(IU07) N_NEST, MAX_NEST
 IF (.NOT.ALLOCATED(NBOUNC )) ALLOCATE (NBOUNC(N_NEST))
 IF (.NOT.ALLOCATED(N_NAME )) ALLOCATE (N_NAME(N_NEST))
 if (.not.allocated(n_code )) allocate (n_code(n_nest))
@@ -536,14 +663,74 @@ IF (.NOT.ALLOCATED(N_WEST )) ALLOCATE (N_WEST(N_NEST))
 IF (.NOT.ALLOCATED(BLNGC  )) ALLOCATE (BLNGC(MAX_NEST,N_NEST))
 IF (.NOT.ALLOCATED(BLATC  )) ALLOCATE (BLATC(MAX_NEST,N_NEST))
 IF (.NOT.ALLOCATED(N_ZDEL )) ALLOCATE (N_ZDEL(MAX_NEST,N_NEST))
-DO I=1,N_NEST
-   READ(IU07) NBOUNC(I), N_NAME(I), n_code(i)
-   IF (NBOUNC(I).GT.0) THEN
-      READ(IU07) IJARC(1:NBOUNC(I),I)
-      READ(IU07) XDELLO, XDELLA, N_SOUTH(I), N_NORTH(I), N_EAST(I), N_WEST(I), &
-&                BLNGC(1:NBOUNC(I),I), BLATC(1:NBOUNC(I),I), N_ZDEL(1:NBOUNC(I),I)
-   END IF
-END DO
+
+call check( nf90_inq_varid(ncid, "nbounc", varid_nbounc ), "nf90_inq_varid " // "nbounc")
+call check( nf90_inq_varid(ncid, "n_name", varid_n_name ), "nf90_inq_varid " // "n_name")
+call check( nf90_inq_varid(ncid, "n_code", varid_n_code ), "nf90_inq_varid " // "n_code")
+
+call check( nf90_get_var(ncid, varid_nbounc, nbounc), "nf90_get_var nbounc" )
+call check( nf90_get_var(ncid, varid_n_name, n_name), "nf90_get_var n_name" )
+call check( nf90_get_var(ncid, varid_n_code, n_code), "nf90_get_var n_code" )
+
+if(DEBUG .eqv. .true.) then
+   write( stdout, *) "------------------- Output of Variables ------------------"
+   write( stdout, *) "After reading header = ", trim(header)
+   write( stdout, *) "After reading n_nest = ", n_nest
+   write( stdout, *) "After reading max_nest = ", max_nest
+   write( stdout, *) "After reading nbounc = ", nbounc
+   write( stdout, *) "After reading n_name = ", trim(n_name(1)), trim(n_name(2))
+   write( stdout, *) "After reading n_code = ", n_code
+endif
+
+
+if( maxval(NBOUNC) > 0 ) then
+   call check( nf90_inq_varid(ncid, "ijarc", varid_ijarc ), "nf90_inq_varid " // "ijarc")
+   call check( nf90_inq_varid(ncid, "xdello", varid_xdello ), "nf90_inq_varid " // "xdello")
+   call check( nf90_inq_varid(ncid, "xdella", varid_xdella ), "nf90_inq_varid " // "xdella")
+   call check( nf90_inq_varid(ncid, "n_south", varid_n_south ), "nf90_inq_varid " // "n_south")
+
+   call check( nf90_inq_varid(ncid, "n_north", varid_n_north ), "nf90_inq_varid " // "n_north")
+   call check( nf90_inq_varid(ncid, "n_east", varid_n_east ), "nf90_inq_varid " // "n_east")
+   call check( nf90_inq_varid(ncid, "n_west", varid_n_west ), "nf90_inq_varid " // "n_west")
+   call check( nf90_inq_varid(ncid, "blngc", varid_blngc ), "nf90_inq_varid " // "blngc")
+   call check( nf90_inq_varid(ncid, "blatc", varid_blatc ), "nf90_inq_varid " // "blatc")
+
+   call check( nf90_inq_varid(ncid, "n_zdel", varid_n_zdel ), "nf90_inq_varid " // "n_zdel")
+
+   call check( nf90_get_var(ncid, varid_ijarc, ijarc), "nf90_get_var ijarc" )
+   call check( nf90_get_var(ncid, varid_xdello, xdello), "nf90_get_var xdello" )
+   call check( nf90_get_var(ncid, varid_xdella, xdella), "nf90_get_var xdella" )
+   call check( nf90_get_var(ncid, varid_n_south, n_south), "nf90_get_var n_south" )
+   call check( nf90_get_var(ncid, varid_n_north, n_north), "nf90_get_var n_north" )
+   call check( nf90_get_var(ncid, varid_n_east, n_east), "nf90_get_var n_east" )
+   call check( nf90_get_var(ncid, varid_n_west, n_west), "nf90_get_var n_wnest" )
+   call check( nf90_get_var(ncid, varid_blngc, blngc), "nf90_get_var blngc" )
+   call check( nf90_get_var(ncid, varid_blatc, blatc), "nf90_get_var blatc" )
+   call check( nf90_get_var(ncid, varid_n_zdel, n_zdel), "nf90_get_var n_zdel" )
+
+   if(DEBUG .eqv. .true.) then
+      write( stdout, *) "After reading IJARC = ", ijarc
+      write( stdout, *) "After reading xdello = ", xdello
+      write( stdout, *) "After reading xdella = ", xdella
+      write( stdout, *) "After reading n_south = ", n_south
+      write( stdout, *) "After reading n_north = ", n_north
+      write( stdout, *) "After reading n_south = ", n_east
+      write( stdout, *) "After reading n_north = ", n_west
+      write( stdout, *) "After reading blngc = ", blngc
+      write( stdout, *) "After reading blatc = ", blatc
+      write( stdout, *) "After reading n_zdel = ", n_zdel
+   endif
+end if
+
+
+    ! DO I=1,N_NEST
+!   READ(IU07) NBOUNC(I), N_NAME(I), n_code(i)
+!   IF (NBOUNC(I).GT.0) THEN
+!      READ(IU07) IJARC(1:NBOUNC(I),I)
+!      READ(IU07) XDELLO, XDELLA, N_SOUTH(I), N_NORTH(I), N_EAST(I), N_WEST(I), &
+!&                BLNGC(1:NBOUNC(I),I), BLATC(1:NBOUNC(I),I), N_ZDEL(1:NBOUNC(I),I)
+!   END IF
+! END DO
 
 ! ---------------------------------------------------------------------------- !
 !                                                                              !
@@ -682,7 +869,9 @@ READ (IU07) DELU
 !     8. CLOSE FILE AND RETURN.                                                !
 !        ----------------------                                                !
 
-CLOSE (UNIT=IU07, STATUS='KEEP')
+call check( nf90_close(ncid), "NF90_CLOSE" )
+
+!CLOSE (UNIT=IU07, STATUS='KEEP')
 
 IF(USE_OASIS)CALL WAM_OASIS_WRITE_GRID  !! ModR04: Include OASIS
 
