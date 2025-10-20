@@ -483,373 +483,349 @@ END SUBROUTINE PREPARE_START
   end subroutine error_msg_allocation
 
 
-SUBROUTINE READ_PREPROC_FILE
+  SUBROUTINE READ_PREPROC_FILE
 
-USE WAM_OASIS_MODULE,     ONLY: USE_OASIS,WAM_OASIS_WRITE_GRID !! ModR04: Include OASIS
-! ---------------------------------------------------------------------------- !
-!                                                                              !
-!   READ_PREPROC_FILE -  READ OUTPUT FILE FROM PREPROC.                        !
-!                                                                              !
-!     H. GUNTHER      GKSS/ECMWF      MAY 1990                                 !
-!     H. GUNTHER      GKSS        OCTOBER 2000  FT90                           !
-!                                                                              !
-!     PURPOSE.                                                                 !
-!     --------                                                                 !
-!                                                                              !
-!       INPUT OF PREPROC OUTPUT.                                               !
-!                                                                              !
-!     METHOD.                                                                  !
-!     -------                                                                  !
-!                                                                              !
-!       UNFORMATTED READ FROM FILE07.                                          !
-!                                                                              !
-!     REFERENCE.                                                               !
-!     ----------                                                               !
-!                                                                              !
-!       NONE.                                                                  !
-!                                                                              !
-! ---------------------------------------------------------------------------- !
-!                                                                              !
-!     LOCAL VARIABLES.                                                         !
-!     ----------------                                                         !
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !   READ_PREPROC_FILE -  READ OUTPUT FILE FROM PREPROC.                        !
+    !                                                                              !
+    !     H. GUNTHER      GKSS/ECMWF      MAY 1990                                 !
+    !     H. GUNTHER      GKSS        OCTOBER 2000  FT90                           !
+    !     J. BENKE        JSC             OCT 2025                                 !
+    !                                                                              ! 
+    !     PURPOSE.                                                                 !
+    !     --------                                                                 !
+    !                                                                              !
+    !       INPUT OF PREPROC OUTPUT.                                               !
+    !                                                                              !
+    !     METHOD.                                                                  !
+    !     -------                                                                  !
+    !                                                                              !
+    !       UNFORMATTED READ FROM FILE07.                                          !
+    !                                                                              !
+    !     REFERENCE.                                                               !
+    !     ----------                                                               !
+    !                                                                              !
+    !       NONE.                                                                  !
+    !                                                                              !
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !     LOCAL VARIABLES.                                                         !
+    !     ----------------                                                         !
 
-use iso_fortran_env, only: stdout => output_unit, stderr => error_unit
-!use netcdf
+    USE WAM_OASIS_MODULE,     ONLY: USE_OASIS,WAM_OASIS_WRITE_GRID !! ModR04: Include OASIS
+    use iso_fortran_env, only: stdout => output_unit, stderr => error_unit
+    !use netcdf
 
-LOGICAL  :: L_OBSTRUCTION_T, debug = .true.
+    LOGICAL  :: L_OBSTRUCTION_T, debug = .true.
 
-character(len = 80) :: FILE07_NC
-character(len = 50), allocatable, dimension(:) :: name_of_dim
+    character(len = 80) :: FILE07_NC
+    character(len = 50), allocatable, dimension(:) :: name_of_dim
 
-INTEGER  :: IOS = 0, LEN, I
-integer  :: ncid, status
-integer  :: n_dims, n_vars, n_attrs, k_un
-integer, allocatable, dimension(:) :: id_of_dim
+    INTEGER  :: IOS = 0, LEN, I
+    integer  :: ncid, status
+    integer  :: n_dims, n_vars, n_attrs, k_un
+    integer, allocatable, dimension(:) :: id_of_dim
 
-! Section 1 variable id definition
-integer :: varid_header
-    
-! Section 2 variable id definition
-integer :: varid_n_nest, varid_max_nest
-integer :: varid_nbounc, varid_n_name, varid_n_code
-integer :: varid_ijarc, varid_xdello, varid_xdella
-integer :: varid_n_south, varid_n_north, varid_n_east, varid_n_west
-integer :: varid_blngc, varid_blatc, varid_n_zdel
+    ! Section 1 variable id definition
+    integer :: varid_header
 
-! Section 3 variable id definition
-integer :: varid_nbounf, varid_nbinp, varid_c_name
-integer :: varid_blngf, varid_blatf, varid_ijarf, varid_ibfl, varid_ibfr, varid_bfw
+    ! Section 2 variable id definition
+    integer :: varid_n_nest, varid_max_nest
+    integer :: varid_nbounc, varid_n_name, varid_n_code
+    integer :: varid_ijarc, varid_xdello, varid_xdella
+    integer :: varid_n_south, varid_n_north, varid_n_east, varid_n_west
+    integer :: varid_blngc, varid_blatc, varid_n_zdel
 
-! Section 4 variable id definition
-integer :: varid_ml, varid_kl
-integer :: varid_fr, varid_dfim, varid_gom, varid_c, varid_delth, varid_deltr, varid_th
-integer :: varid_costh, varid_sinth, varid_inv_log_co, varid_df, varid_df_fr, varid_df_fr2
-integer :: varid_dfimofr
+    ! Section 3 variable id definition
+    integer :: varid_nbounf, varid_nbinp, varid_c_name
+    integer :: varid_blngf, varid_blatf, varid_ijarf, varid_ibfl, varid_ibfr, varid_bfw
 
-integer :: varid_dfim_fr, varid_dfim_fr2, varid_fr5, varid_frm5, varid_rhowg_dfim
-integer :: varid_fmin, varid_mo_tail, varid_mm1_tail, varid_mp1_tail, varid_mp2_tail 
-integer :: varid_mpm, varid_kpm, varid_jxo, varid_jyo
+    ! Section 4 variable id definition
+    integer :: varid_ml, varid_kl
+    integer :: varid_fr, varid_dfim, varid_gom, varid_c, varid_delth, varid_deltr, varid_th
+    integer :: varid_costh, varid_sinth, varid_inv_log_co, varid_df, varid_df_fr, varid_df_fr2
+    integer :: varid_dfimofr
 
-! Section 5 variable id definition
-integer :: varid_nx, varid_ny, varid_nsea, varid_iper, varid_one_point
-integer :: varid_reduced_grid, varid_l_obstruction_t, varid_nlon_rg, varid_delphi, varid_dellam 
-integer :: varid_sinph, varid_cosph, varid_amowep, varid_amosop, varid_amoeap, varid_amonop
+    integer :: varid_dfim_fr, varid_dfim_fr2, varid_fr5, varid_frm5, varid_rhowg_dfim
+    integer :: varid_fmin, varid_mo_tail, varid_mm1_tail, varid_mp1_tail, varid_mp2_tail 
+    integer :: varid_mpm, varid_kpm, varid_jxo, varid_jyo
 
-integer :: varid_zdello, varid_ixlg, varid_kxlt, varid_l_s_mask, varid_klat, varid_klon, varid_wlat
-integer :: varid_depth_b, varid_obslat, varid_obslon
+    ! Section 5 variable id definition
+    integer :: varid_nx, varid_ny, varid_nsea, varid_iper, varid_one_point
+    integer :: varid_reduced_grid, varid_l_obstruction_t, varid_nlon_rg, varid_delphi, varid_dellam 
+    integer :: varid_sinph, varid_cosph, varid_amowep, varid_amosop, varid_amoeap, varid_amonop
 
-! section 6 variable id definition 
-integer :: varid_ndepth, varid_deptha, varid_depthd, varid_depthe
-integer :: varid_flminfr, varid_tcgond, varid_tfak, varid_tsihkd, varid_tfac_st, varid_t_tail
-integer :: varid_delu
+    integer :: varid_zdello, varid_ixlg, varid_kxlt, varid_l_s_mask, varid_klat, varid_klon, varid_wlat
+    integer :: varid_depth_b, varid_obslat, varid_obslon
 
-integer :: iper_tmp, one_point_tmp, reduced_grid_tmp, l_obstruction_t_tmp, l_s_mask_tmp
+    ! section 6 variable id definition 
+    integer :: varid_ndepth, varid_deptha, varid_depthd, varid_depthe
+    integer :: varid_flminfr, varid_tcgond, varid_tfak, varid_tsihkd, varid_tfac_st, varid_t_tail
+    integer :: varid_delu
 
-
-! ---------------------------------------------------------------------------- !
-!                                                                              !
-!     0. OPEN GRID_INFO FILE FROM PREPROC OUTPUT.                              !
-!        ----------------------------------------                              !
-
-LEN = LEN_TRIM(FILE07)
-FILE07_NC = trim(FILE07) // ".nc"
-
-! Open File
-IOS = nf90_open(FILE07_NC, NF90_NOWRITE, ncid)
-write(stdout, *) "FILE07_NC ",trim(FILE07_NC), " IOS = ", IOS     
-
-IF (IOS .NE. 0) THEN
-   WRITE (IU06,*) ' ****************************************************'
-   WRITE (IU06,*) ' *                                                  *'
-   WRITE (IU06,*) ' *     FATAL ERROR IN SUB. READ_PREPROC_FILE        *'
-   WRITE (IU06,*) ' *     =====================================        *'
-   WRITE (IU06,*) ' *                                                  *'
-   WRITE (IU06,*) ' * PREPROC OUTPUT FILE COULD NOT BE OPENED          *'
-   WRITE (IU06,*) ' *    ERROR CODE IS IOSTAT = ', IOS                 
-   WRITE (IU06,*) ' *    FILE NAME IS  FILE07 = ', FILE07_NC           
-   WRITE (IU06,*) ' *    UNIT IS         IU07 = ', IU07                
-   WRITE (IU06,*) ' *                                                  *'
-   WRITE (IU06,*) ' *         PROGRAM ABORTS  PROGRAM ABORTS           *'
-   WRITE (IU06,*) ' *                                                  *'
-   WRITE (IU06,*) ' ****************************************************'
-   CALL ABORT1
-END IF
-
-call check( nf90_inquire( ncid, n_dims, n_vars, n_attrs, k_un ), "nf90_inquire" )
-if(DEBUG .eqv. .true.) then
-   write(stdout, *) "-- nf90_inquire start --"
-   write(stdout, *) "n_dims = ", n_dims
-   write(stdout, *) "n_vars = ", n_vars
-   write(stdout, *) "n_attrs = ", n_attrs
-   write(stdout, *) "k_un = ", k_un
-   write(stdout, *) "-- nf90_inquire end --"
-   write(stdout, *)
-endif
-
-! Create list of type dimension_attr and dimids                                                                                                                                     
-if(.not. allocated(name_of_dim)) then
-   allocate( name_of_dim(n_dims), stat = status)
-   call error_msg_allocation( "name_of_dim" )
-end if
-
-if(.not. allocated(id_of_dim)) then
-   allocate( id_of_dim(n_dims), stat = status)
-   call error_msg_allocation( "id_of_dim" )
-end if
-
-name_of_dim(1) = "n_nest"
-name_of_dim(2) = "ml"
-name_of_dim(3) = "kl"
-name_of_dim(4) = "nbounf"
-name_of_dim(5) = "nx"
-name_of_dim(6) = "ny"
-name_of_dim(7) = "dim_nsea"
-name_of_dim(8) = "jumax"
-name_of_dim(9) = "dim_ndepth"
-name_of_dim(10) = "result_max_val"
-name_of_dim(11) = "dim_three"
-name_of_dim(12) = "dim_two"
-name_of_dim(13) = "stringlen"
-name_of_dim(14) = "stringlen_c_name"
-
-call check( nf90_inq_dimid(ncid, name_of_dim(1), id_of_dim(1)), "nf90_inq_dim N_NEST" )
-!    call check( nf90_inquire_dimension(ncid, id_of_dim(1), name_of_dim(1), len_of_dim(1)), "nf90_inq_dim N_NEST" )                                                                     
-call check( nf90_inq_dimid(ncid, name_of_dim(2), id_of_dim(2)), "nf90_inq_dim ML" )
-call check( nf90_inq_dimid(ncid, name_of_dim(3), id_of_dim(3)), "nf90_inq_dim KL" )
-call check( nf90_inq_dimid(ncid, name_of_dim(4), id_of_dim(4)), "nf90_inq_dim NBOUNF" )
-call check( nf90_inq_dimid(ncid, name_of_dim(5), id_of_dim(5)), "nf90_inq_dim NX" )
-call check( nf90_inq_dimid(ncid, name_of_dim(6), id_of_dim(6)), "nf90_inq_dim NY" )
-call check( nf90_inq_dimid(ncid, name_of_dim(7), id_of_dim(7)), "nf90_inq_dim DIM_NSEA" )
-call check( nf90_inq_dimid(ncid, name_of_dim(8), id_of_dim(8)), "nf90_inq_dim JUMAX" )
-call check( nf90_inq_dimid(ncid, name_of_dim(9), id_of_dim(9)), "nf90_inq_dim DIM_NDEPTH" )
-call check( nf90_inq_dimid(ncid, name_of_dim(10), id_of_dim(10)), "nf90_inq_dim result_max_val" )
-call check( nf90_inq_dimid(ncid, name_of_dim(11), id_of_dim(11)), "nf90_inq_dim DIM_THREE" )
-call check( nf90_inq_dimid(ncid, name_of_dim(12), id_of_dim(12)), "nf90_inq_dim DIM_TWO" )
-call check( nf90_inq_dimid(ncid, name_of_dim(13), id_of_dim(13)), "nf90_inq_dim STRINGLEN" )
-call check( nf90_inq_dimid(ncid, name_of_dim(14), id_of_dim(14)), "nf90_inq_dim STRINGLEN_C_NAME" )
+    integer :: iper_tmp, one_point_tmp, reduced_grid_tmp, l_obstruction_t_tmp, l_s_mask_tmp
 
 
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !     0. OPEN GRID_INFO FILE FROM PREPROC OUTPUT.                              !
+    !        ----------------------------------------                              !
 
-! section 1 nf90_inq_varid
-call check( nf90_inq_varid(ncid, "header", varid_header ), "nf90_inq_varid " // "header")
-call check( nf90_get_var(ncid, varid_header, header), "nf90_get_var header" )
+    LEN = LEN_TRIM(FILE07)
+    FILE07_NC = trim(FILE07) // ".nc"
 
-!READ (IU07) HEADER
+    ! Open File
+    IOS = nf90_open(FILE07_NC, NF90_NOWRITE, ncid)
+    IF (IOS .NE. 0) THEN
+       WRITE (IU06,*) ' ****************************************************'
+       WRITE (IU06,*) ' *                                                  *'
+       WRITE (IU06,*) ' *     FATAL ERROR IN SUB. READ_PREPROC_FILE        *'
+       WRITE (IU06,*) ' *     =====================================        *'
+       WRITE (IU06,*) ' *                                                  *'
+       WRITE (IU06,*) ' * PREPROC OUTPUT FILE COULD NOT BE OPENED          *'
+       WRITE (IU06,*) ' *    ERROR CODE IS IOSTAT = ', IOS                 
+       WRITE (IU06,*) ' *    FILE NAME IS  FILE07 = ', FILE07_NC           
+       WRITE (IU06,*) ' *    UNIT IS         IU07 = ', IU07                
+       WRITE (IU06,*) ' *                                                  *'
+       WRITE (IU06,*) ' *         PROGRAM ABORTS  PROGRAM ABORTS           *'
+       WRITE (IU06,*) ' *                                                  *'
+       WRITE (IU06,*) ' ****************************************************'
+       CALL ABORT1
+    END IF
 
-! ---------------------------------------------------------------------------- !
-!                                                                              !
-!     1. READ COARSE GRID BOUNDARY OUTPUT INFORMATION.                         !
-!        ---------------------------------------------                         !
+    call check( nf90_inquire( ncid, n_dims, n_vars, n_attrs, k_un ), "nf90_inquire" )
+    if(DEBUG .eqv. .true.) then
+       write(stdout, *) "-- nf90_inquire start --"
+       write(stdout, *) "n_dims = ", n_dims
+       write(stdout, *) "n_vars = ", n_vars
+       write(stdout, *) "n_attrs = ", n_attrs
+       write(stdout, *) "k_un = ", k_un
+       write(stdout, *) "-- nf90_inquire end --"
+       write(stdout, *)
+    endif
+
+    ! Create list of type dimension_attr and dimids                                                                                                                                     
+    ! if(.not. allocated(name_of_dim)) then
+    !   allocate( name_of_dim(n_dims), stat = status)
+    !   call error_msg_allocation( "name_of_dim" )
+    ! end if
+
+    ! if(.not. allocated(id_of_dim)) then
+    !   allocate( id_of_dim(n_dims), stat = status)
+    !   call error_msg_allocation( "id_of_dim" )
+    ! end if
+
+    ! name_of_dim(1) = "n_nest"
+    ! name_of_dim(2) = "ml"
+    ! name_of_dim(3) = "kl"
+    !name_of_dim(4) = "nbounf"
+    !name_of_dim(5) = "nx"
+    !name_of_dim(6) = "ny"
+    !name_of_dim(7) = "dim_nsea"
+    !name_of_dim(8) = "jumax"
+    !name_of_dim(9) = "dim_ndepth"
+    !name_of_dim(10) = "result_max_val"
+    !name_of_dim(11) = "dim_three"
+    !name_of_dim(12) = "dim_two"
+    !name_of_dim(13) = "stringlen"
+    !name_of_dim(14) = "stringlen_c_name"
+
+    !call check( nf90_inq_dimid(ncid, name_of_dim(1), id_of_dim(1)), "nf90_inq_dim N_NEST" )
+    !    call check( nf90_inquire_dimension(ncid, id_of_dim(1), name_of_dim(1), len_of_dim(1)), "nf90_inq_dim N_NEST" )                                                                     
+    !call check( nf90_inq_dimid(ncid, name_of_dim(2), id_of_dim(2)), "nf90_inq_dim ML" )
+    !call check( nf90_inq_dimid(ncid, name_of_dim(3), id_of_dim(3)), "nf90_inq_dim KL" )
+    !call check( nf90_inq_dimid(ncid, name_of_dim(4), id_of_dim(4)), "nf90_inq_dim NBOUNF" )
+    !call check( nf90_inq_dimid(ncid, name_of_dim(5), id_of_dim(5)), "nf90_inq_dim NX" )
+    !call check( nf90_inq_dimid(ncid, name_of_dim(6), id_of_dim(6)), "nf90_inq_dim NY" )
+    !call check( nf90_inq_dimid(ncid, name_of_dim(7), id_of_dim(7)), "nf90_inq_dim DIM_NSEA" )
+    !call check( nf90_inq_dimid(ncid, name_of_dim(8), id_of_dim(8)), "nf90_inq_dim JUMAX" )
+    !call check( nf90_inq_dimid(ncid, name_of_dim(9), id_of_dim(9)), "nf90_inq_dim DIM_NDEPTH" )
+    !call check( nf90_inq_dimid(ncid, name_of_dim(10), id_of_dim(10)), "nf90_inq_dim result_max_val" )
+    !call check( nf90_inq_dimid(ncid, name_of_dim(11), id_of_dim(11)), "nf90_inq_dim DIM_THREE" )
+    !call check( nf90_inq_dimid(ncid, name_of_dim(12), id_of_dim(12)), "nf90_inq_dim DIM_TWO" )
+    !call check( nf90_inq_dimid(ncid, name_of_dim(13), id_of_dim(13)), "nf90_inq_dim STRINGLEN" )
+    !call check( nf90_inq_dimid(ncid, name_of_dim(14), id_of_dim(14)), "nf90_inq_dim STRINGLEN_C_NAME" )
+
+
+    ! section 1 nf90_inq_varid
+    call check( nf90_inq_varid(ncid, "header", varid_header ), "nf90_inq_varid " // "header")
+    call check( nf90_get_var(ncid, varid_header, header), "nf90_get_var header" )
+
+
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !     1. READ COARSE GRID BOUNDARY OUTPUT INFORMATION.                         !
+    !        ---------------------------------------------                         !
 
     ! section 2 nf90_inq_varid
-call check( nf90_inq_varid(ncid, "n_nest", varid_n_nest ), "nf90_inq_varid " // "n_nest")
-call check( nf90_inq_varid(ncid, "max_nest", varid_max_nest ), "nf90_inq_varid " // "max_nest")
+    call check( nf90_inq_varid(ncid, "n_nest", varid_n_nest ), "nf90_inq_varid " // "n_nest")
+    call check( nf90_inq_varid(ncid, "max_nest", varid_max_nest ), "nf90_inq_varid " // "max_nest")
 
-call check( nf90_get_var(ncid, varid_n_nest, n_nest), "nf90_get_var n_nest" )
-call check( nf90_get_var(ncid, varid_max_nest, max_nest), "nf90_get_var max_nest" )
-
-
-!READ(IU07) N_NEST, MAX_NEST
-IF (.NOT.ALLOCATED(NBOUNC )) ALLOCATE (NBOUNC(N_NEST))
-IF (.NOT.ALLOCATED(N_NAME )) ALLOCATE (N_NAME(N_NEST))
-if (.not.allocated(n_code )) allocate (n_code(n_nest))
-IF (.NOT.ALLOCATED(IJARC  )) ALLOCATE (IJARC(MAX_NEST,N_NEST))
-IF (.NOT.ALLOCATED(N_SOUTH)) ALLOCATE (N_SOUTH(N_NEST))
-IF (.NOT.ALLOCATED(N_NORTH)) ALLOCATE (N_NORTH(N_NEST))
-IF (.NOT.ALLOCATED(N_EAST )) ALLOCATE (N_EAST(N_NEST))
-IF (.NOT.ALLOCATED(N_WEST )) ALLOCATE (N_WEST(N_NEST))
-IF (.NOT.ALLOCATED(BLNGC  )) ALLOCATE (BLNGC(MAX_NEST,N_NEST))
-IF (.NOT.ALLOCATED(BLATC  )) ALLOCATE (BLATC(MAX_NEST,N_NEST))
-IF (.NOT.ALLOCATED(N_ZDEL )) ALLOCATE (N_ZDEL(MAX_NEST,N_NEST))
-
-call check( nf90_inq_varid(ncid, "nbounc", varid_nbounc ), "nf90_inq_varid " // "nbounc")
-call check( nf90_inq_varid(ncid, "n_name", varid_n_name ), "nf90_inq_varid " // "n_name")
-call check( nf90_inq_varid(ncid, "n_code", varid_n_code ), "nf90_inq_varid " // "n_code")
-
-call check( nf90_get_var(ncid, varid_nbounc, nbounc), "nf90_get_var nbounc" )
-call check( nf90_get_var(ncid, varid_n_name, n_name), "nf90_get_var n_name" )
-call check( nf90_get_var(ncid, varid_n_code, n_code), "nf90_get_var n_code" )
-
-if(DEBUG .eqv. .true.) then
-   write( stdout, *) "------------------- Output of Variables ------------------"
-   write( stdout, *) "After reading header = ", trim(header)
-   write( stdout, *) "After reading n_nest = ", n_nest
-   write( stdout, *) "After reading max_nest = ", max_nest
-   write( stdout, *) "After reading nbounc = ", nbounc
-   write( stdout, *) "After reading n_name = ", trim(n_name(1)), trim(n_name(2))
-   write( stdout, *) "After reading n_code = ", n_code
-endif
+    call check( nf90_get_var(ncid, varid_n_nest, n_nest), "nf90_get_var n_nest" )
+    call check( nf90_get_var(ncid, varid_max_nest, max_nest), "nf90_get_var max_nest" )
 
 
-if( maxval(NBOUNC) > 0 ) then
-   call check( nf90_inq_varid(ncid, "ijarc", varid_ijarc ), "nf90_inq_varid " // "ijarc")
-   call check( nf90_inq_varid(ncid, "xdello", varid_xdello ), "nf90_inq_varid " // "xdello")
-   call check( nf90_inq_varid(ncid, "xdella", varid_xdella ), "nf90_inq_varid " // "xdella")
-   call check( nf90_inq_varid(ncid, "n_south", varid_n_south ), "nf90_inq_varid " // "n_south")
+    IF (.NOT.ALLOCATED(NBOUNC )) ALLOCATE (NBOUNC(N_NEST))
+    IF (.NOT.ALLOCATED(N_NAME )) ALLOCATE (N_NAME(N_NEST))
+    if (.not.allocated(n_code )) allocate (n_code(n_nest))
+    IF (.NOT.ALLOCATED(IJARC  )) ALLOCATE (IJARC(MAX_NEST,N_NEST))
+    IF (.NOT.ALLOCATED(N_SOUTH)) ALLOCATE (N_SOUTH(N_NEST))
+    IF (.NOT.ALLOCATED(N_NORTH)) ALLOCATE (N_NORTH(N_NEST))
+    IF (.NOT.ALLOCATED(N_EAST )) ALLOCATE (N_EAST(N_NEST))
+    IF (.NOT.ALLOCATED(N_WEST )) ALLOCATE (N_WEST(N_NEST))
+    IF (.NOT.ALLOCATED(BLNGC  )) ALLOCATE (BLNGC(MAX_NEST,N_NEST))
+    IF (.NOT.ALLOCATED(BLATC  )) ALLOCATE (BLATC(MAX_NEST,N_NEST))
+    IF (.NOT.ALLOCATED(N_ZDEL )) ALLOCATE (N_ZDEL(MAX_NEST,N_NEST))
 
-   call check( nf90_inq_varid(ncid, "n_north", varid_n_north ), "nf90_inq_varid " // "n_north")
-   call check( nf90_inq_varid(ncid, "n_east", varid_n_east ), "nf90_inq_varid " // "n_east")
-   call check( nf90_inq_varid(ncid, "n_west", varid_n_west ), "nf90_inq_varid " // "n_west")
-   call check( nf90_inq_varid(ncid, "blngc", varid_blngc ), "nf90_inq_varid " // "blngc")
-   call check( nf90_inq_varid(ncid, "blatc", varid_blatc ), "nf90_inq_varid " // "blatc")
+    call check( nf90_inq_varid(ncid, "nbounc", varid_nbounc ), "nf90_inq_varid " // "nbounc")
+    call check( nf90_inq_varid(ncid, "n_name", varid_n_name ), "nf90_inq_varid " // "n_name")
+    call check( nf90_inq_varid(ncid, "n_code", varid_n_code ), "nf90_inq_varid " // "n_code")
 
-   call check( nf90_inq_varid(ncid, "n_zdel", varid_n_zdel ), "nf90_inq_varid " // "n_zdel")
+    call check( nf90_get_var(ncid, varid_nbounc, nbounc), "nf90_get_var nbounc" )
+    call check( nf90_get_var(ncid, varid_n_name, n_name), "nf90_get_var n_name" )
+    call check( nf90_get_var(ncid, varid_n_code, n_code), "nf90_get_var n_code" )
 
-   call check( nf90_get_var(ncid, varid_ijarc, ijarc), "nf90_get_var ijarc" )
-   call check( nf90_get_var(ncid, varid_xdello, xdello), "nf90_get_var xdello" )
-   call check( nf90_get_var(ncid, varid_xdella, xdella), "nf90_get_var xdella" )
-   call check( nf90_get_var(ncid, varid_n_south, n_south), "nf90_get_var n_south" )
-   call check( nf90_get_var(ncid, varid_n_north, n_north), "nf90_get_var n_north" )
-   call check( nf90_get_var(ncid, varid_n_east, n_east), "nf90_get_var n_east" )
-   call check( nf90_get_var(ncid, varid_n_west, n_west), "nf90_get_var n_wnest" )
-   call check( nf90_get_var(ncid, varid_blngc, blngc), "nf90_get_var blngc" )
-   call check( nf90_get_var(ncid, varid_blatc, blatc), "nf90_get_var blatc" )
-   call check( nf90_get_var(ncid, varid_n_zdel, n_zdel), "nf90_get_var n_zdel" )
-
-   if(DEBUG .eqv. .true.) then
-      write( stdout, *) "After reading IJARC = ", ijarc
-      write( stdout, *) "After reading xdello = ", xdello
-      write( stdout, *) "After reading xdella = ", xdella
-      write( stdout, *) "After reading n_south = ", n_south
-      write( stdout, *) "After reading n_north = ", n_north
-      write( stdout, *) "After reading n_south = ", n_east
-      write( stdout, *) "After reading n_north = ", n_west
-      write( stdout, *) "After reading blngc = ", blngc
-      write( stdout, *) "After reading blatc = ", blatc
-      write( stdout, *) "After reading n_zdel = ", n_zdel
-   endif
-end if
+    if(DEBUG .eqv. .true.) then
+       write( stdout, *) "------------------- Output of Variables ------------------"
+       write( stdout, *) "After reading header = ", trim(header)
+       write( stdout, *) "After reading n_nest = ", n_nest
+       write( stdout, *) "After reading max_nest = ", max_nest
+       write( stdout, *) "After reading nbounc = ", nbounc
+       write( stdout, *) "After reading n_name = ", trim(n_name(1)), trim(n_name(2))
+       write( stdout, *) "After reading n_code = ", n_code
+    endif
 
 
-    ! DO I=1,N_NEST
-!   READ(IU07) NBOUNC(I), N_NAME(I), n_code(i)
-!   IF (NBOUNC(I).GT.0) THEN
-!      READ(IU07) IJARC(1:NBOUNC(I),I)
-!      READ(IU07) XDELLO, XDELLA, N_SOUTH(I), N_NORTH(I), N_EAST(I), N_WEST(I), &
-!&                BLNGC(1:NBOUNC(I),I), BLATC(1:NBOUNC(I),I), N_ZDEL(1:NBOUNC(I),I)
-!   END IF
-! END DO
+    if( maxval(NBOUNC) > 0 ) then
+       call check( nf90_inq_varid(ncid, "ijarc", varid_ijarc ), "nf90_inq_varid " // "ijarc")
+       call check( nf90_inq_varid(ncid, "xdello", varid_xdello ), "nf90_inq_varid " // "xdello")
+       call check( nf90_inq_varid(ncid, "xdella", varid_xdella ), "nf90_inq_varid " // "xdella")
+       call check( nf90_inq_varid(ncid, "n_south", varid_n_south ), "nf90_inq_varid " // "n_south")
 
-! ---------------------------------------------------------------------------- !
-!                                                                              !
-!     2. READ FINE GRID BOUNDARY INPUT INFORMATION.                            !
-!        ------------------------------------------                            !
+       call check( nf90_inq_varid(ncid, "n_north", varid_n_north ), "nf90_inq_varid " // "n_north")
+       call check( nf90_inq_varid(ncid, "n_east", varid_n_east ), "nf90_inq_varid " // "n_east")
+       call check( nf90_inq_varid(ncid, "n_west", varid_n_west ), "nf90_inq_varid " // "n_west")
+       call check( nf90_inq_varid(ncid, "blngc", varid_blngc ), "nf90_inq_varid " // "blngc")
+       call check( nf90_inq_varid(ncid, "blatc", varid_blatc ), "nf90_inq_varid " // "blatc")
 
-!READ (UNIT=IU07) NBOUNF, NBINP, C_NAME
+       call check( nf90_inq_varid(ncid, "n_zdel", varid_n_zdel ), "nf90_inq_varid " // "n_zdel")
 
-call check( nf90_inq_varid(ncid, "nbounf", varid_nbounf ), "nf90_inq_varid " // "nbounf")
-call check( nf90_inq_varid(ncid, "nbinp", varid_nbinp ), "nf90_inq_varid " // "nbinp")
-call check( nf90_inq_varid(ncid, "c_name", varid_c_name ), "nf90_inq_varid " // "c_name")
+       call check( nf90_get_var(ncid, varid_ijarc, ijarc), "nf90_get_var ijarc" )
+       call check( nf90_get_var(ncid, varid_xdello, xdello), "nf90_get_var xdello" )
+       call check( nf90_get_var(ncid, varid_xdella, xdella), "nf90_get_var xdella" )
+       call check( nf90_get_var(ncid, varid_n_south, n_south), "nf90_get_var n_south" )
+       call check( nf90_get_var(ncid, varid_n_north, n_north), "nf90_get_var n_north" )
+       call check( nf90_get_var(ncid, varid_n_east, n_east), "nf90_get_var n_east" )
+       call check( nf90_get_var(ncid, varid_n_west, n_west), "nf90_get_var n_wnest" )
+       call check( nf90_get_var(ncid, varid_blngc, blngc), "nf90_get_var blngc" )
+       call check( nf90_get_var(ncid, varid_blatc, blatc), "nf90_get_var blatc" )
+       call check( nf90_get_var(ncid, varid_n_zdel, n_zdel), "nf90_get_var n_zdel" )
 
-call check( nf90_get_var(ncid, varid_nbounf, nbounf), "nf90_get_var nbounf" )
-call check( nf90_get_var(ncid, varid_nbinp, nbinp), "nf90_get_var nbinp" )
-call check( nf90_get_var(ncid, varid_c_name, c_name), "nf90_get_var c_name" )
-
-if(DEBUG .eqv. .true.) then
-   write( stdout, *) "After reading nbouf = ", nbounf
-   write( stdout, *) "After reading nbinp = ", nbinp
-   write( stdout, *) "After reading c_name = ", c_name
-   write( stdout, *)     
-endif
-
-
-IF (NBOUNF.GT.0) THEN
-   IF (.NOT.ALLOCATED(BLNGF)) ALLOCATE (BLNGF(NBOUNF))
-   IF (.NOT.ALLOCATED(BLATF)) ALLOCATE (BLATF(NBOUNF))
-   IF (.NOT.ALLOCATED(IJARF)) ALLOCATE (IJARF(NBOUNF))
-   IF (.NOT.ALLOCATED(IBFL )) ALLOCATE (IBFL(NBOUNF))
-   IF (.NOT.ALLOCATED(IBFR )) ALLOCATE (IBFR(NBOUNF))
-   IF (.NOT.ALLOCATED(BFW  )) ALLOCATE (BFW(NBOUNF))
-
-   call check( nf90_inq_varid(ncid, "blngf", varid_blngf ), "nf90_inq_varid " // "blngf")
-   call check( nf90_inq_varid(ncid, "blatf", varid_blatf ), "nf90_inq_varid " // "blatf")
-   call check( nf90_inq_varid(ncid, "ijarf", varid_ijarf ), "nf90_inq_varid " // "ijarf")
-   call check( nf90_inq_varid(ncid, "ibfl", varid_ibfl ), "nf90_inq_varid " // "ibfl")
-   call check( nf90_inq_varid(ncid, "ibfr", varid_ibfr ), "nf90_inq_varid " // "ibfr")
-   call check( nf90_inq_varid(ncid, "bfw", varid_bfw ), "nf90_inq_varid " // "bfw")
-
-   call check( nf90_get_var(ncid, varid_blngf, blngf), "nf90_get_var blngf" )
-   call check( nf90_get_var(ncid, varid_blatf, blatf), "nf90_get_var blatf" )
-   call check( nf90_get_var(ncid, varid_ijarf, ijarf), "nf90_get_var ijarf" )
-   call check( nf90_get_var(ncid, varid_ibfl, ibfl), "nf90_get_var ibfl" )
-   call check( nf90_get_var(ncid, varid_ibfr, ibfr), "nf90_get_var ibfr" )
-   call check( nf90_get_var(ncid, varid_bfw, bfw), "nf90_get_var bfw" )
-
-   if(DEBUG .eqv. .true.) then
-      write( stdout, *) "After reading blngf = ", blngf
-      write( stdout, *) "After reading blatf = ", blatf
-      write( stdout, *) "After reading ijarf = ", ijarf
-      write( stdout, *) "After reading ibfl = ", ibfl
-      write( stdout, *) "After reading ibfr = ", ibfr
-      write( stdout, *) "After reading bfw = ", bfw
-   end if
-
-   !   READ (IU07) BLNGF(1:NBOUNF), BLATF(1:NBOUNF), IJARF(1:NBOUNF),              &
-   !&             IBFL(1:NBOUNF), IBFR(1:NBOUNF), BFW(1:NBOUNF)
-END IF
-
-! ---------------------------------------------------------------------------- !
-!                                                                              !
-!     3. READ FREQUENCY DIRECTION GRID.                                        !
-!        ------------------------------                                        !
-
-!READ (IU07) ML, KL
-
-call check( nf90_inq_varid(ncid, "ml", varid_ml ), "nf90_inq_varid " // "ml")
-call check( nf90_inq_varid(ncid, "kl", varid_kl ), "nf90_inq_varid " // "kl")
-
-call check( nf90_get_var(ncid, varid_ml, ml), "nf90_get_var ml" )
-call check( nf90_get_var(ncid, varid_kl, kl), "nf90_get_var kl" )
+       if(DEBUG .eqv. .true.) then
+          write( stdout, *) "After reading IJARC = ", ijarc
+          write( stdout, *) "After reading xdello = ", xdello
+          write( stdout, *) "After reading xdella = ", xdella
+          write( stdout, *) "After reading n_south = ", n_south
+          write( stdout, *) "After reading n_north = ", n_north
+          write( stdout, *) "After reading n_south = ", n_east
+          write( stdout, *) "After reading n_north = ", n_west
+          write( stdout, *) "After reading blngc = ", blngc
+          write( stdout, *) "After reading blatc = ", blatc
+          write( stdout, *) "After reading n_zdel = ", n_zdel
+       endif
+    end if
 
 
-IF ( .NOT.ALLOCATED(FR)      ) ALLOCATE( FR(ML)      )
-IF ( .NOT.ALLOCATED(DFIM)    ) ALLOCATE( DFIM(ML)    )
-IF ( .NOT.ALLOCATED(GOM)     ) ALLOCATE( GOM(ML)     )
-IF ( .NOT.ALLOCATED(C)       ) ALLOCATE( C(ML)       )
-IF ( .NOT.ALLOCATED(TH)      ) ALLOCATE( TH(KL)      )
-IF ( .NOT.ALLOCATED(COSTH)   ) ALLOCATE( COSTH(KL)   )
-IF ( .NOT.ALLOCATED(SINTH)   ) ALLOCATE( SINTH(KL)   )
-IF ( .NOT.ALLOCATED(DF)      ) ALLOCATE( DF(ML)      )
-IF ( .NOT.ALLOCATED(DF_FR)   ) ALLOCATE( DF_FR(ML)   )
-IF ( .NOT.ALLOCATED(DF_FR2)  ) ALLOCATE( DF_FR2(ML)  )
-IF ( .NOT.ALLOCATED(DFIM)    ) ALLOCATE( DFIM(ML)    )
-IF ( .NOT.ALLOCATED(DFIMOFR) ) ALLOCATE( DFIMOFR(ML) )
-IF ( .NOT.ALLOCATED(DFIM_FR) ) ALLOCATE( DFIM_FR(ML) )
-IF ( .NOT.ALLOCATED(DFIM_FR2)) ALLOCATE( DFIM_FR2(ML))
-IF ( .NOT.ALLOCATED(FR5)     ) ALLOCATE( FR5(ML)     )
-IF ( .NOT.ALLOCATED(FRM5)    ) ALLOCATE( FRM5(ML)    )
-IF ( .NOT.ALLOCATED(RHOWG_DFIM)) ALLOCATE( RHOWG_DFIM(ML))
-IF (.NOT. ALLOCATED(MPM)     ) ALLOCATE(MPM(ML,-1:1))  !! FREQUENCY NEIGHTBOURS.
-IF (.NOT. ALLOCATED(KPM)     ) ALLOCATE(KPM(KL,-1:1))  !! DIRECTION NEIGHTBOURS.
-IF (.NOT. ALLOCATED(JXO)     ) ALLOCATE(JXO(KL,2))
-IF (.NOT. ALLOCATED(JYO)     ) ALLOCATE(JYO(KL,2))
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !     2. READ FINE GRID BOUNDARY INPUT INFORMATION.                            !
+    !        ------------------------------------------                            !
 
-!READ (IU07)  FR, DFIM, GOM, C, DELTH, DELTR, TH, COSTH, SINTH, INV_LOG_CO,     &
-!&            DF, DF_FR, DF_FR2, DFIM, DFIMOFR, DFIM_FR, DFIM_FR2, FR5, FRM5,   &
-!&            RHOWG_DFIM,                                                       &
-!&            FMIN, MO_TAIL, MM1_TAIL, MP1_TAIL, MP2_TAIL
+    call check( nf90_inq_varid(ncid, "nbounf", varid_nbounf ), "nf90_inq_varid " // "nbounf")
+    call check( nf90_inq_varid(ncid, "nbinp", varid_nbinp ), "nf90_inq_varid " // "nbinp")
+    call check( nf90_inq_varid(ncid, "c_name", varid_c_name ), "nf90_inq_varid " // "c_name")
 
-  call check( nf90_inq_varid(ncid, "ml", varid_ml ), "nf90_inq_varid " // "ml")
+    call check( nf90_get_var(ncid, varid_nbounf, nbounf), "nf90_get_var nbounf" )
+    call check( nf90_get_var(ncid, varid_nbinp, nbinp), "nf90_get_var nbinp" )
+    call check( nf90_get_var(ncid, varid_c_name, c_name), "nf90_get_var c_name" )
+
+    if(DEBUG .eqv. .true.) then
+       write( stdout, *) "After reading nbouf = ", nbounf
+       write( stdout, *) "After reading nbinp = ", nbinp
+       write( stdout, *) "After reading c_name = ", c_name
+       write( stdout, *)     
+    endif
+
+
+    IF (NBOUNF.GT.0) THEN
+       IF (.NOT.ALLOCATED(BLNGF)) ALLOCATE (BLNGF(NBOUNF))
+       IF (.NOT.ALLOCATED(BLATF)) ALLOCATE (BLATF(NBOUNF))
+       IF (.NOT.ALLOCATED(IJARF)) ALLOCATE (IJARF(NBOUNF))
+       IF (.NOT.ALLOCATED(IBFL )) ALLOCATE (IBFL(NBOUNF))
+       IF (.NOT.ALLOCATED(IBFR )) ALLOCATE (IBFR(NBOUNF))
+       IF (.NOT.ALLOCATED(BFW  )) ALLOCATE (BFW(NBOUNF))
+
+       call check( nf90_inq_varid(ncid, "blngf", varid_blngf ), "nf90_inq_varid " // "blngf")
+       call check( nf90_inq_varid(ncid, "blatf", varid_blatf ), "nf90_inq_varid " // "blatf")
+       call check( nf90_inq_varid(ncid, "ijarf", varid_ijarf ), "nf90_inq_varid " // "ijarf")
+       call check( nf90_inq_varid(ncid, "ibfl", varid_ibfl ), "nf90_inq_varid " // "ibfl")
+       call check( nf90_inq_varid(ncid, "ibfr", varid_ibfr ), "nf90_inq_varid " // "ibfr")
+       call check( nf90_inq_varid(ncid, "bfw", varid_bfw ), "nf90_inq_varid " // "bfw")
+
+       call check( nf90_get_var(ncid, varid_blngf, blngf), "nf90_get_var blngf" )
+       call check( nf90_get_var(ncid, varid_blatf, blatf), "nf90_get_var blatf" )
+       call check( nf90_get_var(ncid, varid_ijarf, ijarf), "nf90_get_var ijarf" )
+       call check( nf90_get_var(ncid, varid_ibfl, ibfl), "nf90_get_var ibfl" )
+       call check( nf90_get_var(ncid, varid_ibfr, ibfr), "nf90_get_var ibfr" )
+       call check( nf90_get_var(ncid, varid_bfw, bfw), "nf90_get_var bfw" )
+
+       if(DEBUG .eqv. .true.) then
+          write( stdout, *) "After reading blngf = ", blngf
+          write( stdout, *) "After reading blatf = ", blatf
+          write( stdout, *) "After reading ijarf = ", ijarf
+          write( stdout, *) "After reading ibfl = ", ibfl
+          write( stdout, *) "After reading ibfr = ", ibfr
+          write( stdout, *) "After reading bfw = ", bfw
+       end if
+
+    END IF
+
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !     3. READ FREQUENCY DIRECTION GRID.                                        !
+    !        ------------------------------                                        !
+
+    call check( nf90_inq_varid(ncid, "ml", varid_ml ), "nf90_inq_varid " // "ml")
+    call check( nf90_inq_varid(ncid, "kl", varid_kl ), "nf90_inq_varid " // "kl")
+
+    call check( nf90_get_var(ncid, varid_ml, ml), "nf90_get_var ml" )
+    call check( nf90_get_var(ncid, varid_kl, kl), "nf90_get_var kl" )
+
+
+    IF ( .NOT.ALLOCATED(FR)      ) ALLOCATE( FR(ML)      )
+    IF ( .NOT.ALLOCATED(DFIM)    ) ALLOCATE( DFIM(ML)    )
+    IF ( .NOT.ALLOCATED(GOM)     ) ALLOCATE( GOM(ML)     )
+    IF ( .NOT.ALLOCATED(C)       ) ALLOCATE( C(ML)       )
+    IF ( .NOT.ALLOCATED(TH)      ) ALLOCATE( TH(KL)      )
+    IF ( .NOT.ALLOCATED(COSTH)   ) ALLOCATE( COSTH(KL)   )
+    IF ( .NOT.ALLOCATED(SINTH)   ) ALLOCATE( SINTH(KL)   )
+    IF ( .NOT.ALLOCATED(DF)      ) ALLOCATE( DF(ML)      )
+    IF ( .NOT.ALLOCATED(DF_FR)   ) ALLOCATE( DF_FR(ML)   )
+    IF ( .NOT.ALLOCATED(DF_FR2)  ) ALLOCATE( DF_FR2(ML)  )
+    IF ( .NOT.ALLOCATED(DFIM)    ) ALLOCATE( DFIM(ML)    )
+    IF ( .NOT.ALLOCATED(DFIMOFR) ) ALLOCATE( DFIMOFR(ML) )
+    IF ( .NOT.ALLOCATED(DFIM_FR) ) ALLOCATE( DFIM_FR(ML) )
+    IF ( .NOT.ALLOCATED(DFIM_FR2)) ALLOCATE( DFIM_FR2(ML))
+    IF ( .NOT.ALLOCATED(FR5)     ) ALLOCATE( FR5(ML)     )
+    IF ( .NOT.ALLOCATED(FRM5)    ) ALLOCATE( FRM5(ML)    )
+    IF ( .NOT.ALLOCATED(RHOWG_DFIM)) ALLOCATE( RHOWG_DFIM(ML))
+    IF (.NOT. ALLOCATED(MPM)     ) ALLOCATE(MPM(ML,-1:1))  !! FREQUENCY NEIGHTBOURS.
+    IF (.NOT. ALLOCATED(KPM)     ) ALLOCATE(KPM(KL,-1:1))  !! DIRECTION NEIGHTBOURS.
+    IF (.NOT. ALLOCATED(JXO)     ) ALLOCATE(JXO(KL,2))
+    IF (.NOT. ALLOCATED(JYO)     ) ALLOCATE(JYO(KL,2))
+
+    call check( nf90_inq_varid(ncid, "ml", varid_ml ), "nf90_inq_varid " // "ml")
     call check( nf90_inq_varid(ncid, "kl", varid_kl ), "nf90_inq_varid " // "kl")
     call check( nf90_inq_varid(ncid, "fr", varid_fr ), "nf90_inq_varid " // "fr")
     call check( nf90_inq_varid(ncid, "dfim", varid_dfim ), "nf90_inq_varid " // "dfim")
@@ -880,12 +856,12 @@ IF (.NOT. ALLOCATED(JYO)     ) ALLOCATE(JYO(KL,2))
     call check( nf90_inq_varid(ncid, "mp1_tail", varid_mp1_tail ), "nf90_inq_varid " // "mp1_tail")
     call check( nf90_inq_varid(ncid, "mp2_tail", varid_mp2_tail ), "nf90_inq_varid " // "mp2_tail")
 
-       call check( nf90_get_var(ncid, varid_ml, ml), "nf90_get_var ml" )
+    call check( nf90_get_var(ncid, varid_ml, ml), "nf90_get_var ml" )
     call check( nf90_get_var(ncid, varid_kl, kl), "nf90_get_var kl" )
     call check( nf90_get_var(ncid, varid_fr, fr), "nf90_get_var fr" )
     call check( nf90_get_var(ncid, varid_dfim, dfim), "nf90_get_var dfim" )
     call check( nf90_get_var(ncid, varid_gom, gom), "nf90_get_var gom" )
- 
+
     call check( nf90_get_var(ncid, varid_c, c), "nf90_get_var c" )
     call check( nf90_get_var(ncid, varid_delth, delth), "nf90_get_var delth" )
     call check( nf90_get_var(ncid, varid_deltr, deltr), "nf90_get_var deltr" )
@@ -897,7 +873,7 @@ IF (.NOT. ALLOCATED(JYO)     ) ALLOCATE(JYO(KL,2))
     call check( nf90_get_var(ncid, varid_df, df), "nf90_get_var df" )
     call check( nf90_get_var(ncid, varid_df_fr, df_fr), "nf90_get_var df_fr" )
     call check( nf90_get_var(ncid, varid_df_fr2, df_fr2), "nf90_get_var df_fr2" )
-    
+
     call check( nf90_get_var(ncid, varid_dfimofr, dfimofr), "nf90_get_var dfimofr" )
     call check( nf90_get_var(ncid, varid_dfim_fr, dfim_fr), "nf90_get_var dfim_fr" )
     call check( nf90_get_var(ncid, varid_dfim_fr2, dfim_fr2), "nf90_get_var dfim_fr2" )
@@ -912,7 +888,6 @@ IF (.NOT. ALLOCATED(JYO)     ) ALLOCATE(JYO(KL,2))
 
     call check( nf90_get_var(ncid, varid_mp2_tail, mp2_tail), "nf90_get_var mp2_tail" )
 
-!READ (IU07)  MPM, KPM, JXO, JYO
 
     call check( nf90_inq_varid(ncid, "mpm", varid_mpm ), "nf90_inq_varid " // "mpm")
     call check( nf90_inq_varid(ncid, "kpm", varid_kpm ), "nf90_inq_varid " // "kpm")
@@ -924,7 +899,7 @@ IF (.NOT. ALLOCATED(JYO)     ) ALLOCATE(JYO(KL,2))
     call check( nf90_get_var(ncid, varid_jxo, jxo), "nf90_get_var jxo" )
     call check( nf90_get_var(ncid, varid_jyo, jyo), "nf90_get_var jyo" )
 
- if(DEBUG .eqv. .true.) then
+    if(DEBUG .eqv. .true.) then
        write( stdout, *) "After reading ml = ", ml
        write( stdout, *) "After reading kl = ", kl
        write( stdout, *) "After reading fr = ", fr
@@ -964,15 +939,13 @@ IF (.NOT. ALLOCATED(JYO)     ) ALLOCATE(JYO(KL,2))
        write( stdout, *)
     endif
 
-    
-    
-! ---------------------------------------------------------------------------- !
-!                                                                              !
-!     4. READ GRID INFORMATION.                                                !
-!        ----------------------                                                !
 
-! READ (IU07) NX, NY, NSEA, IPER, ONE_POINT, REDUCED_GRID, L_OBSTRUCTION_T
-    
+
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !     4. READ GRID INFORMATION.                                                !
+    !        ----------------------                                                !
+
     call check( nf90_inq_varid(ncid, "nx", varid_nx ), "nf90_inq_varid " // "nx")
     call check( nf90_inq_varid(ncid, "ny", varid_ny ), "nf90_inq_varid " // "ny")
     call check( nf90_inq_varid(ncid, "nsea", varid_nsea ), "nf90_inq_varid " // "nsea")
@@ -981,11 +954,6 @@ IF (.NOT. ALLOCATED(JYO)     ) ALLOCATE(JYO(KL,2))
 
     call check( nf90_inq_varid(ncid, "reduced_grid", varid_reduced_grid ), "nf90_inq_varid " // "reduced_grid")
     call check( nf90_inq_varid(ncid, "l_obstruction_t", varid_l_obstruction_t ), "nf90_inq_varid " // "l_obstruction_t")
-    if( l_obstruction_t .eqv. .true. ) then
-       call check( nf90_inq_varid(ncid, "obslat", varid_obslat ), "nf90_inq_varid " // "obslat")
-       call check( nf90_inq_varid(ncid, "obslon", varid_obslon ), "nf90_inq_varid " // "obslon")
-    endif
-
 
     call check( nf90_get_var(ncid, varid_nx, nx), "nf90_get_var nx" )
     call check( nf90_get_var(ncid, varid_ny, ny), "nf90_get_var ny" )
@@ -1010,256 +978,250 @@ IF (.NOT. ALLOCATED(JYO)     ) ALLOCATE(JYO(KL,2))
        write( stdout, *)
     endif
 
-    
-IF ( .NOT.ALLOCATED(L_S_MASK)) ALLOCATE( L_S_MASK(1:NX,1:NY) )
-IF ( .NOT.ALLOCATED(NLON_RG) ) ALLOCATE( NLON_RG(1:NY) )
-IF ( .NOT.ALLOCATED(DELLAM)  ) ALLOCATE( DELLAM(1:NY)  )
-IF ( .NOT.ALLOCATED(ZDELLO)  ) ALLOCATE( ZDELLO(1:NY) )
-IF ( .NOT.ALLOCATED(IXLG)    ) ALLOCATE( IXLG(1:NSEA) )
-IF ( .NOT.ALLOCATED(KXLT)    ) ALLOCATE( KXLT(1:NSEA) )
-IF ( .NOT.ALLOCATED(SINPH)   ) ALLOCATE( SINPH(1:NY)  )
-IF ( .NOT.ALLOCATED(COSPH)   ) ALLOCATE( COSPH(1:NY)  )
-IF ( .NOT.ALLOCATED(KLAT)    ) ALLOCATE( KLAT(1:NSEA,1:2,1:2) )
-IF ( .NOT.ALLOCATED(KLON)    ) ALLOCATE( KLON(1:NSEA,1:2) )
-IF ( .NOT.ALLOCATED(WLAT)    ) ALLOCATE( WLAT(1:NSEA,1:2) )
-IF ( .NOT.ALLOCATED(DEPTH_B) ) ALLOCATE( DEPTH_B(1:NSEA) )
 
-IF ( .NOT.ALLOCATED(OBSLAT ) ) ALLOCATE (OBSLAT (NSEA,2,ML))
-IF ( .NOT.ALLOCATED(OBSLON ) ) ALLOCATE (OBSLON (NSEA,2,ML))
+    IF ( .NOT.ALLOCATED(L_S_MASK)) ALLOCATE( L_S_MASK(1:NX,1:NY) )
+    IF ( .NOT.ALLOCATED(NLON_RG) ) ALLOCATE( NLON_RG(1:NY) )
+    IF ( .NOT.ALLOCATED(DELLAM)  ) ALLOCATE( DELLAM(1:NY)  )
+    IF ( .NOT.ALLOCATED(ZDELLO)  ) ALLOCATE( ZDELLO(1:NY) )
+    IF ( .NOT.ALLOCATED(IXLG)    ) ALLOCATE( IXLG(1:NSEA) )
+    IF ( .NOT.ALLOCATED(KXLT)    ) ALLOCATE( KXLT(1:NSEA) )
+    IF ( .NOT.ALLOCATED(SINPH)   ) ALLOCATE( SINPH(1:NY)  )
+    IF ( .NOT.ALLOCATED(COSPH)   ) ALLOCATE( COSPH(1:NY)  )
+    IF ( .NOT.ALLOCATED(KLAT)    ) ALLOCATE( KLAT(1:NSEA,1:2,1:2) )
+    IF ( .NOT.ALLOCATED(KLON)    ) ALLOCATE( KLON(1:NSEA,1:2) )
+    IF ( .NOT.ALLOCATED(WLAT)    ) ALLOCATE( WLAT(1:NSEA,1:2) )
+    IF ( .NOT.ALLOCATED(DEPTH_B) ) ALLOCATE( DEPTH_B(1:NSEA) )
 
-if( l_obstruction_t .eqv. .true. ) then
-   call check( nf90_inq_varid(ncid, "obslat", varid_obslat ), "nf90_inq_varid " // "obslat")
-   call check( nf90_inq_varid(ncid, "obslon", varid_obslon ), "nf90_inq_varid " // "obslon")
+    IF ( .NOT.ALLOCATED(OBSLAT ) ) ALLOCATE (OBSLAT (NSEA,2,ML))
+    IF ( .NOT.ALLOCATED(OBSLON ) ) ALLOCATE (OBSLON (NSEA,2,ML))
 
-   call check( nf90_get_var(ncid, varid_obslat, obslat), "nf90_get_var obslat" )
-   call check( nf90_get_var(ncid, varid_obslon, obslon), "nf90_get_var obslon" )
+    if( l_obstruction_t .eqv. .true. ) then
+       call check( nf90_inq_varid(ncid, "obslat", varid_obslat ), "nf90_inq_varid " // "obslat")
+       call check( nf90_inq_varid(ncid, "obslon", varid_obslon ), "nf90_inq_varid " // "obslon")
 
-   if(DEBUG .eqv. .true.) then
-      write( stdout, *) "After reading obslat = ", obslat
-      write( stdout, *) "After reading obslon = ", obslon
-      write( stdout, *)
-   endif
-end if
+       call check( nf90_get_var(ncid, varid_obslat, obslat), "nf90_get_var obslat" )
+       call check( nf90_get_var(ncid, varid_obslon, obslon), "nf90_get_var obslon" )
 
-! -----------
+       if(DEBUG .eqv. .true.) then
+          write( stdout, *) "After reading obslat = ", obslat
+          write( stdout, *) "After reading obslon = ", obslon
+          write( stdout, *)
+       endif
+    end if
 
-call check( nf90_inq_varid(ncid, "nlon_rg", varid_nlon_rg ), "nf90_inq_varid " // "nlon_rg")
-call check( nf90_inq_varid(ncid, "delphi", varid_delphi ), "nf90_inq_varid " // "delphi")
-call check( nf90_inq_varid(ncid, "dellam", varid_dellam ), "nf90_inq_varid " // "dellam")
+    ! -----------
 
-call check( nf90_inq_varid(ncid, "sinph", varid_sinph ), "nf90_inq_varid " // "sinph")
-call check( nf90_inq_varid(ncid, "cosph", varid_cosph ), "nf90_inq_varid " // "cosph")
-call check( nf90_inq_varid(ncid, "amowep", varid_amowep ), "nf90_inq_varid " // "amowep")
-call check( nf90_inq_varid(ncid, "amosop", varid_amosop ), "nf90_inq_varid " // "amosop")
-call check( nf90_inq_varid(ncid, "amoeap", varid_amoeap ), "nf90_inq_varid " // "amoeap")
-call check( nf90_inq_varid(ncid, "amonop", varid_amonop ), "nf90_inq_varid " // "amonop")
+    call check( nf90_inq_varid(ncid, "nlon_rg", varid_nlon_rg ), "nf90_inq_varid " // "nlon_rg")
+    call check( nf90_inq_varid(ncid, "delphi", varid_delphi ), "nf90_inq_varid " // "delphi")
+    call check( nf90_inq_varid(ncid, "dellam", varid_dellam ), "nf90_inq_varid " // "dellam")
 
-call check( nf90_inq_varid(ncid, "zdello", varid_zdello ), "nf90_inq_varid " // "zdello")
-call check( nf90_inq_varid(ncid, "ixlg", varid_ixlg ), "nf90_inq_varid " // "ixlg")
-call check( nf90_inq_varid(ncid, "kxlt", varid_kxlt ), "nf90_inq_varid " // "kxlt")
-call check( nf90_inq_varid(ncid, "l_s_mask", varid_l_s_mask ), "nf90_inq_varid " // "l_s_mask")
-call check( nf90_inq_varid(ncid, "klat", varid_klat ), "nf90_inq_varid " // "klat")
-call check( nf90_inq_varid(ncid, "klon", varid_klon ), "nf90_inq_varid " // "klon")
-call check( nf90_inq_varid(ncid, "wlat", varid_wlat ), "nf90_inq_varid " // "wlat")
-call check( nf90_inq_varid(ncid, "depth_b", varid_depth_b ), "nf90_inq_varid " // "depth_b")
+    call check( nf90_inq_varid(ncid, "sinph", varid_sinph ), "nf90_inq_varid " // "sinph")
+    call check( nf90_inq_varid(ncid, "cosph", varid_cosph ), "nf90_inq_varid " // "cosph")
+    call check( nf90_inq_varid(ncid, "amowep", varid_amowep ), "nf90_inq_varid " // "amowep")
+    call check( nf90_inq_varid(ncid, "amosop", varid_amosop ), "nf90_inq_varid " // "amosop")
+    call check( nf90_inq_varid(ncid, "amoeap", varid_amoeap ), "nf90_inq_varid " // "amoeap")
+    call check( nf90_inq_varid(ncid, "amonop", varid_amonop ), "nf90_inq_varid " // "amonop")
 
-
-call check( nf90_get_var(ncid, varid_nlon_rg, nlon_rg), "nf90_get_var nlon_rg" )
-call check( nf90_get_var(ncid, varid_delphi, delphi), "nf90_get_var delphi" )
-call check( nf90_get_var(ncid, varid_dellam, dellam), "nf90_get_var dellam" )
-call check( nf90_get_var(ncid, varid_sinph, sinph), "nf90_get_var sinph" )
-call check( nf90_get_var(ncid, varid_cosph, cosph), "nf90_get_var cosph" )
-call check( nf90_get_var(ncid, varid_amowep, amowep), "nf90_get_var amowep" )
-
-call check( nf90_get_var(ncid, varid_amosop, amosop), "nf90_get_var amosop" )
-call check( nf90_get_var(ncid, varid_amoeap, amoeap), "nf90_get_var amoeap" )
-call check( nf90_get_var(ncid, varid_amonop, amonop), "nf90_get_var amonop" )
-call check( nf90_get_var(ncid, varid_xdello, xdello), "nf90_get_var xdello" )
-call check( nf90_get_var(ncid, varid_xdella, xdella), "nf90_get_var xdella" )
-call check( nf90_get_var(ncid, varid_zdello, zdello), "nf90_get_var zdello" )
-call check( nf90_get_var(ncid, varid_ixlg, ixlg), "nf90_get_var ixlg" )
-
-call check( nf90_get_var(ncid, varid_kxlt, kxlt), "nf90_get_var kxlt" )
-call check( nf90_get_var(ncid, varid_l_s_mask, l_s_mask_tmp), "nf90_get_var l_s_mask" )
-l_s_mask = merge(.TRUE., .FALSE., l_s_mask_tmp /= 0)
-call check( nf90_get_var(ncid, varid_klat, klat), "nf90_get_var klat" )
-call check( nf90_get_var(ncid, varid_klon, klon), "nf90_get_var klon" )
-call check( nf90_get_var(ncid, varid_wlat, wlat), "nf90_get_var wlat" )
-call check( nf90_get_var(ncid, varid_depth_b, depth_b), "nf90_get_var depth_b" )
-
-if( L_OBSTRUCTION_T .eqv. .TRUE.) then
-   call check( nf90_inq_varid(ncid, "obslat", varid_obslat ), "nf90_inq_varid " // "obslat")
-   call check( nf90_inq_varid(ncid, "obslon", varid_obslon ), "nf90_inq_varid " // "obslon")
-   
-   call check( nf90_get_var(ncid, varid_obslat, obslat), "nf90_get_var obslat" )
-   call check( nf90_get_var(ncid, varid_obslon, obslon), "nf90_get_var obslon" )
-
-   IF (.NOT.L_OBSTRUCTION) THEN
-      OBSLAT = 1.
-      OBSLON = 1.
-   END IF
-
-   if(DEBUG .eqv. .true.) then
-      write( stdout, *) "After reading obslat = ", obslat
-      write( stdout, *) "After reading obslon = ", obslon
-      write( stdout, *)
-   endif
-else
-   OBSLAT = 1.
-   OBSLON = 1.
-   IF (L_OBSTRUCTION) THEN
-      WRITE (IU06,*) ' ++++++++++++++++++++++++++++++++++++++++++++++++++++'
-      WRITE (IU06,*) ' +                                                  +'
-      WRITE (IU06,*) ' +     WARNING ERROR SUB. READ_PREPROC_FILE.        +'
-      WRITE (IU06,*) ' +     =======================================      +'
-      WRITE (IU06,*) ' +                                                  +'
-      WRITE (IU06,*) ' + REDUCTION DUE TO SUB-GRID FEATURES REQUESTED,    +'
-      WRITE (IU06,*) ' + BUT OBSTRUCTION FACTORS ARE NOT IN               +'
-      WRITE (IU06,*) ' + PREPROC OUTPUT FILE.                             +'
-      WRITE (IU06,*) ' +                                                  +'
-      WRITE (IU06,*) ' +               MODEL CONTINUES                    +'
-      WRITE (IU06,*) ' +              WITHOUT REDUCTION                   +'
-      WRITE (IU06,*) ' +                                                  +'
-      WRITE (IU06,*) ' ++++++++++++++++++++++++++++++++++++++++++++++++++++'
-      L_OBSTRUCTION = .FALSE.
-   END IF
-end if
-
-if(DEBUG .eqv. .true.) then
-   write( stdout, *) "After reading nlon_rg = ", nlon_rg
-   write( stdout, *) "After reading delphi = ", delphi
-   write( stdout, *) "After reading dellam = ", dellam
-   write( stdout, *) "After reading sinph = ", sinph
-   write( stdout, *) "After reading cosph = ", cosph
-   write( stdout, *) "After reading amowep = ", amowep
-
-   write( stdout, *) "After reading amosop = ", amosop
-   write( stdout, *) "After reading amoeap = ", amoeap
-   write( stdout, *) "After reading amonop = ", amonop
-   write( stdout, *) "After reading zdello = ", zdello
-   write( stdout, *) "After reading ixlg = ", ixlg
-
-   write( stdout, *) "After reading kxlt = ", kxlt
-   write( stdout, *) "After reading l_s_mask = ", l_s_mask
-   write( stdout, *) "After reading klat = ", klat
-   write( stdout, *) "After reading klon = ", klon
-
-   write( stdout, *) "After reading wlat = ", wlat
-   write( stdout, *) "After reading depth_b = ", depth_b
-   write( stdout, *)
-endif
+    call check( nf90_inq_varid(ncid, "zdello", varid_zdello ), "nf90_inq_varid " // "zdello")
+    call check( nf90_inq_varid(ncid, "ixlg", varid_ixlg ), "nf90_inq_varid " // "ixlg")
+    call check( nf90_inq_varid(ncid, "kxlt", varid_kxlt ), "nf90_inq_varid " // "kxlt")
+    call check( nf90_inq_varid(ncid, "l_s_mask", varid_l_s_mask ), "nf90_inq_varid " // "l_s_mask")
+    call check( nf90_inq_varid(ncid, "klat", varid_klat ), "nf90_inq_varid " // "klat")
+    call check( nf90_inq_varid(ncid, "klon", varid_klon ), "nf90_inq_varid " // "klon")
+    call check( nf90_inq_varid(ncid, "wlat", varid_wlat ), "nf90_inq_varid " // "wlat")
+    call check( nf90_inq_varid(ncid, "depth_b", varid_depth_b ), "nf90_inq_varid " // "depth_b")
 
 
-! READ (IU07) NLON_RG
-!READ (IU07) DELPHI, DELLAM, SINPH, COSPH, AMOWEP, AMOSOP, AMOEAP, AMONOP,      &
-!&           XDELLA, XDELLO, ZDELLO
-!READ (IU07) IXLG, KXLT, L_S_MASK
-!READ (IU07) KLAT, KLON, WLAT, DEPTH_B
-!IF (L_OBSTRUCTION_T) THEN
-!   READ (IU07) OBSLAT, OBSLON
-!   IF (.NOT.L_OBSTRUCTION) THEN
-!      OBSLAT = 1.
-!      OBSLON = 1.
-!   END IF
-!ELSE
-!   OBSLAT = 1.
-!   OBSLON = 1.
-!   IF (L_OBSTRUCTION) THEN
-!      WRITE (IU06,*) ' ++++++++++++++++++++++++++++++++++++++++++++++++++++'
-!      WRITE (IU06,*) ' +                                                  +'
-!      WRITE (IU06,*) ' +     WARNING ERROR SUB. READ_PREPROC_FILE.        +'
-!      WRITE (IU06,*) ' +     =======================================      +'
-!      WRITE (IU06,*) ' +                                                  +'
-!      WRITE (IU06,*) ' + REDUCTION DUE TO SUB-GRID FEATURES REQUESTED,    +'
-!      WRITE (IU06,*) ' + BUT OBSTRUCTION FACTORS ARE NOT IN               +'
-!      WRITE (IU06,*) ' + PREPROC OUTPUT FILE.                             +'
-!      WRITE (IU06,*) ' +                                                  +'
-!      WRITE (IU06,*) ' +               MODEL CONTINUES                    +'
-!      WRITE (IU06,*) ' +              WITHOUT REDUCTION                   +'
-!      WRITE (IU06,*) ' +                                                  +'
-!      WRITE (IU06,*) ' ++++++++++++++++++++++++++++++++++++++++++++++++++++'
-!      L_OBSTRUCTION = .FALSE.
-!   END IF
-! END IF
+    call check( nf90_get_var(ncid, varid_nlon_rg, nlon_rg), "nf90_get_var nlon_rg" )
+    call check( nf90_get_var(ncid, varid_delphi, delphi), "nf90_get_var delphi" )
+    call check( nf90_get_var(ncid, varid_dellam, dellam), "nf90_get_var dellam" )
+    call check( nf90_get_var(ncid, varid_sinph, sinph), "nf90_get_var sinph" )
+    call check( nf90_get_var(ncid, varid_cosph, cosph), "nf90_get_var cosph" )
+    call check( nf90_get_var(ncid, varid_amowep, amowep), "nf90_get_var amowep" )
 
-! ---------------------------------------------------------------------------- !
-!                                                                              !
-!     7. READ TABLES.                                                          !
-!        ------------                                                          !
+    call check( nf90_get_var(ncid, varid_amosop, amosop), "nf90_get_var amosop" )
+    call check( nf90_get_var(ncid, varid_amoeap, amoeap), "nf90_get_var amoeap" )
+    call check( nf90_get_var(ncid, varid_amonop, amonop), "nf90_get_var amonop" )
+    call check( nf90_get_var(ncid, varid_xdello, xdello), "nf90_get_var xdello" )
+    call check( nf90_get_var(ncid, varid_xdella, xdella), "nf90_get_var xdella" )
+    call check( nf90_get_var(ncid, varid_zdello, zdello), "nf90_get_var zdello" )
+    call check( nf90_get_var(ncid, varid_ixlg, ixlg), "nf90_get_var ixlg" )
 
-! READ (IU07) NDEPTH, DEPTHA, DEPTHD, DEPTHE
-call check( nf90_inq_varid(ncid, "ndepth", varid_ndepth ), "nf90_inq_varid " // "ndepth")
-call check( nf90_inq_varid(ncid, "deptha", varid_deptha ), "nf90_inq_varid " // "deptha")
-call check( nf90_inq_varid(ncid, "depthd", varid_depthd ), "nf90_inq_varid " // "depthd")
-call check( nf90_inq_varid(ncid, "depthe", varid_depthe ), "nf90_inq_varid " // "depthe")
+    call check( nf90_get_var(ncid, varid_kxlt, kxlt), "nf90_get_var kxlt" )
+    call check( nf90_get_var(ncid, varid_l_s_mask, l_s_mask_tmp), "nf90_get_var l_s_mask" )
+    l_s_mask = merge(.TRUE., .FALSE., l_s_mask_tmp /= 0)
+    call check( nf90_get_var(ncid, varid_klat, klat), "nf90_get_var klat" )
+    call check( nf90_get_var(ncid, varid_klon, klon), "nf90_get_var klon" )
+    call check( nf90_get_var(ncid, varid_wlat, wlat), "nf90_get_var wlat" )
+    call check( nf90_get_var(ncid, varid_depth_b, depth_b), "nf90_get_var depth_b" )
 
-call check( nf90_get_var(ncid, varid_ndepth, ndepth), "nf90_get_var ndepth" )
-call check( nf90_get_var(ncid, varid_deptha, deptha), "nf90_get_var deptha" )
-call check( nf90_get_var(ncid, varid_depthd, depthd), "nf90_get_var depthd" )
-call check( nf90_get_var(ncid, varid_depthe, depthe), "nf90_get_var depthe" )
+    if( L_OBSTRUCTION_T .eqv. .TRUE.) then
+       call check( nf90_inq_varid(ncid, "obslat", varid_obslat ), "nf90_inq_varid " // "obslat")
+       call check( nf90_inq_varid(ncid, "obslon", varid_obslon ), "nf90_inq_varid " // "obslon")
 
+       call check( nf90_get_var(ncid, varid_obslat, obslat), "nf90_get_var obslat" )
+       call check( nf90_get_var(ncid, varid_obslon, obslon), "nf90_get_var obslon" )
 
-IF (ALLOCATED(FLMINFR)) DEALLOCATE (FLMINFR)
-ALLOCATE (FLMINFR(1:JUMAX,1:ML))
-IF (ALLOCATED(TCGOND) ) DEALLOCATE (TCGOND)
-ALLOCATE (TCGOND(NDEPTH,ML) )
-IF (ALLOCATED(TFAK)   ) DEALLOCATE (TFAK)
-ALLOCATE (TFAK(NDEPTH,ML)   )
-IF (ALLOCATED(TSIHKD) ) DEALLOCATE (TSIHKD)
-ALLOCATE (TSIHKD(NDEPTH,ML) )
-IF (ALLOCATED(TFAC_ST)) DEALLOCATE (TFAC_ST)
-ALLOCATE( TFAC_ST(NDEPTH,ML))
-IF (ALLOCATED(T_TAIL)) DEALLOCATE (T_TAIL)
-ALLOCATE( T_TAIL(NDEPTH,ML))
+       IF (.NOT.L_OBSTRUCTION) THEN
+          OBSLAT = 1.
+          OBSLON = 1.
+       END IF
 
-call check( nf90_inq_varid(ncid, "flminfr", varid_flminfr ), "nf90_inq_varid " // "flminfr")
-call check( nf90_inq_varid(ncid, "tcgond", varid_tcgond ), "nf90_inq_varid " // "tcgond")
-call check( nf90_inq_varid(ncid, "tfak", varid_tfak ), "nf90_inq_varid " // "tfak")
-call check( nf90_inq_varid(ncid, "tsihkd", varid_tsihkd ), "nf90_inq_varid " // "tsihkd")
-call check( nf90_inq_varid(ncid, "tfac_st", varid_tfac_st ), "nf90_inq_varid " // "tfac_st")
-call check( nf90_inq_varid(ncid, "t_tail", varid_t_tail ), "nf90_inq_varid " // "t_tail")
-call check( nf90_inq_varid(ncid, "delu", varid_delu ), "nf90_inq_varid " // "delu")
+       if(DEBUG .eqv. .true.) then
+          write( stdout, *) "After reading obslat = ", obslat
+          write( stdout, *) "After reading obslon = ", obslon
+          write( stdout, *)
+       endif
+    else
+       OBSLAT = 1.
+       OBSLON = 1.
+       IF (L_OBSTRUCTION) THEN
+          WRITE (IU06,*) ' ++++++++++++++++++++++++++++++++++++++++++++++++++++'
+          WRITE (IU06,*) ' +                                                  +'
+          WRITE (IU06,*) ' +     WARNING ERROR SUB. READ_PREPROC_FILE.        +'
+          WRITE (IU06,*) ' +     =======================================      +'
+          WRITE (IU06,*) ' +                                                  +'
+          WRITE (IU06,*) ' + REDUCTION DUE TO SUB-GRID FEATURES REQUESTED,    +'
+          WRITE (IU06,*) ' + BUT OBSTRUCTION FACTORS ARE NOT IN               +'
+          WRITE (IU06,*) ' + PREPROC OUTPUT FILE.                             +'
+          WRITE (IU06,*) ' +                                                  +'
+          WRITE (IU06,*) ' +               MODEL CONTINUES                    +'
+          WRITE (IU06,*) ' +              WITHOUT REDUCTION                   +'
+          WRITE (IU06,*) ' +                                                  +'
+          WRITE (IU06,*) ' ++++++++++++++++++++++++++++++++++++++++++++++++++++'
+          L_OBSTRUCTION = .FALSE.
+       END IF
+    end if
 
-call check( nf90_get_var(ncid, varid_flminfr, flminfr), "nf90_get_var flminfr" )
-call check( nf90_get_var(ncid, varid_tcgond, tcgond), "nf90_get_var tcgond" )
-call check( nf90_get_var(ncid, varid_tfak, tfak), "nf90_get_var tfak" )
-call check( nf90_get_var(ncid, varid_tsihkd, tsihkd), "nf90_get_var tsihkd" )
-call check( nf90_get_var(ncid, varid_tfac_st, tfac_st), "nf90_get_var tfac_st" )
-call check( nf90_get_var(ncid, varid_t_tail, t_tail), "nf90_get_var t_tail" )
-call check( nf90_get_var(ncid, varid_delu, delu), "nf90_get_var delu" )
+    if(DEBUG .eqv. .true.) then
+       write( stdout, *) "After reading nlon_rg = ", nlon_rg
+       write( stdout, *) "After reading delphi = ", delphi
+       write( stdout, *) "After reading dellam = ", dellam
+       write( stdout, *) "After reading sinph = ", sinph
+       write( stdout, *) "After reading cosph = ", cosph
+       write( stdout, *) "After reading amowep = ", amowep
 
-if(DEBUG .eqv. .true.) then
-   write( stdout, *) "After reading ndepth = ", ndepth
-   write( stdout, *) "After reading deptha = ", deptha
-   write( stdout, *) "After reading depthd = ", depthd
-   write( stdout, *) "After reading depthe = ", depthe
-   write( stdout, *) "After reading flminfr = ", flminfr
-   write( stdout, *) "After reading tcgond = ", tcgond
-   write( stdout, *) "After reading tfak = ", tfak
-   write( stdout, *) "After reading tsihkd = ", tsihkd
-   write( stdout, *) "After reading tfac_st = ", tfac_st
-   write( stdout, *) "After reading t_tail = ", t_tail
-   write( stdout, *) "After reading delu = ", delu
-   write( stdout, *)
-endif
+       write( stdout, *) "After reading amosop = ", amosop
+       write( stdout, *) "After reading amoeap = ", amoeap
+       write( stdout, *) "After reading amonop = ", amonop
+       write( stdout, *) "After reading zdello = ", zdello
+       write( stdout, *) "After reading ixlg = ", ixlg
+
+       write( stdout, *) "After reading kxlt = ", kxlt
+       write( stdout, *) "After reading l_s_mask = ", l_s_mask
+       write( stdout, *) "After reading klat = ", klat
+       write( stdout, *) "After reading klon = ", klon
+
+       write( stdout, *) "After reading wlat = ", wlat
+       write( stdout, *) "After reading depth_b = ", depth_b
+       write( stdout, *)
+    endif
 
 
+    ! READ (IU07) NLON_RG
+    !READ (IU07) DELPHI, DELLAM, SINPH, COSPH, AMOWEP, AMOSOP, AMOEAP, AMONOP,      &
+    !&           XDELLA, XDELLO, ZDELLO
+    !READ (IU07) IXLG, KXLT, L_S_MASK
+    !READ (IU07) KLAT, KLON, WLAT, DEPTH_B
+    !IF (L_OBSTRUCTION_T) THEN
+    !   READ (IU07) OBSLAT, OBSLON
+    !   IF (.NOT.L_OBSTRUCTION) THEN
+    !      OBSLAT = 1.
+    !      OBSLON = 1.
+    !   END IF
+    !ELSE
+    !   OBSLAT = 1.
+    !   OBSLON = 1.
+    !   IF (L_OBSTRUCTION) THEN
+    !      WRITE (IU06,*) ' ++++++++++++++++++++++++++++++++++++++++++++++++++++'
+    !      WRITE (IU06,*) ' +                                                  +'
+    !      WRITE (IU06,*) ' +     WARNING ERROR SUB. READ_PREPROC_FILE.        +'
+    !      WRITE (IU06,*) ' +     =======================================      +'
+    !      WRITE (IU06,*) ' +                                                  +'
+    !      WRITE (IU06,*) ' + REDUCTION DUE TO SUB-GRID FEATURES REQUESTED,    +'
+    !      WRITE (IU06,*) ' + BUT OBSTRUCTION FACTORS ARE NOT IN               +'
+    !      WRITE (IU06,*) ' + PREPROC OUTPUT FILE.                             +'
+    !      WRITE (IU06,*) ' +                                                  +'
+    !      WRITE (IU06,*) ' +               MODEL CONTINUES                    +'
+    !      WRITE (IU06,*) ' +              WITHOUT REDUCTION                   +'
+    !      WRITE (IU06,*) ' +                                                  +'
+    !      WRITE (IU06,*) ' ++++++++++++++++++++++++++++++++++++++++++++++++++++'
+    !      L_OBSTRUCTION = .FALSE.
+    !   END IF
+    ! END IF
 
-! READ (IU07) FLMINFR, TCGOND, TFAK, TSIHKD, TFAC_ST, T_TAIL
-! READ (IU07) DELU
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !     7. READ TABLES.                                                          !
+    !        ------------                                                          !
 
-! ---------------------------------------------------------------------------- !
-!                                                                              !
-!     8. CLOSE FILE AND RETURN.                                                !
-!        ----------------------                                                !
+    call check( nf90_inq_varid(ncid, "ndepth", varid_ndepth ), "nf90_inq_varid " // "ndepth")
+    call check( nf90_inq_varid(ncid, "deptha", varid_deptha ), "nf90_inq_varid " // "deptha")
+    call check( nf90_inq_varid(ncid, "depthd", varid_depthd ), "nf90_inq_varid " // "depthd")
+    call check( nf90_inq_varid(ncid, "depthe", varid_depthe ), "nf90_inq_varid " // "depthe")
 
-call check( nf90_close(ncid), "NF90_CLOSE" )
+    call check( nf90_get_var(ncid, varid_ndepth, ndepth), "nf90_get_var ndepth" )
+    call check( nf90_get_var(ncid, varid_deptha, deptha), "nf90_get_var deptha" )
+    call check( nf90_get_var(ncid, varid_depthd, depthd), "nf90_get_var depthd" )
+    call check( nf90_get_var(ncid, varid_depthe, depthe), "nf90_get_var depthe" )
 
-!CLOSE (UNIT=IU07, STATUS='KEEP')
 
-IF(USE_OASIS)CALL WAM_OASIS_WRITE_GRID  !! ModR04: Include OASIS
+    IF (ALLOCATED(FLMINFR)) DEALLOCATE (FLMINFR)
+    ALLOCATE (FLMINFR(1:JUMAX,1:ML))
+    IF (ALLOCATED(TCGOND) ) DEALLOCATE (TCGOND)
+    ALLOCATE (TCGOND(NDEPTH,ML) )
+    IF (ALLOCATED(TFAK)   ) DEALLOCATE (TFAK)
+    ALLOCATE (TFAK(NDEPTH,ML)   )
+    IF (ALLOCATED(TSIHKD) ) DEALLOCATE (TSIHKD)
+    ALLOCATE (TSIHKD(NDEPTH,ML) )
+    IF (ALLOCATED(TFAC_ST)) DEALLOCATE (TFAC_ST)
+    ALLOCATE( TFAC_ST(NDEPTH,ML))
+    IF (ALLOCATED(T_TAIL)) DEALLOCATE (T_TAIL)
+    ALLOCATE( T_TAIL(NDEPTH,ML))
 
-END SUBROUTINE READ_PREPROC_FILE
+    call check( nf90_inq_varid(ncid, "flminfr", varid_flminfr ), "nf90_inq_varid " // "flminfr")
+    call check( nf90_inq_varid(ncid, "tcgond", varid_tcgond ), "nf90_inq_varid " // "tcgond")
+    call check( nf90_inq_varid(ncid, "tfak", varid_tfak ), "nf90_inq_varid " // "tfak")
+    call check( nf90_inq_varid(ncid, "tsihkd", varid_tsihkd ), "nf90_inq_varid " // "tsihkd")
+    call check( nf90_inq_varid(ncid, "tfac_st", varid_tfac_st ), "nf90_inq_varid " // "tfac_st")
+    call check( nf90_inq_varid(ncid, "t_tail", varid_t_tail ), "nf90_inq_varid " // "t_tail")
+    call check( nf90_inq_varid(ncid, "delu", varid_delu ), "nf90_inq_varid " // "delu")
+
+    call check( nf90_get_var(ncid, varid_flminfr, flminfr), "nf90_get_var flminfr" )
+    call check( nf90_get_var(ncid, varid_tcgond, tcgond), "nf90_get_var tcgond" )
+    call check( nf90_get_var(ncid, varid_tfak, tfak), "nf90_get_var tfak" )
+    call check( nf90_get_var(ncid, varid_tsihkd, tsihkd), "nf90_get_var tsihkd" )
+    call check( nf90_get_var(ncid, varid_tfac_st, tfac_st), "nf90_get_var tfac_st" )
+    call check( nf90_get_var(ncid, varid_t_tail, t_tail), "nf90_get_var t_tail" )
+    call check( nf90_get_var(ncid, varid_delu, delu), "nf90_get_var delu" )
+
+    if(DEBUG .eqv. .true.) then
+       write( stdout, *) "After reading ndepth = ", ndepth
+       write( stdout, *) "After reading deptha = ", deptha
+       write( stdout, *) "After reading depthd = ", depthd
+       write( stdout, *) "After reading depthe = ", depthe
+       write( stdout, *) "After reading flminfr = ", flminfr
+       write( stdout, *) "After reading tcgond = ", tcgond
+       write( stdout, *) "After reading tfak = ", tfak
+       write( stdout, *) "After reading tsihkd = ", tsihkd
+       write( stdout, *) "After reading tfac_st = ", tfac_st
+       write( stdout, *) "After reading t_tail = ", t_tail
+       write( stdout, *) "After reading delu = ", delu
+       write( stdout, *)
+    endif
+
+
+    ! ---------------------------------------------------------------------------- !
+    !                                                                              !
+    !     8. CLOSE FILE AND RETURN.                                                !
+    !        ----------------------                                                !
+
+    call check( nf90_close(ncid), "NF90_CLOSE" )
+
+    IF(USE_OASIS)CALL WAM_OASIS_WRITE_GRID  !! ModR04: Include OASIS
+
+  END SUBROUTINE READ_PREPROC_FILE
+
 
 ! ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ !
 !                                                                              !
