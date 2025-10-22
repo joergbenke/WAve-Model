@@ -605,49 +605,6 @@ END SUBROUTINE PREPARE_START
        write(stdout, *)
     endif
 
-    ! Create list of type dimension_attr and dimids                                                                                                                                     
-    ! if(.not. allocated(name_of_dim)) then
-    !   allocate( name_of_dim(n_dims), stat = status)
-    !   call error_msg_allocation( "name_of_dim" )
-    ! end if
-
-    ! if(.not. allocated(id_of_dim)) then
-    !   allocate( id_of_dim(n_dims), stat = status)
-    !   call error_msg_allocation( "id_of_dim" )
-    ! end if
-
-    ! name_of_dim(1) = "n_nest"
-    ! name_of_dim(2) = "ml"
-    ! name_of_dim(3) = "kl"
-    !name_of_dim(4) = "nbounf"
-    !name_of_dim(5) = "nx"
-    !name_of_dim(6) = "ny"
-    !name_of_dim(7) = "dim_nsea"
-    !name_of_dim(8) = "jumax"
-    !name_of_dim(9) = "dim_ndepth"
-    !name_of_dim(10) = "result_max_val"
-    !name_of_dim(11) = "dim_three"
-    !name_of_dim(12) = "dim_two"
-    !name_of_dim(13) = "stringlen"
-    !name_of_dim(14) = "stringlen_c_name"
-
-    !call check( nf90_inq_dimid(ncid, name_of_dim(1), id_of_dim(1)), "nf90_inq_dim N_NEST" )
-    !    call check( nf90_inquire_dimension(ncid, id_of_dim(1), name_of_dim(1), len_of_dim(1)), "nf90_inq_dim N_NEST" )                                                                     
-    !call check( nf90_inq_dimid(ncid, name_of_dim(2), id_of_dim(2)), "nf90_inq_dim ML" )
-    !call check( nf90_inq_dimid(ncid, name_of_dim(3), id_of_dim(3)), "nf90_inq_dim KL" )
-    !call check( nf90_inq_dimid(ncid, name_of_dim(4), id_of_dim(4)), "nf90_inq_dim NBOUNF" )
-    !call check( nf90_inq_dimid(ncid, name_of_dim(5), id_of_dim(5)), "nf90_inq_dim NX" )
-    !call check( nf90_inq_dimid(ncid, name_of_dim(6), id_of_dim(6)), "nf90_inq_dim NY" )
-    !call check( nf90_inq_dimid(ncid, name_of_dim(7), id_of_dim(7)), "nf90_inq_dim DIM_NSEA" )
-    !call check( nf90_inq_dimid(ncid, name_of_dim(8), id_of_dim(8)), "nf90_inq_dim JUMAX" )
-    !call check( nf90_inq_dimid(ncid, name_of_dim(9), id_of_dim(9)), "nf90_inq_dim DIM_NDEPTH" )
-    !call check( nf90_inq_dimid(ncid, name_of_dim(10), id_of_dim(10)), "nf90_inq_dim result_max_val" )
-    !call check( nf90_inq_dimid(ncid, name_of_dim(11), id_of_dim(11)), "nf90_inq_dim DIM_THREE" )
-    !call check( nf90_inq_dimid(ncid, name_of_dim(12), id_of_dim(12)), "nf90_inq_dim DIM_TWO" )
-    !call check( nf90_inq_dimid(ncid, name_of_dim(13), id_of_dim(13)), "nf90_inq_dim STRINGLEN" )
-    !call check( nf90_inq_dimid(ncid, name_of_dim(14), id_of_dim(14)), "nf90_inq_dim STRINGLEN_C_NAME" )
-
-
     ! section 1 nf90_inq_varid
     call check( nf90_inq_varid(ncid, "header", varid_header ), "nf90_inq_varid " // "header")
     call check( nf90_get_var(ncid, varid_header, header), "nf90_get_var header" )
@@ -1117,38 +1074,6 @@ END SUBROUTINE PREPARE_START
        write( stdout, *)
     endif
 
-
-    ! READ (IU07) NLON_RG
-    !READ (IU07) DELPHI, DELLAM, SINPH, COSPH, AMOWEP, AMOSOP, AMOEAP, AMONOP,      &
-    !&           XDELLA, XDELLO, ZDELLO
-    !READ (IU07) IXLG, KXLT, L_S_MASK
-    !READ (IU07) KLAT, KLON, WLAT, DEPTH_B
-    !IF (L_OBSTRUCTION_T) THEN
-    !   READ (IU07) OBSLAT, OBSLON
-    !   IF (.NOT.L_OBSTRUCTION) THEN
-    !      OBSLAT = 1.
-    !      OBSLON = 1.
-    !   END IF
-    !ELSE
-    !   OBSLAT = 1.
-    !   OBSLON = 1.
-    !   IF (L_OBSTRUCTION) THEN
-    !      WRITE (IU06,*) ' ++++++++++++++++++++++++++++++++++++++++++++++++++++'
-    !      WRITE (IU06,*) ' +                                                  +'
-    !      WRITE (IU06,*) ' +     WARNING ERROR SUB. READ_PREPROC_FILE.        +'
-    !      WRITE (IU06,*) ' +     =======================================      +'
-    !      WRITE (IU06,*) ' +                                                  +'
-    !      WRITE (IU06,*) ' + REDUCTION DUE TO SUB-GRID FEATURES REQUESTED,    +'
-    !      WRITE (IU06,*) ' + BUT OBSTRUCTION FACTORS ARE NOT IN               +'
-    !      WRITE (IU06,*) ' + PREPROC OUTPUT FILE.                             +'
-    !      WRITE (IU06,*) ' +                                                  +'
-    !      WRITE (IU06,*) ' +               MODEL CONTINUES                    +'
-    !      WRITE (IU06,*) ' +              WITHOUT REDUCTION                   +'
-    !      WRITE (IU06,*) ' +                                                  +'
-    !      WRITE (IU06,*) ' ++++++++++++++++++++++++++++++++++++++++++++++++++++'
-    !      L_OBSTRUCTION = .FALSE.
-    !   END IF
-    ! END IF
 
     ! ---------------------------------------------------------------------------- !
     !                                                                              !

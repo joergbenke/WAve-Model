@@ -1877,8 +1877,6 @@ CONTAINS
     name_of_dim(14) = "stringlen_c_name"
 
     call check( nf90_inq_dimid(ncid, name_of_dim(1), id_of_dim(1)), "nf90_inq_dim N_NEST" )
-!    call check( nf90_inquire_dimension(ncid, id_of_dim(1), name_of_dim(1), len_of_dim(1)), "nf90_inq_dim N_NEST" )
-
     call check( nf90_inq_dimid(ncid, name_of_dim(2), id_of_dim(2)), "nf90_inq_dim ML" )
     call check( nf90_inq_dimid(ncid, name_of_dim(3), id_of_dim(3)), "nf90_inq_dim KL" )
     call check( nf90_inq_dimid(ncid, name_of_dim(4), id_of_dim(4)), "nf90_inq_dim NBOUNF" )
@@ -1893,20 +1891,6 @@ CONTAINS
     call check( nf90_inq_dimid(ncid, name_of_dim(13), id_of_dim(13)), "nf90_inq_dim STRINGLEN" )
     call check( nf90_inq_dimid(ncid, name_of_dim(14), id_of_dim(14)), "nf90_inq_dim STRINGLEN_C_NAME" )
 
-    
-    ! Define all variabless
-    
-    !    name_of_var = [ "header", "n_nest  ", "max_nest", "nbounc", "n_name", "n_code", "xdello", "xdella", "n_south", "n_north", "n_east", &
-    !         "n_west", "ijarc", "blngc", "blatc", "n_zdel", "ml", "kl", "fr", "dfim", "gom", &
-    !         "c", "th", "costh", "sinth", "delth", "deltr", "inv_log_co", "df", "df_fr", "df_fr2", &
-    !         "dfim_ofr", "dfim_fr", "dfim_fr2", "fr5", "frm5", "rhowg_dfim", "fmin", "mo_tail", "mm1_tail", "mp1_tail", &
-    !         "mp2_tail", "mpm", "kpm", "jxo", "jyo", "nbounf", "nbinp", "c_name", "blngf", "blatf", &
-    !         "ijarf", "ibfl", "ibfr", "bfw", "nx", "ny", "nsea", "iper", "one_point", "reduced_grid", &
-    !         "l_obstruction_t", "obslat", "obslon", "nlon_rg", "delphi", "dellam", "sinph", "cosph", "amowep", "amosop", &
-    !         "amoeap", "amonop", "zdello", "ixlg", "kxlt", "l_s_mask", "klat", "klon", "wlat", "depth_b", &
-    !         "ndepth", "deptha", "depthb", "depthe", "flminfr", "tcgond", "tfak", "tsihkd", "tfac_st", "t_tail", &
-    !         "delu"]
-    
 
     ! section 1 nf90_inq_varid
     call check( nf90_inq_varid(ncid, "header", varid_header ), "nf90_inq_varid " // "header")
