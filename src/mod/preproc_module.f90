@@ -1264,7 +1264,7 @@ CONTAINS
     !        --------------------------------                                      !
 
     LEN = LEN_TRIM(FILE07)
-    FILE07_NC = trim(FILE07) // ".nc"
+    FILE07_NC = trim(FILE07(1:LEN)) // ".nc"
 
     result_max_val = maxval(NBOUNC)
 
